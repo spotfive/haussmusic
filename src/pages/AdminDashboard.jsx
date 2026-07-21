@@ -100,29 +100,37 @@ export default function AdminDashboard() {
     onError: () => toast.error('Erro ao remover banner'),
   });
 
-  const updateUserTypeMutation = useMutation({
-    mutationFn: async ({ userId, user_type }) => {
-      await base44.entities.User.update(userId, { user_type });
-      if (user_type === 'artista') {
+  // Unified "cargo" selector: ouvinte/artista/gravadora/staff live on user_type,
+  // admin lives on the separate `role` field — this mutation sets whichever
+  // combination matches the picked cargo and keeps the Artist mirror row in sync.
+  const updateUserRoleMutation = useMutation({
+    mutationFn: async ({ userId, cargo }) => {
+      const isAdmin = cargo === 'admin';
+      await base44.entities.User.update(userId, isAdmin ? { role: 'admin' } : { role: 'user', user_type: cargo });
+
+      if (!isAdmin) {
         const u = users.find(u => u.id === userId);
         const existingArtists = await base44.entities.Artist.list();
         const existingArtist = existingArtists.find(a => a.user_id === userId);
-        const artistData = { user_id: userId, display_name: u?.display_name || u?.full_name, email: u?.email, profile_picture: u?.profile_picture, verified: u?.verified || false, user_type: 'artista' };
-        if (existingArtist) await base44.entities.Artist.update(existingArtist.id, artistData);
-        else await base44.entities.Artist.create(artistData);
-      } else {
-        const existingArtists = await base44.entities.Artist.list();
-        const existingArtist = existingArtists.find(a => a.user_id === userId);
-        if (existingArtist) await base44.entities.Artist.delete(existingArtist.id);
+        if (cargo === 'artista') {
+          const artistData = { user_id: userId, display_name: u?.display_name || u?.full_name, email: u?.email, profile_picture: u?.profile_picture, verified: u?.verified || false, user_type: 'artista' };
+          if (existingArtist) await base44.entities.Artist.update(existingArtist.id, artistData);
+          else await base44.entities.Artist.create(artistData);
+        } else if (existingArtist) {
+          await base44.entities.Artist.delete(existingArtist.id);
+        }
       }
     },
-    onMutate: async ({ userId, user_type }) => {
+    onMutate: async ({ userId, cargo }) => {
       await queryClient.cancelQueries({ queryKey: ['users'] });
       const prev = queryClient.getQueryData(['users']);
-      queryClient.setQueryData(['users'], (old) => old?.map(u => u.id === userId ? { ...u, user_type } : u));
+      queryClient.setQueryData(['users'], (old) => old?.map(u => u.id === userId
+        ? (cargo === 'admin' ? { ...u, role: 'admin' } : { ...u, role: 'user', user_type: cargo })
+        : u
+      ));
       return { prev };
     },
-    onError: (err, vars, ctx) => { queryClient.setQueryData(['users'], ctx.prev); toast.error('Erro ao atualizar tipo'); },
+    onError: (err, vars, ctx) => { queryClient.setQueryData(['users'], ctx.prev); toast.error('Erro ao atualizar cargo'); },
     onSettled: () => { queryClient.invalidateQueries({ queryKey: ['users'] }); queryClient.invalidateQueries({ queryKey: ['artists'] }); },
   });
 
@@ -567,16 +575,23 @@ export default function AdminDashboard() {
                     </div>
                     {/* Actions */}
                     <div className="flex items-center gap-1.5 flex-shrink-0">
-                      <Select value={u.user_type || 'ouvinte'}
-                        onValueChange={(v) => updateUserTypeMutation.mutate({ userId: u.id, user_type: v })}>
-                        <SelectTrigger className="h-8 w-[110px] bg-white/5 border-white/10 text-white text-xs rounded-lg">
+                      <Select value={u.role === 'admin' ? 'admin' : (u.user_type || 'ouvinte')}
+                        onValueChange={(v) => {
+                          if (v !== 'admin' && u.role === 'admin' && u.id === user?.id) {
+                            toast.error('Você não pode remover seu próprio acesso de admin');
+                            return;
+                          }
+                          updateUserRoleMutation.mutate({ userId: u.id, cargo: v });
+                        }}>
+                        <SelectTrigger className="h-8 w-[120px] bg-white/5 border-white/10 text-white text-xs rounded-lg">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-[#1a1a1a] border-white/10">
                           <SelectItem value="ouvinte" className="text-white text-xs">🎧 Ouvinte</SelectItem>
-                            <SelectItem value="artista" className="text-white text-xs">🎤 Artista</SelectItem>
-                            <SelectItem value="gravadora" className="text-white text-xs">🏷️ Gravadora</SelectItem>
-                            <SelectItem value="staff" className="text-white text-xs">⭐ Staff</SelectItem>
+                          <SelectItem value="artista" className="text-white text-xs">🎤 Artista</SelectItem>
+                          <SelectItem value="gravadora" className="text-white text-xs">🏷️ Gravadora</SelectItem>
+                          <SelectItem value="staff" className="text-white text-xs">⭐ Staff</SelectItem>
+                          <SelectItem value="admin" className="text-white text-xs">🛡️ Admin</SelectItem>
                         </SelectContent>
                       </Select>
                       <Button variant="ghost" size="sm"
