@@ -19,8 +19,8 @@ export default function FloatingLogo() {
 
           {/* Simple clean logo */}
           <img
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/694d5d3ac5830688f08c9355/ae27efd7d_Gemini_Generated_Image_5yxuzp5yxuzp5yxu-removebg-preview.png"
-            alt="Atlantix"
+            src="/logo.png"
+            alt="HAUSS MUSIC"
             className="w-full h-full object-contain opacity-90"
           />
         </motion.div>

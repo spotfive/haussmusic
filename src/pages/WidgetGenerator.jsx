@@ -19,12 +19,12 @@ export default function WidgetGenerator() {
   const appUrl = window.location.origin;
   const widgetUrl = `${appUrl}/api/functions/getEmbedWidget`;
 
-  const apiCode = `// 1. Configure o segredo ATLANTIX_API_KEY no seu dashboard
+  const apiCode = `// 1. Configure o segredo HAUSS_API_KEY no seu dashboard
 // 2. Use o código abaixo no seu app Base44:
 
-fetch('${appUrl}/api/functions/atlantixAPI?action=${config.type}&limit=${config.limit}${config.search ? `&search=${config.search}` : ''}${config.genre ? `&genre=${config.genre}` : ''}${config.artist ? `&artist=${config.artist}` : ''}', {
+fetch('${appUrl}/api/functions/haussAPI?action=${config.type}&limit=${config.limit}${config.search ? `&search=${config.search}` : ''}${config.genre ? `&genre=${config.genre}` : ''}${config.artist ? `&artist=${config.artist}` : ''}', {
   headers: {
-    'X-Atlantix-API-Key': 'atlantix_2026_music_api'
+    'X-Hauss-API-Key': 'hauss_2026_music_api'
   }
 })
   .then(res => res.json())
@@ -33,11 +33,11 @@ fetch('${appUrl}/api/functions/atlantixAPI?action=${config.type}&limit=${config.
     // Use data.data.songs ou data.data.releases
   });`;
 
-  const embedCode = `<!-- Widget Atlantix -->
-<div id="atlantix-widget"></div>
+  const embedCode = `<!-- Widget HAUSS MUSIC -->
+<div id="hauss-widget"></div>
 <script src="${widgetUrl}"></script>
 <script>
-  AtlantixWidget.init('atlantix-widget', {
+  HaussWidget.init('hauss-widget', {
     limit: ${config.limit},
     type: '${config.type}',
     theme: '${config.theme}'${config.search ? `,\n    search: '${config.search}'` : ''}${config.genre ? `,\n    genre: '${config.genre}'` : ''}${config.artist ? `,\n    artist: '${config.artist}'` : ''}
@@ -55,7 +55,7 @@ fetch('${appUrl}/api/functions/atlantixAPI?action=${config.type}&limit=${config.
     <div className="min-h-screen pb-32">
       {/* Header */}
       <div className="relative px-6 lg:px-8 py-12 mb-8">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-600/20 to-fuchsia-600/20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-500/20 to-neutral-500/20" />
         <div className="absolute inset-0 backdrop-blur-3xl" />
         
         <div className="relative max-w-6xl mx-auto">
@@ -64,12 +64,12 @@ fetch('${appUrl}/api/functions/atlantixAPI?action=${config.type}&limit=${config.
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center gap-4 mb-4"
           >
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-zinc-400 to-neutral-500 flex items-center justify-center shadow-lg">
               <Sparkles className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-black text-white">Widget do Atlantix</h1>
-              <p className="text-zinc-400 mt-1">Incorpore músicas do Atlantix no seu site</p>
+              <h1 className="text-4xl font-black text-white">Widget do HAUSS MUSIC</h1>
+              <p className="text-zinc-400 mt-1">Incorpore músicas do HAUSS MUSIC no seu site</p>
             </div>
           </motion.div>
         </div>
@@ -85,7 +85,7 @@ fetch('${appUrl}/api/functions/atlantixAPI?action=${config.type}&limit=${config.
           >
             <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
               <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <Settings className="w-5 h-5 text-violet-400" />
+                <Settings className="w-5 h-5 text-zinc-300" />
                 Configurações do Widget
               </h2>
 
@@ -174,7 +174,7 @@ fetch('${appUrl}/api/functions/atlantixAPI?action=${config.type}&limit=${config.
             <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-white flex items-center gap-2">
-                  <Code className="w-5 h-5 text-violet-400" />
+                  <Code className="w-5 h-5 text-zinc-300" />
                   Código API (Simples)
                 </h3>
                 <button
@@ -196,12 +196,12 @@ fetch('${appUrl}/api/functions/atlantixAPI?action=${config.type}&limit=${config.
             <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-white flex items-center gap-2">
-                  <Code className="w-5 h-5 text-violet-400" />
+                  <Code className="w-5 h-5 text-zinc-300" />
                   Código Widget (Completo)
                 </h3>
                 <button
                   onClick={copyCode}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-500 hover:bg-violet-400 text-white transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-400 hover:bg-zinc-300 text-white transition-colors"
                 >
                   {copied ? (
                     <><Check className="w-4 h-4" /> Copiado!</>
@@ -224,7 +224,7 @@ fetch('${appUrl}/api/functions/atlantixAPI?action=${config.type}&limit=${config.
           >
             <div className="bg-white/5 rounded-2xl p-6 border border-white/10 sticky top-6">
               <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <Eye className="w-5 h-5 text-violet-400" />
+                <Eye className="w-5 h-5 text-zinc-300" />
                 Preview
               </h2>
               <div className="bg-zinc-900 rounded-xl p-4 border border-white/10">
@@ -248,8 +248,8 @@ fetch('${appUrl}/api/functions/atlantixAPI?action=${config.type}&limit=${config.
                 </div>
               </div>
 
-              <div className="mt-4 p-4 bg-violet-500/10 border border-violet-500/30 rounded-lg">
-                <p className="text-sm text-violet-300">
+              <div className="mt-4 p-4 bg-zinc-400/10 border border-zinc-400/30 rounded-lg">
+                <p className="text-sm text-zinc-200">
                   💡 <strong>Dica:</strong> Cole o código HTML no seu site Base44 ou em qualquer página HTML!
                 </p>
               </div>
@@ -268,21 +268,21 @@ fetch('${appUrl}/api/functions/atlantixAPI?action=${config.type}&limit=${config.
           <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-2xl p-6 border border-cyan-500/30">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
               <Code className="w-5 h-5 text-cyan-400" />
-              API do Atlantix (Tipo Spotify)
+              API do HAUSS MUSIC (Tipo Spotify)
             </h3>
             <div className="space-y-4 text-zinc-300">
               <div className="bg-cyan-500/20 rounded-lg p-4 border border-cyan-500/30">
                 <p className="font-bold text-cyan-200 mb-2">🔑 Passo 1: Configure a API Key</p>
                 <p className="text-sm">No seu app Base44, vá em <strong>Dashboard → Segredos</strong> e adicione:</p>
                 <div className="mt-2 p-3 bg-zinc-950 rounded-lg font-mono text-xs text-cyan-300">
-                  Nome: ATLANTIX_API_KEY<br/>
-                  Valor: atlantix_2026_music_api
+                  Nome: HAUSS_API_KEY<br/>
+                  Valor: hauss_2026_music_api
                 </div>
               </div>
               
               <div>
                 <p className="font-bold text-white mb-2">📝 Passo 2: Use o código no seu app</p>
-                <p className="text-sm">Cole no seu site e as músicas do Atlantix aparecerão automaticamente!</p>
+                <p className="text-sm">Cole no seu site e as músicas do HAUSS MUSIC aparecerão automaticamente!</p>
               </div>
 
               <div className="bg-cyan-500/10 rounded-lg p-3 border border-cyan-500/20">
@@ -297,9 +297,9 @@ fetch('${appUrl}/api/functions/atlantixAPI?action=${config.type}&limit=${config.
           </div>
 
           {/* Widget HTML */}
-          <div className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-2xl p-6 border border-violet-500/30">
+          <div className="bg-gradient-to-br from-zinc-400/10 to-zinc-400/10 rounded-2xl p-6 border border-zinc-400/30">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Music2 className="w-5 h-5 text-violet-400" />
+              <Music2 className="w-5 h-5 text-zinc-300" />
               Usando o Widget Completo
             </h3>
             <div className="space-y-3 text-zinc-300">
@@ -307,8 +307,8 @@ fetch('${appUrl}/api/functions/atlantixAPI?action=${config.type}&limit=${config.
               <p><strong>2. Cole em qualquer página HTML</strong> do seu site Base44</p>
               <p><strong>3. Pronto!</strong> O widget aparece automaticamente com player de música</p>
             </div>
-            <div className="mt-4 p-4 bg-violet-500/20 rounded-lg border border-violet-500/30">
-              <p className="text-sm text-violet-200">
+            <div className="mt-4 p-4 bg-zinc-400/20 rounded-lg border border-zinc-400/30">
+              <p className="text-sm text-zinc-100">
                 ✨ <strong>Widget pronto:</strong> Interface completa com player integrado, não precisa programar nada!
               </p>
             </div>

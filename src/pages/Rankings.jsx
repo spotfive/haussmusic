@@ -45,7 +45,7 @@ function PodiumPlatform({ rank, item, type, label, delay, isFirst }) {
         <p className={`text-xs lg:text-sm font-bold text-white truncate max-w-[100px] lg:max-w-[140px] text-center ${isFirst ? 'text-base lg:text-lg' : ''}`}>{item.title}</p>
         <p className="text-[10px] lg:text-xs text-[#B3B3B3] truncate max-w-[100px] lg:max-w-[140px] text-center">{item.artist}</p>
         <div className="flex items-center gap-1 mt-0.5">
-          <Star className="w-3 h-3 text-[#8B5CF6] fill-current" />
+          <Star className="w-3 h-3 text-[#c0c0c8] fill-current" />
           <span className="text-[10px] lg:text-xs text-[#B3B3B3] font-medium">{statValue}{statSuffix}</span>
         </div>
       </div>
@@ -203,13 +203,13 @@ export default function Rankings() {
             animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
             transition={{ duration: 8, repeat: Infinity }}
             className="absolute -top-20 -right-20 w-96 h-96 rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 70%)', filter: 'blur(80px)' }}
+            style={{ background: 'radial-gradient(circle, rgba(200,200,210,0.25) 0%, transparent 70%)', filter: 'blur(80px)' }}
           />
           <motion.div
             animate={{ scale: [1, 1.3, 1], opacity: [0.1, 0.2, 0.1] }}
             transition={{ duration: 10, repeat: Infinity }}
             className="absolute bottom-10 left-10 w-80 h-80 rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(167,139,250,0.2) 0%, transparent 70%)', filter: 'blur(80px)' }}
+            style={{ background: 'radial-gradient(circle, rgba(224,224,230,0.2) 0%, transparent 70%)', filter: 'blur(80px)' }}
           />
         </div>
 
@@ -218,7 +218,7 @@ export default function Rankings() {
             <motion.div
               animate={{ scale: [1, 1.05, 1] }}
               transition={{ duration: 3, repeat: Infinity }}
-              className="w-12 lg:w-16 h-12 lg:h-16 rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#A78BFA] flex items-center justify-center shadow-lg shadow-[#8B5CF6]/30"
+              className="w-12 lg:w-16 h-12 lg:h-16 rounded-2xl bg-gradient-to-br from-[#c0c0c8] to-[#e5e5ea] flex items-center justify-center shadow-lg shadow-[#c0c0c8]/30"
             >
               <Trophy className="w-6 lg:w-8 h-6 lg:h-8 text-white" />
             </motion.div>
@@ -235,7 +235,7 @@ export default function Rankings() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="bg-[#181818] border border-[#282828] mb-4 w-full grid grid-cols-4 p-1 rounded-xl">
             {tabConfigs.map(tab => (
-              <TabsTrigger key={tab.value} value={tab.value} className="data-[state=active]:bg-[#8B5CF6]/20 data-[state=active]:text-[#A78BFA] text-[11px] sm:text-sm lg:text-base flex items-center gap-1.5 lg:gap-2 rounded-lg">
+              <TabsTrigger key={tab.value} value={tab.value} className="data-[state=active]:bg-[#c0c0c8]/20 data-[state=active]:text-[#e5e5ea] text-[11px] sm:text-sm lg:text-base flex items-center gap-1.5 lg:gap-2 rounded-lg">
                 <tab.icon className="w-3.5 lg:w-4 h-3.5 lg:h-4" />
                 <span className="hidden sm:inline">{tab.label}</span>
               </TabsTrigger>

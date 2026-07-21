@@ -61,14 +61,14 @@ module.exports = {
   				ring: 'hsl(var(--sidebar-ring))'
   			},
         spotify: {
-          black: '#121212',
-          darkgray: '#181818',
-          gray: '#282828',
-          lightgray: '#535353',
-          green: '#8B5CF6',
-          brightgreen: '#A78BFA',
+          black: '#0a0a0a',
+          darkgray: '#161616',
+          gray: '#262626',
+          lightgray: '#5c5c5c',
+          green: '#c0c0c8',
+          brightgreen: '#e5e5ea',
           text: '#ffffff',
-          subtext: '#B3B3B3',
+          subtext: '#a3a3a3',
         }
   		},
   		keyframes: {

@@ -190,7 +190,7 @@ export default function Artists() {
             transition={{ duration: 20, repeat: Infinity }}
             className="absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-30"
             style={{
-              background: 'radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(200,200,210,0.4) 0%, transparent 70%)',
               filter: 'blur(80px)'
             }}
           />
@@ -205,9 +205,9 @@ export default function Artists() {
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center"
+              className="w-12 h-12 rounded-full bg-gradient-to-br from-zinc-400 to-zinc-500 flex items-center justify-center"
               style={{
-                boxShadow: '0 0 30px rgba(139,92,246,0.6)'
+                boxShadow: '0 0 30px rgba(200,200,210,0.6)'
               }}
             >
               <Sparkles className="w-6 h-6 text-white" />
@@ -222,17 +222,17 @@ export default function Artists() {
         <Tabs defaultValue="all" className="w-full">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
             <TabsList className="bg-white/5 border border-white/10">
-              <TabsTrigger value="all" className="data-[state=active]:bg-violet-500/30 data-[state=active]:text-violet-400">
+              <TabsTrigger value="all" className="data-[state=active]:bg-zinc-400/30 data-[state=active]:text-zinc-300">
                 <TrendingUp className="w-4 h-4 mr-2" />
                 Todos
               </TabsTrigger>
-              <TabsTrigger value="singles" className="data-[state=active]:bg-violet-500/30 data-[state=active]:text-violet-400">
+              <TabsTrigger value="singles" className="data-[state=active]:bg-zinc-400/30 data-[state=active]:text-zinc-300">
                 Singles
               </TabsTrigger>
-              <TabsTrigger value="albums" className="data-[state=active]:bg-violet-500/30 data-[state=active]:text-violet-400">
+              <TabsTrigger value="albums" className="data-[state=active]:bg-zinc-400/30 data-[state=active]:text-zinc-300">
                 Álbuns
               </TabsTrigger>
-              <TabsTrigger value="eps" className="data-[state=active]:bg-violet-500/30 data-[state=active]:text-violet-400">
+              <TabsTrigger value="eps" className="data-[state=active]:bg-zinc-400/30 data-[state=active]:text-zinc-300">
                 EPs
               </TabsTrigger>
             </TabsList>
@@ -240,7 +240,7 @@ export default function Artists() {
             {canCreatePosts && (
               <Dialog open={showCreatePost} onOpenChange={setShowCreatePost}>
                 <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700">
+                  <Button className="bg-gradient-to-r from-zinc-400 to-zinc-500 hover:from-zinc-500 hover:to-zinc-600">
                     <Plus className="w-4 h-4 mr-2" />
                     Novo Lançamento
                   </Button>
@@ -252,7 +252,7 @@ export default function Artists() {
                   <div className="space-y-4 lg:space-y-6 mt-4">
                     {/* Informações Básicas */}
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-violet-400 flex items-center gap-2">
+                      <h3 className="text-lg font-semibold text-zinc-300 flex items-center gap-2">
                         <Music2 className="w-5 h-5" />
                         Informações Básicas
                       </h3>
@@ -351,7 +351,7 @@ export default function Artists() {
                     {/* Mídia */}
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold text-violet-400 flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-zinc-300 flex items-center gap-2">
                           <Upload className="w-5 h-5" />
                           Mídia
                         </h3>
@@ -360,7 +360,7 @@ export default function Artists() {
                           variant="ghost"
                           size="sm"
                           onClick={() => setShowDimensions(true)}
-                          className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                          className="text-zinc-400 hover:text-zinc-300 hover:bg-zinc-500/10"
                         >
                           <Info className="w-4 h-4 mr-1" />
                           Dimensões
@@ -370,9 +370,9 @@ export default function Artists() {
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div>
                           <label className="text-sm text-zinc-400 mb-1 block">Capa *</label>
-                          <label className="flex flex-col items-center justify-center gap-2 p-6 lg:p-8 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer hover:border-violet-500 transition-colors">
+                          <label className="flex flex-col items-center justify-center gap-2 p-6 lg:p-8 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer hover:border-zinc-400 transition-colors">
                             {uploading ? (
-                              <Loader2 className="w-6 lg:w-8 h-6 lg:h-8 animate-spin text-violet-400" />
+                              <Loader2 className="w-6 lg:w-8 h-6 lg:h-8 animate-spin text-zinc-300" />
                             ) : newPost.cover_url ? (
                               <img src={newPost.cover_url} alt="Cover" className="max-h-32 lg:max-h-40 rounded-lg" />
                             ) : (
@@ -388,9 +388,9 @@ export default function Artists() {
 
                         <div>
                           <label className="text-sm text-zinc-400 mb-1 block">Vídeo de Fundo (opcional)</label>
-                          <label className="flex flex-col items-center justify-center gap-2 p-6 lg:p-8 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer hover:border-cyan-500 transition-colors">
+                          <label className="flex flex-col items-center justify-center gap-2 p-6 lg:p-8 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer hover:border-zinc-500 transition-colors">
                             {uploadingVideo ? (
-                              <Loader2 className="w-6 lg:w-8 h-6 lg:h-8 animate-spin text-cyan-400" />
+                              <Loader2 className="w-6 lg:w-8 h-6 lg:h-8 animate-spin text-zinc-400" />
                             ) : newPost.background_video_url ? (
                               <div className="flex flex-col items-center gap-2 text-green-400">
                                 <Music2 className="w-6 h-6" />
@@ -411,7 +411,7 @@ export default function Artists() {
                     {/* Faixas */}
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold text-violet-400 flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-zinc-300 flex items-center gap-2">
                           <Music2 className="w-5 h-5" />
                           Faixas
                         </h3>
@@ -419,7 +419,7 @@ export default function Artists() {
                           type="button"
                           size="sm"
                           onClick={addTrack}
-                          className="bg-violet-600 hover:bg-violet-700"
+                          className="bg-zinc-500 hover:bg-zinc-600"
                         >
                           <Plus className="w-4 h-4 mr-1" />
                           Adicionar
@@ -468,9 +468,9 @@ export default function Artists() {
                               />
                             )}
                             
-                            <label className="flex items-center justify-center gap-2 p-4 lg:p-6 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer hover:border-cyan-500 transition-colors">
+                            <label className="flex items-center justify-center gap-2 p-4 lg:p-6 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer hover:border-zinc-500 transition-colors">
                               {track.uploading ? (
-                                <Loader2 className="w-5 lg:w-6 h-5 lg:h-6 animate-spin text-cyan-400" />
+                                <Loader2 className="w-5 lg:w-6 h-5 lg:h-6 animate-spin text-zinc-400" />
                               ) : track.audio_url ? (
                                 <div className="flex items-center gap-2 text-green-400">
                                   <Music2 className="w-4 lg:w-5 h-4 lg:h-5" />
@@ -492,7 +492,7 @@ export default function Artists() {
                     <Button
                       onClick={() => createPostMutation.mutate(newPost)}
                       disabled={!newPost.title || !newPost.artist || !newPost.cover_url || createPostMutation.isPending}
-                      className="w-full bg-gradient-to-r from-violet-500 to-purple-600 py-5 lg:py-6 text-base lg:text-lg"
+                      className="w-full bg-gradient-to-r from-zinc-400 to-zinc-500 py-5 lg:py-6 text-base lg:text-lg"
                     >
                       {createPostMutation.isPending ? (
                         <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -510,13 +510,13 @@ export default function Artists() {
             <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-md">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
-                  <Info className="w-5 h-5 text-cyan-400" />
+                  <Info className="w-5 h-5 text-zinc-400" />
                   Especificações de Mídia
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-4 mt-4">
                 <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                  <h4 className="font-semibold text-cyan-400 mb-2 flex items-center gap-2">
+                  <h4 className="font-semibold text-zinc-400 mb-2 flex items-center gap-2">
                     <Upload className="w-4 h-4" />
                     Capa do Lançamento
                   </h4>
@@ -530,7 +530,7 @@ export default function Artists() {
                 </div>
 
                 <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                  <h4 className="font-semibold text-cyan-400 mb-2 flex items-center gap-2">
+                  <h4 className="font-semibold text-zinc-400 mb-2 flex items-center gap-2">
                     <Music2 className="w-4 h-4" />
                     Vídeo de Fundo
                   </h4>
@@ -544,7 +544,7 @@ export default function Artists() {
                 </div>
 
                 <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                  <h4 className="font-semibold text-cyan-400 mb-2 flex items-center gap-2">
+                  <h4 className="font-semibold text-zinc-400 mb-2 flex items-center gap-2">
                     <Music2 className="w-4 h-4" />
                     Arquivos de Áudio
                   </h4>
@@ -563,7 +563,7 @@ export default function Artists() {
             {featuredPosts.length > 0 && (
               <div className="mb-8">
                 <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-violet-400" />
+                  <Sparkles className="w-5 h-5 text-zinc-300" />
                   Em Destaque
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -650,11 +650,11 @@ export default function Artists() {
 
 function PostCard({ post, index, onLike, isLiked }) {
   const typeLabels = { single: 'Single', album: 'Álbum', ep: 'EP', announcement: 'Anúncio' };
-  const typeColors = { 
-    single: 'from-violet-500 to-purple-600', 
-    album: 'from-fuchsia-500 to-pink-600',
-    ep: 'from-cyan-500 to-blue-600',
-    announcement: 'from-amber-500 to-orange-600'
+  const typeColors = {
+    single: 'from-zinc-300 to-zinc-500',
+    album: 'from-neutral-400 to-neutral-600',
+    ep: 'from-slate-300 to-slate-500',
+    announcement: 'from-zinc-200 to-zinc-400'
   };
 
   const CardContent = (
@@ -666,7 +666,7 @@ function PostCard({ post, index, onLike, isLiked }) {
       className="group relative rounded-2xl overflow-hidden cursor-pointer backdrop-blur-xl"
       style={{
         background: 'linear-gradient(135deg, rgba(20,20,30,0.9) 0%, rgba(30,20,40,0.8) 100%)',
-        border: '1px solid rgba(139,92,246,0.2)',
+        border: '1px solid rgba(200,200,210,0.2)',
         boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
         transformStyle: 'preserve-3d'
       }}

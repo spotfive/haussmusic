@@ -29,7 +29,7 @@ export default function GlowingOrb({ isPlaying, coverUrl }) {
         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         className="absolute w-full h-full rounded-full"
         style={{
-          background: 'radial-gradient(circle, rgba(139,92,246,0.6) 0%, rgba(192,132,252,0.4) 30%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(200,200,210,0.6) 0%, rgba(210,210,218,0.4) 30%, transparent 70%)',
           filter: 'blur(50px)'
         }}
       />
@@ -46,7 +46,7 @@ export default function GlowingOrb({ isPlaying, coverUrl }) {
         }}
         className="absolute w-[130%] h-[130%] rounded-full"
         style={{
-          background: 'conic-gradient(from 0deg, rgba(192,132,252,0.3), transparent, rgba(139,92,246,0.3), transparent)',
+          background: 'conic-gradient(from 0deg, rgba(210,210,218,0.3), transparent, rgba(200,200,210,0.3), transparent)',
           filter: 'blur(60px)'
         }}
       />
@@ -59,7 +59,7 @@ export default function GlowingOrb({ isPlaying, coverUrl }) {
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         className="absolute w-[140%] h-[140%] rounded-full"
         style={{
-          background: 'radial-gradient(circle, rgba(236,72,153,0.2) 0%, transparent 50%)',
+          background: 'radial-gradient(circle, rgba(150,150,160,0.2) 0%, transparent 50%)',
           filter: 'blur(80px)'
         }}
       />
@@ -80,13 +80,13 @@ export default function GlowingOrb({ isPlaying, coverUrl }) {
         style={{
           transformStyle: 'preserve-3d',
           border: '3px solid transparent',
-          backgroundImage: 'linear-gradient(#09090b, #09090b), linear-gradient(135deg, rgba(192,192,192,0.4), rgba(139,92,246,0.6), rgba(192,192,192,0.4))',
+          backgroundImage: 'linear-gradient(#09090b, #09090b), linear-gradient(135deg, rgba(192,192,192,0.4), rgba(200,200,210,0.6), rgba(192,192,192,0.4))',
           backgroundOrigin: 'border-box',
           backgroundClip: 'padding-box, border-box',
           boxShadow: `
             0 0 30px rgba(192,192,192,0.3),
-            inset 0 0 30px rgba(139,92,246,0.2),
-            0 0 60px rgba(139,92,246,0.4)
+            inset 0 0 30px rgba(200,200,210,0.2),
+            0 0 60px rgba(200,200,210,0.4)
           `
         }}
       />
@@ -106,10 +106,10 @@ export default function GlowingOrb({ isPlaying, coverUrl }) {
         style={{
           transformStyle: 'preserve-3d',
           border: '2px solid transparent',
-          backgroundImage: 'linear-gradient(#09090b, #09090b), linear-gradient(45deg, rgba(236,72,153,0.4), transparent, rgba(139,92,246,0.5), transparent)',
+          backgroundImage: 'linear-gradient(#09090b, #09090b), linear-gradient(45deg, rgba(150,150,160,0.4), transparent, rgba(200,200,210,0.5), transparent)',
           backgroundOrigin: 'border-box',
           backgroundClip: 'padding-box, border-box',
-          boxShadow: '0 0 40px rgba(236,72,153,0.3), inset 0 0 20px rgba(139,92,246,0.1)'
+          boxShadow: '0 0 40px rgba(150,150,160,0.3), inset 0 0 20px rgba(200,200,210,0.1)'
         }}
       />
 
@@ -128,11 +128,11 @@ export default function GlowingOrb({ isPlaying, coverUrl }) {
           background: `
             conic-gradient(from 0deg, 
               transparent, 
-              rgba(139,92,246,0.6), 
+              rgba(200,200,210,0.6), 
               transparent 25%, 
-              rgba(192,132,252,0.6) 50%, 
+              rgba(210,210,218,0.6) 50%, 
               transparent 75%, 
-              rgba(236,72,153,0.6),
+              rgba(150,150,160,0.6),
               transparent
             )
           `,
@@ -152,11 +152,11 @@ export default function GlowingOrb({ isPlaying, coverUrl }) {
         style={{
           transformStyle: 'preserve-3d',
           boxShadow: `
-            0 0 60px rgba(139,92,246,0.7),
-            0 0 100px rgba(139,92,246,0.5),
+            0 0 60px rgba(200,200,210,0.7),
+            0 0 100px rgba(200,200,210,0.5),
             0 20px 60px rgba(0,0,0,0.6),
             inset 0 0 60px rgba(0,0,0,0.5),
-            inset 0 0 30px rgba(139,92,246,0.3)
+            inset 0 0 30px rgba(200,200,210,0.3)
           `,
           border: '2px solid rgba(192,192,192,0.2)'
         }}
@@ -174,7 +174,7 @@ export default function GlowingOrb({ isPlaying, coverUrl }) {
             transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-violet-900 via-purple-800 to-violet-950 flex items-center justify-center">
+          <div className="w-full h-full bg-gradient-to-br from-zinc-800 via-zinc-700 to-zinc-900 flex items-center justify-center">
             <motion.div
               animate={{
                 scale: isPlaying ? [1, 1.2, 1] : 1
@@ -201,7 +201,7 @@ export default function GlowingOrb({ isPlaying, coverUrl }) {
       {isPlaying && [...Array(16)].map((_, i) => {
         const angle = (i * 22.5 * Math.PI) / 180;
         const radius = 150 + (i % 3) * 30;
-        const colors = ['rgba(139,92,246,0.8)', 'rgba(192,132,252,0.8)', 'rgba(236,72,153,0.6)', 'rgba(192,192,192,0.7)'];
+        const colors = ['rgba(200,200,210,0.8)', 'rgba(210,210,218,0.8)', 'rgba(150,150,160,0.6)', 'rgba(192,192,192,0.7)'];
         return (
           <motion.div
             key={i}
@@ -261,8 +261,8 @@ export default function GlowingOrb({ isPlaying, coverUrl }) {
           <div 
             className="w-full h-full rounded-full"
             style={{
-              background: i % 2 === 0 ? 'rgba(139,92,246,0.9)' : 'rgba(192,192,192,0.8)',
-              boxShadow: `0 0 15px ${i % 2 === 0 ? 'rgba(139,92,246,1)' : 'rgba(192,192,192,1)'}`
+              background: i % 2 === 0 ? 'rgba(200,200,210,0.9)' : 'rgba(192,192,192,0.8)',
+              boxShadow: `0 0 15px ${i % 2 === 0 ? 'rgba(200,200,210,1)' : 'rgba(192,192,192,1)'}`
             }}
           />
         </motion.div>

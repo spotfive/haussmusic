@@ -54,7 +54,7 @@ export default function RankingCard({ item, rank, type, onRate, userRating }) {
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: rank * 0.05 }}
       whileHover={{ x: 5, scale: 1.01 }}
-      className="group relative bg-white/5 rounded-2xl p-4 border border-white/10 hover:border-violet-500/30 transition-all"
+      className="group relative bg-white/5 rounded-2xl p-4 border border-white/10 hover:border-zinc-400/30 transition-all"
     >
       {/* Rank badge */}
       <div className="absolute -left-3 top-1/2 -translate-y-1/2">
@@ -74,7 +74,7 @@ export default function RankingCard({ item, rank, type, onRate, userRating }) {
             {item.cover_url ? (
               <img src={item.cover_url} alt={item.title} className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-300" />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-violet-600 to-fuchsia-600" />
+              <div className="w-full h-full bg-gradient-to-br from-zinc-500 to-neutral-500" />
             )}
           </div>
           {rank === 1 && (
@@ -88,7 +88,7 @@ export default function RankingCard({ item, rank, type, onRate, userRating }) {
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-white truncate group-hover:text-violet-400 transition-colors">
+          <h3 className="font-bold text-white truncate group-hover:text-zinc-300 transition-colors">
             {item.title}
           </h3>
           <p className="text-sm text-zinc-500 truncate">
@@ -129,7 +129,7 @@ export default function RankingCard({ item, rank, type, onRate, userRating }) {
                   e.stopPropagation();
                   setShowPlaylistMenu(!showPlaylistMenu);
                 }}
-                className="p-2 rounded-full text-zinc-500 hover:text-violet-400 hover:bg-white/5 transition-all"
+                className="p-2 rounded-full text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all"
               >
                 <ListPlus className="w-5 h-5" />
               </motion.button>
@@ -195,7 +195,7 @@ export default function RankingCard({ item, rank, type, onRate, userRating }) {
           transition={{ duration: 2, repeat: Infinity }}
           className="absolute top-2 right-2"
         >
-          <TrendingUp className="w-4 h-4 text-[#A78BFA]" />
+          <TrendingUp className="w-4 h-4 text-[#e5e5ea]" />
         </motion.div>
       )}
     </motion.div>

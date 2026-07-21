@@ -82,7 +82,7 @@ export default function RightSidebar({ song, isPlaying, onClose, isFavorite, onF
           ) : song.cover_url ? (
             <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6]/20 to-[#1a1030]">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#c0c0c8]/20 to-[#1a1030]">
               <Music2 className="w-20 h-20 text-[#535353]" />
             </div>
           )}
@@ -137,7 +137,7 @@ export default function RightSidebar({ song, isPlaying, onClose, isFavorite, onF
             </div>
 
             {song.genre && (
-              <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/20">
+              <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-[#c0c0c8]/10 text-[#c0c0c8] border border-[#c0c0c8]/20">
                 {song.genre}
               </span>
             )}
@@ -146,7 +146,7 @@ export default function RightSidebar({ song, isPlaying, onClose, isFavorite, onF
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={onFavoriteToggle}
-                className={`flex-1 py-2 rounded-lg transition-colors ${isFavorite ? 'bg-[#8B5CF6]/20 text-[#8B5CF6]' : 'bg-[#181818] text-[#B3B3B3] hover:text-white'}`}
+                className={`flex-1 py-2 rounded-lg transition-colors ${isFavorite ? 'bg-[#c0c0c8]/20 text-[#c0c0c8]' : 'bg-[#181818] text-[#B3B3B3] hover:text-white'}`}
               >
                 <Heart className={`w-4 h-4 mx-auto ${isFavorite ? 'fill-current' : ''}`} />
               </motion.button>

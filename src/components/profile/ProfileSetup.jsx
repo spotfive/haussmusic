@@ -55,7 +55,7 @@ export default function ProfileSetup({ user, onComplete }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="max-w-md w-full bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 rounded-3xl p-8 border border-violet-500/30 shadow-2xl"
+        className="max-w-md w-full bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 rounded-3xl p-8 border border-zinc-400/30 shadow-2xl"
       >
         {/* Header */}
         <div className="text-center mb-8">
@@ -65,21 +65,21 @@ export default function ProfileSetup({ user, onComplete }) {
               scale: [1, 1.1, 1]
             }}
             transition={{ duration: 3, repeat: Infinity }}
-            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 flex items-center justify-center mx-auto mb-4"
+            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-zinc-400 via-neutral-400 to-pink-500 flex items-center justify-center mx-auto mb-4"
             style={{
-              boxShadow: '0 10px 40px rgba(139,92,246,0.5)'
+              boxShadow: '0 10px 40px rgba(200,200,210,0.5)'
             }}
           >
             <Sparkles className="w-8 h-8 text-white" />
           </motion.div>
-          <h2 className="text-3xl font-bold text-white mb-2">Bem-vindo ao ATLANTIX!</h2>
+          <h2 className="text-3xl font-bold text-white mb-2">Bem-vindo ao HAUSS MUSIC!</h2>
           <p className="text-zinc-400">Complete seu perfil para começar</p>
         </div>
 
         {/* Profile Picture */}
         <div className="flex flex-col items-center gap-4 mb-6">
           <div className="relative group">
-            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 bg-gradient-to-br from-violet-600 to-fuchsia-600">
+            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 bg-gradient-to-br from-zinc-500 to-neutral-500">
               {profileData.profile_picture ? (
                 <img src={profileData.profile_picture} alt="Profile" className="w-full h-full object-cover" />
               ) : (
@@ -128,7 +128,7 @@ export default function ProfileSetup({ user, onComplete }) {
           <Button
             onClick={handleComplete}
             disabled={saving || !profileData.full_name.trim()}
-            className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 h-12"
+            className="w-full bg-gradient-to-r from-zinc-400 to-zinc-500 hover:from-zinc-500 hover:to-zinc-600 h-12"
           >
             {saving ? (
               <>
@@ -138,7 +138,7 @@ export default function ProfileSetup({ user, onComplete }) {
             ) : (
               <>
                 <Save className="w-5 h-5 mr-2" />
-                Começar a usar o ATLANTIX
+                Começar a usar o HAUSS MUSIC
               </>
             )}
           </Button>

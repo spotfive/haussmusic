@@ -8,14 +8,14 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
 const categoryCards = [
-  { id: 'pop', label: 'Pop', color: 'from-rose-500 to-pink-600', icon: Mic2 },
-  { id: 'rock', label: 'Rock', color: 'from-red-600 to-orange-500', icon: Guitar },
-  { id: 'hip-hop', label: 'Hip-Hop', color: 'from-amber-500 to-yellow-500', icon: Headphones },
-  { id: 'electronic', label: 'Eletrônico', color: 'from-cyan-500 to-blue-500', icon: Radio },
-  { id: 'jazz', label: 'Jazz', color: 'from-violet-500 to-purple-500', icon: Music2 },
-  { id: 'classical', label: 'Clássico', color: 'from-emerald-500 to-teal-500', icon: Disc3 },
-  { id: 'r&b', label: 'R&B', color: 'from-fuchsia-500 to-pink-500', icon: Mic2 },
-  { id: 'latin', label: 'Latino', color: 'from-orange-500 to-red-500', icon: Guitar },
+  { id: 'pop', label: 'Pop', color: 'from-zinc-300 to-zinc-500', icon: Mic2 },
+  { id: 'rock', label: 'Rock', color: 'from-neutral-400 to-neutral-600', icon: Guitar },
+  { id: 'hip-hop', label: 'Hip-Hop', color: 'from-zinc-200 to-zinc-400', icon: Headphones },
+  { id: 'electronic', label: 'Eletrônico', color: 'from-slate-400 to-slate-600', icon: Radio },
+  { id: 'jazz', label: 'Jazz', color: 'from-zinc-400 to-zinc-600', icon: Music2 },
+  { id: 'classical', label: 'Clássico', color: 'from-neutral-300 to-neutral-500', icon: Disc3 },
+  { id: 'r&b', label: 'R&B', color: 'from-zinc-300 to-neutral-500', icon: Mic2 },
+  { id: 'latin', label: 'Latino', color: 'from-slate-300 to-slate-500', icon: Guitar },
 ];
 
 function ArtistRow({ artist, currentUser, follows, onFollowToggle }) {
@@ -27,14 +27,14 @@ function ArtistRow({ artist, currentUser, follows, onFollowToggle }) {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-center gap-4 p-3 bg-[#181818] rounded-xl hover:bg-[#282828] transition-colors group border border-[#282828] hover:border-[#8B5CF6]/20"
+      className="flex items-center gap-4 p-3 bg-[#181818] rounded-xl hover:bg-[#282828] transition-colors group border border-[#282828] hover:border-[#c0c0c8]/20"
     >
       <Link to={createPageUrl('ArtistProfile') + '?id=' + artist.id} className="flex items-center gap-4 flex-1 min-w-0">
         <div className="relative shrink-0">
           {artist.profile_picture ? (
-            <img src={artist.profile_picture} alt="" className="w-12 h-12 rounded-full object-cover ring-2 ring-[#282828] group-hover:ring-[#8B5CF6]/30 transition-all" />
+            <img src={artist.profile_picture} alt="" className="w-12 h-12 rounded-full object-cover ring-2 ring-[#282828] group-hover:ring-[#c0c0c8]/30 transition-all" />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-[#282828] flex items-center justify-center ring-2 ring-[#282828] group-hover:ring-[#8B5CF6]/30 transition-all">
+            <div className="w-12 h-12 rounded-full bg-[#282828] flex items-center justify-center ring-2 ring-[#282828] group-hover:ring-[#c0c0c8]/30 transition-all">
               <User className="w-6 h-6 text-[#B3B3B3]" />
             </div>
           )}
@@ -47,7 +47,7 @@ function ArtistRow({ artist, currentUser, follows, onFollowToggle }) {
           )}
         </div>
         <div className="min-w-0">
-          <p className="font-bold text-white text-sm truncate group-hover:text-[#A78BFA] transition-colors">{artist.display_name || artist.full_name}</p>
+          <p className="font-bold text-white text-sm truncate group-hover:text-[#e5e5ea] transition-colors">{artist.display_name || artist.full_name}</p>
           <p className="text-xs text-[#B3B3B3] flex items-center gap-1.5">
             <Users className="w-3 h-3" />{followerCount} seguidores
           </p>
@@ -216,7 +216,7 @@ export default function Search() {
     <div className="min-h-screen pb-40 lg:pb-32 bg-[#121212]">
       {/* Header + Search */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#8B5CF6]/10 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#c0c0c8]/10 via-transparent to-transparent" />
         <div className="relative px-4 lg:px-6 pt-8 pb-4">
           <h1 className="text-3xl lg:text-4xl font-bold text-white mb-4">Buscar</h1>
 
@@ -232,7 +232,7 @@ export default function Search() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="O que você quer ouvir?"
-                className="w-full pl-12 pr-12 py-3.5 text-base bg-[#282828] border border-[#383838] rounded-xl outline-none transition-all focus:bg-[#333] focus:border-[#8B5CF6]/40 text-white placeholder:text-[#696969]"
+                className="w-full pl-12 pr-12 py-3.5 text-base bg-[#282828] border border-[#383838] rounded-xl outline-none transition-all focus:bg-[#333] focus:border-[#c0c0c8]/40 text-white placeholder:text-[#696969]"
               />
               {query && (
                 <button onClick={() => setQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full bg-[#383838] hover:bg-[#535353] transition-colors">
@@ -245,7 +245,7 @@ export default function Search() {
             {selectedCategory && (
               <div className="flex items-center gap-2 mt-3">
                 <span className="text-xs text-[#B3B3B3]">Gênero:</span>
-                <button onClick={() => setSelectedCategory(null)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#8B5CF6]/15 text-[#A78BFA] text-xs font-medium border border-[#8B5CF6]/20 hover:bg-[#8B5CF6]/25 transition-colors">
+                <button onClick={() => setSelectedCategory(null)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#c0c0c8]/15 text-[#e5e5ea] text-xs font-medium border border-[#c0c0c8]/20 hover:bg-[#c0c0c8]/25 transition-colors">
                   {categoryCards.find(c => c.id === selectedCategory)?.label}
                   <X className="w-3 h-3" />
                 </button>
@@ -263,8 +263,8 @@ export default function Search() {
               {filteredArtists.length > 0 && (
                 <section className="mb-8">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-7 h-7 rounded-lg bg-[#8B5CF6]/20 flex items-center justify-center">
-                      <User className="w-3.5 h-3.5 text-[#A78BFA]" />
+                    <div className="w-7 h-7 rounded-lg bg-[#c0c0c8]/20 flex items-center justify-center">
+                      <User className="w-3.5 h-3.5 text-[#e5e5ea]" />
                     </div>
                     <h3 className="text-lg font-bold text-white">Artistas</h3>
                   </div>
@@ -280,8 +280,8 @@ export default function Search() {
               {filteredReleases.length > 0 && (
                 <section className="mb-8">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-7 h-7 rounded-lg bg-[#8B5CF6]/20 flex items-center justify-center">
-                      <Disc3 className="w-3.5 h-3.5 text-[#A78BFA]" />
+                    <div className="w-7 h-7 rounded-lg bg-[#c0c0c8]/20 flex items-center justify-center">
+                      <Disc3 className="w-3.5 h-3.5 text-[#e5e5ea]" />
                     </div>
                     <h3 className="text-lg font-bold text-white">Álbuns e EPs</h3>
                   </div>
@@ -293,7 +293,7 @@ export default function Search() {
                             {r.cover_url ? (
                               <img src={r.cover_url} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400" />
                             ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/30 to-[#1a1030] flex items-center justify-center">
+                              <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 to-[#1a1030] flex items-center justify-center">
                                 <Disc3 className="w-10 h-10 text-[#535353]" />
                               </div>
                             )}
@@ -312,8 +312,8 @@ export default function Search() {
               {filteredSongs.length > 0 && (
                 <section className="mb-8">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-7 h-7 rounded-lg bg-[#8B5CF6]/20 flex items-center justify-center">
-                      <Music2 className="w-3.5 h-3.5 text-[#A78BFA]" />
+                    <div className="w-7 h-7 rounded-lg bg-[#c0c0c8]/20 flex items-center justify-center">
+                      <Music2 className="w-3.5 h-3.5 text-[#e5e5ea]" />
                     </div>
                     <h3 className="text-lg font-bold text-white">Músicas</h3>
                   </div>
@@ -327,12 +327,12 @@ export default function Search() {
                         animate={{ opacity: 1 }}
                         transition={{ delay: i * 0.02 }}
                         onClick={() => handlePlay(song)}
-                        className={`group flex items-center gap-3 p-2.5 transition-colors border-b border-[#282828] last:border-b-0 ${scheduled ? 'cursor-default opacity-60' : 'cursor-pointer'} ${currentSong?.id === song.id ? 'bg-[#8B5CF6]/[0.08]' : scheduled ? '' : 'hover:bg-[#282828]'}`}
+                        className={`group flex items-center gap-3 p-2.5 transition-colors border-b border-[#282828] last:border-b-0 ${scheduled ? 'cursor-default opacity-60' : 'cursor-pointer'} ${currentSong?.id === song.id ? 'bg-[#c0c0c8]/[0.08]' : scheduled ? '' : 'hover:bg-[#282828]'}`}
                       >
                         <span className="w-6 text-center text-xs text-[#535353] font-medium">{i + 1}</span>
                         <div className="relative w-10 h-10 rounded-md overflow-hidden bg-[#282828] shrink-0">
                           {song.cover_url ? <img src={song.cover_url} alt="" className="w-full h-full object-cover" /> : (
-                            <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/30 to-purple-900 flex items-center justify-center">
+                            <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 to-zinc-800 flex items-center justify-center">
                               <Music2 className="w-4 h-4 text-[#535353]" />
                             </div>
                           )}
@@ -344,7 +344,7 @@ export default function Search() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className={`text-sm font-medium truncate ${currentSong?.id === song.id ? 'text-[#8B5CF6]' : 'text-white'}`}>{song.title}</p>
+                            <p className={`text-sm font-medium truncate ${currentSong?.id === song.id ? 'text-[#c0c0c8]' : 'text-white'}`}>{song.title}</p>
                             {scheduled && (
                               <span className="text-[10px] font-bold uppercase bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded whitespace-nowrap">Em Breve</span>
                             )}
@@ -353,7 +353,7 @@ export default function Search() {
                         </div>
                         <span className="text-xs text-[#535353] w-10 text-right">{formatDuration(song.duration)}</span>
                         <button onClick={(e) => { e.stopPropagation(); handleFavorite(song); }}
-                          className={`p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity ${song.is_favorite ? 'text-[#8B5CF6]' : 'text-[#B3B3B3] hover:text-white'}`}>
+                          className={`p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity ${song.is_favorite ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`}>
                           <Heart className={`w-4 h-4 ${song.is_favorite ? 'fill-current' : ''}`} />
                         </button>
                       </motion.div>
@@ -418,12 +418,12 @@ export default function Search() {
                         animate={{ opacity: 1 }}
                         transition={{ delay: i * 0.02 }}
                         onClick={() => handlePlay(song)}
-                        className={`group flex items-center gap-3 p-2.5 transition-colors border-b border-[#282828] last:border-b-0 ${scheduled ? 'cursor-default opacity-60' : 'cursor-pointer'} ${currentSong?.id === song.id ? 'bg-[#8B5CF6]/[0.08]' : scheduled ? '' : 'hover:bg-[#282828]'}`}
+                        className={`group flex items-center gap-3 p-2.5 transition-colors border-b border-[#282828] last:border-b-0 ${scheduled ? 'cursor-default opacity-60' : 'cursor-pointer'} ${currentSong?.id === song.id ? 'bg-[#c0c0c8]/[0.08]' : scheduled ? '' : 'hover:bg-[#282828]'}`}
                       >
                         <span className="w-6 text-center text-xs text-[#535353] font-medium">{i + 1}</span>
                         <div className="relative w-10 h-10 rounded-md overflow-hidden bg-[#282828] shrink-0">
                           {song.cover_url ? <img src={song.cover_url} alt="" className="w-full h-full object-cover" /> : (
-                            <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/30 to-purple-900 flex items-center justify-center">
+                            <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 to-zinc-800 flex items-center justify-center">
                               <Music2 className="w-4 h-4 text-[#535353]" />
                             </div>
                           )}
@@ -435,7 +435,7 @@ export default function Search() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className={`text-sm font-medium truncate ${currentSong?.id === song.id ? 'text-[#8B5CF6]' : 'text-white'}`}>{song.title}</p>
+                            <p className={`text-sm font-medium truncate ${currentSong?.id === song.id ? 'text-[#c0c0c8]' : 'text-white'}`}>{song.title}</p>
                             {scheduled && (
                               <span className="text-[10px] font-bold uppercase bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded whitespace-nowrap">Em Breve</span>
                             )}

@@ -85,7 +85,7 @@ export default function ExpandedMobilePlayer({
                 onClick={handleProgressClick}
               >
                 <div
-                  className="absolute inset-y-0 left-0 bg-[#8B5CF6] rounded-full transition-all"
+                  className="absolute inset-y-0 left-0 bg-[#c0c0c8] rounded-full transition-all"
                   style={{ width: `${progressPct}%` }}
                 />
                 <div
@@ -106,7 +106,7 @@ export default function ExpandedMobilePlayer({
                 whileTap={{ scale: 0.85 }}
                 onClick={onToggleShuffle}
                 className={`p-3 rounded-full transition-colors ${
-                  shuffleEnabled ? 'text-[#8B5CF6] bg-[#8B5CF6]/10' : 'text-[#B3B3B3]'
+                  shuffleEnabled ? 'text-[#c0c0c8] bg-[#c0c0c8]/10' : 'text-[#B3B3B3]'
                 }`}
               >
                 <Shuffle className="w-6 h-6" />
@@ -123,7 +123,7 @@ export default function ExpandedMobilePlayer({
               <motion.button
                 whileTap={{ scale: 0.90 }}
                 onClick={onPlayPause}
-                className="w-20 h-20 rounded-full bg-[#8B5CF6] flex items-center justify-center shadow-2xl flex-shrink-0"
+                className="w-20 h-20 rounded-full bg-[#c0c0c8] flex items-center justify-center shadow-2xl flex-shrink-0"
               >
                 {isPlaying ? (
                   <Pause className="w-8 h-8 text-white fill-white" />
@@ -144,7 +144,7 @@ export default function ExpandedMobilePlayer({
                 whileTap={{ scale: 0.85 }}
                 onClick={onFavoriteToggle}
                 className={`p-3 rounded-full transition-colors ${
-                  isFavorite ? 'text-[#8B5CF6] bg-[#8B5CF6]/10' : 'text-[#B3B3B3]'
+                  isFavorite ? 'text-[#c0c0c8] bg-[#c0c0c8]/10' : 'text-[#B3B3B3]'
                 }`}
               >
                 <Heart className={`w-6 h-6 ${isFavorite ? 'fill-current' : ''}`} />
@@ -157,7 +157,7 @@ export default function ExpandedMobilePlayer({
                 whileTap={{ scale: 0.85 }}
                 onClick={onToggleRepeat}
                 className={`p-2 rounded-full transition-colors ${
-                  repeatMode ? 'text-[#8B5CF6] bg-[#8B5CF6]/10' : 'text-[#B3B3B3]'
+                  repeatMode ? 'text-[#c0c0c8] bg-[#c0c0c8]/10' : 'text-[#B3B3B3]'
                 }`}
               >
                 <Repeat className="w-5 h-5" />
@@ -174,7 +174,7 @@ export default function ExpandedMobilePlayer({
                   onChange={onVolumeChange}
                   className="flex-1"
                   style={{
-                    background: `linear-gradient(to right, #8B5CF6 0%, #8B5CF6 ${
+                    background: `linear-gradient(to right, #c0c0c8 0%, #c0c0c8 ${
                       volume * 100
                     }%, #383838 ${volume * 100}%, #383838 100%)`,
                   }}

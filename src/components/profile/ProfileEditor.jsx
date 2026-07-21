@@ -81,7 +81,7 @@ export default function ProfileEditor({ user, onUpdate }) {
       {/* Profile Picture */}
       <div className="flex flex-col items-center gap-4">
         <div className="relative group">
-          <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 bg-gradient-to-br from-violet-600 to-fuchsia-600">
+          <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 bg-gradient-to-br from-zinc-500 to-neutral-500">
             {profileData.profile_picture ? (
               <img src={profileData.profile_picture} alt="Profile" className="w-full h-full object-cover" />
             ) : (
@@ -129,7 +129,7 @@ export default function ProfileEditor({ user, onUpdate }) {
         <Button
           onClick={handleSave}
           disabled={saving || !profileData.display_name}
-          className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700"
+          className="w-full bg-gradient-to-r from-zinc-400 to-zinc-500 hover:from-zinc-500 hover:to-zinc-600"
         >
           {saving ? (
             <>

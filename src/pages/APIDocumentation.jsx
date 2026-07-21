@@ -19,7 +19,7 @@ export default function APIDocumentation() {
     {
       id: 'getSongs',
       title: 'Obter Músicas',
-      description: 'Retorna as 50 músicas mais recentes publicadas no Atlantix',
+      description: 'Retorna as 50 músicas mais recentes publicadas no HAUSS MUSIC',
       code: `// JavaScript/TypeScript
 const response = await fetch('${apiEndpoint}', {
   method: 'POST',
@@ -136,7 +136,7 @@ const data = await response.json();`,
     <div className="min-h-screen pb-32">
       {/* Header */}
       <div className="relative px-6 lg:px-8 py-12 mb-8">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-600/20 to-fuchsia-600/20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-500/20 to-neutral-500/20" />
         <div className="absolute inset-0 backdrop-blur-3xl" />
         
         <div className="relative max-w-5xl mx-auto">
@@ -145,12 +145,12 @@ const data = await response.json();`,
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center gap-4 mb-4"
           >
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-zinc-400 to-neutral-500 flex items-center justify-center shadow-lg">
               <Code className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-black text-white">API Pública do Atlantix</h1>
-              <p className="text-zinc-400 mt-1">Integre músicas do Atlantix no seu aplicativo</p>
+              <h1 className="text-4xl font-black text-white">API Pública do HAUSS MUSIC</h1>
+              <p className="text-zinc-400 mt-1">Integre músicas do HAUSS MUSIC no seu aplicativo</p>
             </div>
           </motion.div>
         </div>
@@ -164,15 +164,15 @@ const data = await response.json();`,
           className="bg-white/5 rounded-2xl p-6 border border-white/10 mb-8"
         >
           <h2 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
-            <Music2 className="w-5 h-5 text-violet-400" />
+            <Music2 className="w-5 h-5 text-zinc-300" />
             Sobre a API
           </h2>
           <p className="text-zinc-300 mb-4">
-            A API pública do Atlantix permite que você acesse músicas, álbuns e EPs publicados na plataforma. 
-            Perfeito para criar integrações, widgets de música, ou permitir que usuários compartilhem músicas do Atlantix em outras plataformas.
+            A API pública do HAUSS MUSIC permite que você acesse músicas, álbuns e EPs publicados na plataforma. 
+            Perfeito para criar integrações, widgets de música, ou permitir que usuários compartilhem músicas do HAUSS MUSIC em outras plataformas.
           </p>
-          <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl p-4">
-            <div className="text-sm text-violet-300 font-mono break-all">
+          <div className="bg-zinc-400/10 border border-zinc-400/30 rounded-xl p-4">
+            <div className="text-sm text-zinc-200 font-mono break-all">
               <strong>Endpoint:</strong> {apiEndpoint}
             </div>
           </div>
@@ -221,7 +221,7 @@ const data = await response.json();`,
               {/* Request */}
               <div className="p-6 border-b border-white/10">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-semibold text-violet-400 uppercase">Request</h4>
+                  <h4 className="text-sm font-semibold text-zinc-300 uppercase">Request</h4>
                   <button
                     onClick={() => copyCode(example.code, example.id + '-req')}
                     className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm transition-colors"
@@ -266,11 +266,11 @@ const data = await response.json();`,
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="mt-8 bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 rounded-2xl p-6 border border-violet-500/30"
+          className="mt-8 bg-gradient-to-br from-zinc-400/20 to-neutral-400/20 rounded-2xl p-6 border border-zinc-400/30"
         >
           <h3 className="text-xl font-bold text-white mb-4">🎵 Exemplo: Widget de Música em React</h3>
           <pre className="bg-zinc-950 rounded-xl p-4 overflow-x-auto">
-            <code className="text-sm text-violet-300">{`function AtlantixMusicWidget() {
+            <code className="text-sm text-zinc-200">{`function HaussMusicWidget() {
   const [songs, setSongs] = useState([]);
   
   useEffect(() => {
@@ -285,7 +285,7 @@ const data = await response.json();`,
   
   return (
     <div className="music-widget">
-      <h2>🎧 Do Atlantix</h2>
+      <h2>🎧 Do HAUSS MUSIC</h2>
       {songs.map(song => (
         <div key={song.id} className="song-item">
           <img src={song.cover_url} alt={song.title} />
@@ -304,7 +304,7 @@ const data = await response.json();`,
 
         {/* Footer */}
         <div className="mt-12 text-center text-zinc-500">
-          <p>💜 Feito com amor pela equipe Atlantix</p>
+          <p>🖤 Feito com amor pela equipe HAUSS MUSIC</p>
           <p className="text-sm mt-2">Tem dúvidas? Entre em contato conosco!</p>
         </div>
       </div>

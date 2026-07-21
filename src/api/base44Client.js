@@ -1,13 +1,9 @@
-import { createClient } from '@base44/sdk';
-import { appParams } from '@/lib/app-params';
+// HAUSS MUSIC runs fully client-side: no connection to any external backend.
+// `base44` here is a local, localStorage-backed stand-in with the same
+// shape (auth / entities / functions / integrations) the app already used,
+// so every page keeps working without a hosted server.
+import { localBackend, seedDemoData } from './localBackend';
 
-const { appId, token, functionsVersion } = appParams;
+seedDemoData();
 
-//Create a client with authentication required
-export const base44 = createClient({
-  appId,
-  token,
-  functionsVersion,
-  serverUrl: '',
-  requiresAuth: false
-});
+export const base44 = localBackend;

@@ -36,7 +36,7 @@ export default function PlayerControls({
           max={duration || 100}
           step={1}
           onValueChange={(value) => onSeek(value[0])}
-          className="cursor-pointer [&_[role=slider]]:bg-violet-400 [&_[role=slider]]:border-violet-300 [&_[role=slider]]:shadow-[0_0_10px_rgba(139,92,246,0.5)] [&_.bg-primary]:bg-gradient-to-r [&_.bg-primary]:from-violet-600 [&_.bg-primary]:to-purple-400"
+          className="cursor-pointer [&_[role=slider]]:bg-zinc-300 [&_[role=slider]]:border-zinc-200 [&_[role=slider]]:shadow-[0_0_10px_rgba(200,200,210,0.5)] [&_.bg-primary]:bg-gradient-to-r [&_.bg-primary]:from-zinc-500 [&_.bg-primary]:to-zinc-300"
         />
         <div className="flex justify-between text-xs text-zinc-500 font-medium">
           <span>{formatTime(currentTime)}</span>
@@ -50,7 +50,7 @@ export default function PlayerControls({
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={onShuffleToggle}
-          className={`p-2 rounded-full transition-colors ${isShuffled ? 'text-violet-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+          className={`p-2 rounded-full transition-colors ${isShuffled ? 'text-zinc-300' : 'text-zinc-500 hover:text-zinc-300'}`}
         >
           <Shuffle className="w-5 h-5" />
         </motion.button>
@@ -70,10 +70,10 @@ export default function PlayerControls({
           onClick={onPlayPause}
           className="relative p-6 rounded-full text-white shadow-2xl"
           style={{
-            background: 'linear-gradient(135deg, rgba(139,92,246,0.9) 0%, rgba(192,132,252,0.8) 50%, rgba(236,72,153,0.7) 100%)',
+            background: 'linear-gradient(135deg, rgba(200,200,210,0.9) 0%, rgba(210,210,218,0.8) 50%, rgba(150,150,160,0.7) 100%)',
             boxShadow: `
-              0 0 40px rgba(139,92,246,0.7), 
-              0 0 80px rgba(139,92,246,0.4),
+              0 0 40px rgba(200,200,210,0.7), 
+              0 0 80px rgba(200,200,210,0.4),
               0 10px 50px rgba(0,0,0,0.5),
               inset 0 0 30px rgba(255,255,255,0.1)
             `,
@@ -84,7 +84,7 @@ export default function PlayerControls({
           <motion.div
             className="absolute inset-0 rounded-full"
             style={{
-              background: 'linear-gradient(135deg, rgba(139,92,246,0.6), rgba(236,72,153,0.4))'
+              background: 'linear-gradient(135deg, rgba(200,200,210,0.6), rgba(150,150,160,0.4))'
             }}
             animate={{
               opacity: isPlaying ? [0.3, 0.7, 0.3] : 0.3,
@@ -119,11 +119,11 @@ export default function PlayerControls({
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={onRepeatToggle}
-          className={`p-2 rounded-full transition-colors relative ${repeatMode !== 'off' ? 'text-violet-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+          className={`p-2 rounded-full transition-colors relative ${repeatMode !== 'off' ? 'text-zinc-300' : 'text-zinc-500 hover:text-zinc-300'}`}
         >
           <Repeat className="w-5 h-5" />
           {repeatMode === 'one' && (
-            <span className="absolute -top-1 -right-1 text-[10px] font-bold text-violet-400">1</span>
+            <span className="absolute -top-1 -right-1 text-[10px] font-bold text-zinc-300">1</span>
           )}
         </motion.button>
       </div>

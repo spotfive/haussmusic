@@ -115,7 +115,7 @@ export default function ArtistProfile() {
   if (!artist) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-violet-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-zinc-300" />
       </div>
     );
   }
@@ -126,7 +126,7 @@ export default function ArtistProfile() {
     <div className="min-h-screen pb-32">
       {/* Hero Header */}
       <div className="relative h-72 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-600/30 to-fuchsia-600/30" />
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-500/30 to-neutral-500/30" />
         {artist.profile_picture && (
           <img src={artist.profile_picture} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20 scale-110 blur-2xl" />
         )}
@@ -144,7 +144,7 @@ export default function ArtistProfile() {
                   className="w-32 h-32 rounded-full object-cover border-4 border-white/20 shadow-2xl"
                 />
               ) : (
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center border-4 border-white/20 shadow-2xl">
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-zinc-400 to-neutral-500 flex items-center justify-center border-4 border-white/20 shadow-2xl">
                   <User className="w-16 h-16 text-white" />
                 </div>
               )}
@@ -158,13 +158,13 @@ export default function ArtistProfile() {
             </div>
 
             <div className="flex-1 pb-2">
-              <div className="text-sm text-violet-300 mb-1">
+              <div className="text-sm text-zinc-200 mb-1">
                 {artist.user_type === 'artista' ? '🎤 Artista' : artist.user_type === 'staff' ? '⭐ Staff' : '🎧 Usuário'}
               </div>
               <h1 className="text-4xl lg:text-5xl font-black text-white mb-2">{artist.display_name || artist.full_name}</h1>
               <div className="flex items-center gap-6 text-sm text-zinc-300 flex-wrap">
                 <span className="flex items-center gap-1.5">
-                  <Users className="w-4 h-4 text-violet-400" />
+                  <Users className="w-4 h-4 text-zinc-300" />
                   <motion.span
                     key={artistFollows.length}
                     initial={{ scale: 1.3 }}
@@ -201,7 +201,7 @@ export default function ArtistProfile() {
                   className={`px-6 py-3 rounded-full font-semibold text-sm flex items-center gap-2 transition-all ${
                     isFollowing
                       ? 'bg-white/10 border border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-400'
-                      : 'bg-violet-500 hover:bg-violet-400 text-white shadow-lg shadow-violet-500/30'
+                      : 'bg-zinc-400 hover:bg-zinc-300 text-white shadow-lg shadow-zinc-400/30'
                   }`}
                 >
                   {isFollowing ? (
@@ -226,7 +226,7 @@ export default function ArtistProfile() {
       <div className="px-6 lg:px-8 py-8">
         <div className="grid grid-cols-4 gap-4 mb-8">
           <div className="bg-white/5 rounded-2xl p-5 border border-white/10 text-center">
-            <Users className="w-7 h-7 text-violet-400 mb-2 mx-auto" />
+            <Users className="w-7 h-7 text-zinc-300 mb-2 mx-auto" />
             <motion.div
               key={artistFollows.length}
               initial={{ scale: 1.2 }}
@@ -238,7 +238,7 @@ export default function ArtistProfile() {
             <div className="text-xs text-zinc-500 mt-0.5">Seguidores</div>
           </div>
           <div className="bg-white/5 rounded-2xl p-5 border border-white/10 text-center">
-            <Play className="w-7 h-7 text-violet-400 mb-2 mx-auto" />
+            <Play className="w-7 h-7 text-zinc-300 mb-2 mx-auto" />
             <div className="text-2xl font-bold text-white">{totalPlays.toLocaleString()}</div>
             <div className="text-xs text-zinc-500 mt-0.5">Plays</div>
           </div>
@@ -273,14 +273,14 @@ export default function ArtistProfile() {
                     {song.cover_url ? (
                       <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-violet-600 to-fuchsia-600" />
+                      <div className="w-full h-full bg-gradient-to-br from-zinc-500 to-neutral-500" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-white truncate">{song.title}</div>
                     <div className="text-sm text-zinc-500">{song.plays || 0} plays</div>
                     {song.label_name && (
-                      <div className="flex items-center gap-1 text-xs text-[#A78BFA] mt-0.5">
+                      <div className="flex items-center gap-1 text-xs text-[#e5e5ea] mt-0.5">
                         <Music2 className="w-3 h-3" />
                         <span>{song.label_name}</span>
                       </div>
@@ -317,7 +317,7 @@ export default function ArtistProfile() {
                       {post.cover_url ? (
                         <img src={post.cover_url} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-violet-500 to-fuchsia-600" />
+                        <div className="w-full h-full bg-gradient-to-br from-zinc-400 to-neutral-500" />
                       )}
                     </div>
                     <h3 className="font-bold text-white mb-1 truncate">{post.title}</h3>

@@ -33,7 +33,7 @@ export default function Sidebar({ currentPage }) {
     staleTime: 60000,
   });
 
-  const logoUrl = appSettings.find(s => s.key === 'logo_url')?.value || null;
+  const logoUrl = appSettings.find(s => s.key === 'logo_url')?.value || '/logo.png';
 
   const isActive = (page) => currentPage === page;
 
@@ -43,10 +43,10 @@ export default function Sidebar({ currentPage }) {
       <div className="flex items-center justify-center h-[72px] border-b border-[#282828]">
         <Link to={createPageUrl('Home')}>
           {logoUrl ? (
-            <img src={logoUrl} alt="Logo" className="w-10 h-10 rounded-full object-cover" />
+            <img src={logoUrl} alt="HAUSS MUSIC" className="w-10 h-10 object-contain" />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-[#8B5CF6] flex items-center justify-center">
-              <span className="text-white font-black text-xs">ATX</span>
+            <div className="w-10 h-10 rounded-full bg-[#c0c0c8] flex items-center justify-center">
+              <span className="text-black font-black text-xs">HM</span>
             </div>
           )}
         </Link>
@@ -61,7 +61,7 @@ export default function Sidebar({ currentPage }) {
               whileTap={{ scale: 0.95 }}
               className={`relative flex flex-col items-center justify-center gap-1 py-3 rounded-xl transition-all duration-200 ${
                 isActive(item.page)
-                  ? 'text-[#8B5CF6]'
+                  ? 'text-[#c0c0c8]'
                   : 'text-[#B3B3B3] hover:text-white'
               }`}
             >
@@ -82,7 +82,7 @@ export default function Sidebar({ currentPage }) {
               whileTap={{ scale: 0.95 }}
               className={`relative flex flex-col items-center justify-center gap-1 py-3 rounded-xl transition-all duration-200 ${
                 isActive(item.page)
-                  ? 'text-[#8B5CF6]'
+                  ? 'text-[#c0c0c8]'
                   : 'text-[#B3B3B3] hover:text-white'
               }`}
             >
@@ -100,7 +100,7 @@ export default function Sidebar({ currentPage }) {
               whileTap={{ scale: 0.95 }}
               className={`relative flex flex-col items-center justify-center gap-1 py-3 rounded-xl transition-all duration-200 ${
                 isActive('ArtistDashboard')
-                  ? 'text-[#8B5CF6]'
+                  ? 'text-[#c0c0c8]'
                   : 'text-[#B3B3B3] hover:text-white'
               }`}
             >
@@ -118,7 +118,7 @@ export default function Sidebar({ currentPage }) {
               whileTap={{ scale: 0.95 }}
               className={`relative flex flex-col items-center justify-center gap-1 py-3 rounded-xl transition-all duration-200 ${
                 isActive('LabelDashboard')
-                  ? 'text-[#8B5CF6]'
+                  ? 'text-[#c0c0c8]'
                   : 'text-[#B3B3B3] hover:text-white'
               }`}
             >
@@ -136,7 +136,7 @@ export default function Sidebar({ currentPage }) {
               whileTap={{ scale: 0.95 }}
               className={`relative flex flex-col items-center justify-center gap-1 py-3 rounded-xl transition-all duration-200 ${
                 isActive('LabelManagement')
-                  ? 'text-[#8B5CF6]'
+                  ? 'text-[#c0c0c8]'
                   : 'text-[#B3B3B3] hover:text-white'
               }`}
             >
@@ -154,7 +154,7 @@ export default function Sidebar({ currentPage }) {
               whileTap={{ scale: 0.95 }}
               className={`relative flex flex-col items-center justify-center gap-1 py-3 rounded-xl transition-all duration-200 ${
                 isActive('AdminDashboard')
-                  ? 'text-[#8B5CF6]'
+                  ? 'text-[#c0c0c8]'
                   : 'text-[#B3B3B3] hover:text-white'
               }`}
             >

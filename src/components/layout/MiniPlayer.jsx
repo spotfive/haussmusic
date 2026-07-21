@@ -100,7 +100,7 @@ export default function MiniPlayer({
         {/* Progress bar */}
         <div className="relative h-1 bg-[#282828] group/progress cursor-pointer" onClick={handleProgressClick}>
           <div
-            className="absolute inset-y-0 left-0 bg-[#8B5CF6] rounded-full transition-all duration-100 group-hover/progress:h-1.5 group-hover/progress:-top-[1px]"
+            className="absolute inset-y-0 left-0 bg-[#c0c0c8] rounded-full transition-all duration-100 group-hover/progress:h-1.5 group-hover/progress:-top-[1px]"
             style={{ width: `${progressPct}%` }}
           >
             <div className="absolute -right-[6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover/progress:opacity-100 transition-opacity shadow-md" />
@@ -128,7 +128,7 @@ export default function MiniPlayer({
             onClick={handleProgressClick}
           >
             <div
-              className="absolute inset-y-0 left-0 bg-[#8B5CF6] rounded-full"
+              className="absolute inset-y-0 left-0 bg-[#c0c0c8] rounded-full"
               style={{ width: `${progressPct}%` }}
             />
             <div
@@ -156,7 +156,7 @@ export default function MiniPlayer({
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={onPlayPause}
-              className="w-12 h-12 rounded-full bg-[#8B5CF6] flex items-center justify-center shadow-md flex-shrink-0"
+              className="w-12 h-12 rounded-full bg-[#c0c0c8] flex items-center justify-center shadow-md flex-shrink-0"
             >
               {isPlaying ? (
                 <Pause className="w-5 h-5 text-white fill-white" />
@@ -176,7 +176,7 @@ export default function MiniPlayer({
             <motion.button
               whileTap={{ scale: 0.88 }}
               onClick={onFavoriteToggle}
-              className={`p-2 rounded-lg ml-auto transition-colors ${isFavorite ? 'text-[#8B5CF6]' : 'text-[#B3B3B3] active:bg-[#282828]'}`}
+              className={`p-2 rounded-lg ml-auto transition-colors ${isFavorite ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] active:bg-[#282828]'}`}
             >
               <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
             </motion.button>
@@ -211,10 +211,10 @@ export default function MiniPlayer({
 
           {/* Controls */}
           <div className="flex-1 flex items-center justify-center gap-1">
-            <button onClick={onToggleShuffle} className={`p-2 rounded-lg transition-colors ${shuffleEnabled ? 'text-[#8B5CF6]' : 'text-[#B3B3B3] hover:text-white'}`} title="Modo aleatório">
+            <button onClick={onToggleShuffle} className={`p-2 rounded-lg transition-colors ${shuffleEnabled ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`} title="Modo aleatório">
               <Shuffle className="w-4 h-4" />
             </button>
-            <button onClick={onToggleRepeat} className={`p-2 rounded-lg transition-colors ${repeatMode ? 'text-[#8B5CF6]' : 'text-[#B3B3B3] hover:text-white'}`}>
+            <button onClick={onToggleRepeat} className={`p-2 rounded-lg transition-colors ${repeatMode ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`}>
               <Repeat className="w-4 h-4" />
             </button>
             <button onClick={onPrevious} className="p-2 rounded-lg text-[#B3B3B3] hover:text-white transition-colors">
@@ -226,10 +226,10 @@ export default function MiniPlayer({
             <button onClick={onNext} className="p-2 rounded-lg text-[#B3B3B3] hover:text-white transition-colors">
               <SkipForward className="w-4 h-4" />
             </button>
-            <button onClick={onFavoriteToggle} className={`p-2 rounded-lg transition-colors ${isFavorite ? 'text-[#8B5CF6]' : 'text-[#B3B3B3] hover:text-white'}`}>
+            <button onClick={onFavoriteToggle} className={`p-2 rounded-lg transition-colors ${isFavorite ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`}>
               <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
             </button>
-            <button onClick={onToggleCrossfade} className={`p-2 rounded-lg transition-colors ${crossfadeEnabled ? 'text-[#8B5CF6]' : 'text-[#B3B3B3] hover:text-white'}`} title="Crossfade entre faixas">
+            <button onClick={onToggleCrossfade} className={`p-2 rounded-lg transition-colors ${crossfadeEnabled ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`} title="Crossfade entre faixas">
               <GitMerge className="w-4 h-4" />
             </button>
             <button 
@@ -250,7 +250,7 @@ export default function MiniPlayer({
                 {isMuted || volume === 0 ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
               </button>
               <input type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={onVolumeChange} className="w-full"
-                style={{ background: `linear-gradient(to right, #8B5CF6 0%, #8B5CF6 ${(isMuted ? 0 : volume) * 100}%, #535353 ${(isMuted ? 0 : volume) * 100}%, #535353 100%)` }}
+                style={{ background: `linear-gradient(to right, #c0c0c8 0%, #c0c0c8 ${(isMuted ? 0 : volume) * 100}%, #535353 ${(isMuted ? 0 : volume) * 100}%, #535353 100%)` }}
               />
             </div>
           </div>

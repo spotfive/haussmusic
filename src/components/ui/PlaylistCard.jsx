@@ -82,7 +82,7 @@ export default function PlaylistCard({ playlist, onPlay, index, songs = [] }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onPlay(playlist)}
-            className="w-10 h-10 rounded-full bg-violet-600 hover:bg-violet-500 text-white flex items-center justify-center shadow-lg"
+            className="w-10 h-10 rounded-full bg-zinc-500 hover:bg-zinc-400 text-white flex items-center justify-center shadow-lg"
           >
             <Play className="w-4 h-4 fill-current ml-0.5" />
           </motion.button>

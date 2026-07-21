@@ -104,7 +104,7 @@ export default function Home() {
     staleTime: 60000,
   });
 
-  const logoUrl = appSettings.find(s => s.key === 'logo_url')?.value || null;
+  const logoUrl = appSettings.find(s => s.key === 'logo_url')?.value || '/logo.png';
 
   const scheduledAlbums = new Set(posts.filter(p => p.is_scheduled && p.scheduled_datetime && new Date(p.scheduled_datetime) > new Date()).map(p => p.title));
   const isSongScheduled = (song) => song.album && scheduledAlbums.has(song.album);
@@ -194,16 +194,16 @@ export default function Home() {
               <motion.div
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 1.5, repeat: 1 }}
-                className="w-24 h-24 mx-auto mb-6 rounded-full bg-[#8B5CF6] flex items-center justify-center overflow-hidden"
-                style={{ boxShadow: '0 0 60px rgba(139,92,246,0.4)' }}
+                className="w-24 h-24 mx-auto mb-6 rounded-full bg-[#c0c0c8] flex items-center justify-center overflow-hidden"
+                style={{ boxShadow: '0 0 60px rgba(200,200,210,0.4)' }}
               >
                 {logoUrl ? (
-                  <img src={logoUrl} alt="ATLANTIX" className="w-full h-full object-cover" />
+                  <img src={logoUrl} alt="HAUSS MUSIC" className="w-full h-full object-contain p-2" />
                 ) : (
                   <Music2 className="w-12 h-12 text-black" />
                 )}
               </motion.div>
-              <h1 className="text-5xl font-bold text-white mb-2">ATLANTIX</h1>
+              <h1 className="text-5xl font-bold text-white mb-2">HAUSS MUSIC</h1>
               <p className="text-[#B3B3B3]">Bem-vindo à sua música</p>
             </motion.div>
           </motion.div>
@@ -251,7 +251,7 @@ export default function Home() {
                       style={{ filter: 'saturate(1.3) brightness(0.55)' }}
                     />
                     {/* blur edge glow */}
-                    <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 60% 40%, rgba(139,92,246,0.18) 0%, transparent 70%)' }} />
+                    <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 60% 40%, rgba(200,200,210,0.18) 0%, transparent 70%)' }} />
                   </>
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-[#1a1030] via-[#0d0a20] to-[#1a1a2e]" />
@@ -269,7 +269,7 @@ export default function Home() {
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[#A78BFA] text-xs font-bold uppercase tracking-widest mb-1.5">Mais Ouvidas</p>
+                    <p className="text-[#e5e5ea] text-xs font-bold uppercase tracking-widest mb-1.5">Mais Ouvidas</p>
                     <h1 className="text-2xl lg:text-4xl font-black text-white mb-0.5 truncate">{featuredSong.title}</h1>
                     <p className="text-white/70 text-sm lg:text-base mb-4 truncate">{featuredSong.artist}{featuredSong.featuring ? ` feat. ${featuredSong.featuring}` : ''}</p>
 
@@ -281,7 +281,7 @@ export default function Home() {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={(e) => { e.stopPropagation(); dispatchPlaySong(featuredSong); }}
-                          className="w-12 h-12 rounded-full bg-[#8B5CF6] flex items-center justify-center shadow-lg shadow-[#8B5CF6]/40"
+                          className="w-12 h-12 rounded-full bg-[#c0c0c8] flex items-center justify-center shadow-lg shadow-[#c0c0c8]/40"
                         >
                           {currentPlayingSong?.id === featuredSong.id ? (
                             <Pause className="w-6 h-6 text-white fill-white" />
@@ -293,7 +293,7 @@ export default function Home() {
                       <motion.button
                         whileTap={{ scale: 0.9 }}
                         onClick={(e) => toggleFavorite(featuredSong, e)}
-                        className={`p-2 rounded-full ${featuredSong.is_favorite ? 'text-[#8B5CF6]' : 'text-white/60 hover:text-white'}`}
+                        className={`p-2 rounded-full ${featuredSong.is_favorite ? 'text-[#c0c0c8]' : 'text-white/60 hover:text-white'}`}
                       >
                         <Heart className={`w-5 h-5 ${featuredSong.is_favorite ? 'fill-current' : ''}`} />
                       </motion.button>
@@ -321,7 +321,7 @@ export default function Home() {
                           <h2 className="text-xl lg:text-2xl font-bold text-white">Em Alta</h2>
                           <p className="text-sm text-[#B3B3B3]">O que está bombando agora</p>
                         </div>
-                        <TrendingUp className="w-5 h-5 text-[#8B5CF6]" />
+                        <TrendingUp className="w-5 h-5 text-[#c0c0c8]" />
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
                         {trending.map((song, i) => {
@@ -339,7 +339,7 @@ export default function Home() {
                               {song.cover_url ? (
                                 <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover" />
                               ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/20 to-[#1a1030] flex items-center justify-center">
+                                <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/20 to-[#1a1030] flex items-center justify-center">
                                   <Music2 className="w-8 h-8 text-[#535353]" />
                                 </div>
                               )}
@@ -350,7 +350,7 @@ export default function Home() {
                                   whileHover={{ scale: 1.08 }}
                                   whileTap={{ scale: 0.9 }}
                                   onClick={(e) => { e.stopPropagation(); dispatchPlaySong(song); }}
-                                  className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#8B5CF6] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
+                                  className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#c0c0c8] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
                                 >
                                   {currentPlayingSong?.id === song.id ? (
                                     <Pause className="w-5 h-5 text-white fill-white" />
@@ -387,7 +387,7 @@ export default function Home() {
                             animate={{ opacity: 1 }}
                             transition={{ delay: index * 0.03 }}
                             onClick={() => dispatchPlaySong(song)}
-                            className={`group flex items-center gap-3 p-2.5 rounded-lg transition-all ${scheduled ? 'opacity-60 cursor-default' : 'hover:bg-[#282828] cursor-pointer'} ${activeSongId === song.id ? 'bg-purple-500/10' : ''}`}
+                            className={`group flex items-center gap-3 p-2.5 rounded-lg transition-all ${scheduled ? 'opacity-60 cursor-default' : 'hover:bg-[#282828] cursor-pointer'} ${activeSongId === song.id ? 'bg-zinc-400/10' : ''}`}
                           >
                             <span className="w-6 text-center text-sm text-[#B3B3B3] font-medium">{index + 1}</span>
 
@@ -395,13 +395,13 @@ export default function Home() {
                               {song.cover_url ? (
                                 <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover" />
                               ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/30 to-[#1a1030]" />
+                                <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 to-[#1a1030]" />
                               )}
                             </div>
 
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <div className={`text-sm font-medium truncate ${activeSongId === song.id ? 'text-purple-500' : 'text-white'}`}>
+                                <div className={`text-sm font-medium truncate ${activeSongId === song.id ? 'text-zinc-400' : 'text-white'}`}>
                                   {song.title}
                                 </div>
                                 {scheduled && (
@@ -417,7 +417,7 @@ export default function Home() {
                             <motion.button
                               whileTap={{ scale: 0.9 }}
                               onClick={(e) => toggleFavorite(song, e)}
-                              className={`p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${song.is_favorite ? 'text-[#8B5CF6]' : 'text-[#B3B3B3] hover:text-white'}`}
+                              className={`p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${song.is_favorite ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`}
                             >
                               <Heart className={`w-4 h-4 ${song.is_favorite ? 'fill-current' : ''}`} />
                             </motion.button>
@@ -453,7 +453,7 @@ export default function Home() {
                               {song.cover_url ? (
                                 <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover" />
                               ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-purple-900/60 to-violet-950 flex items-center justify-center">
+                                <div className="w-full h-full bg-gradient-to-br from-zinc-800/60 to-zinc-900 flex items-center justify-center">
                                   <Music2 className="w-8 h-8 text-[#535353]" />
                                 </div>
                               )}
@@ -464,7 +464,7 @@ export default function Home() {
                                   whileHover={{ scale: 1.08 }}
                                   whileTap={{ scale: 0.9 }}
                                   onClick={(e) => { e.stopPropagation(); dispatchPlaySong(song); }}
-                                  className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#8B5CF6] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
+                                  className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#c0c0c8] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
                                 >
                                   {currentPlayingSong?.id === song.id ? (
                                     <Pause className="w-5 h-5 text-white fill-white" />
@@ -490,7 +490,7 @@ export default function Home() {
                           <h2 className="text-xl lg:text-2xl font-bold text-white">Melhor Avaliadas</h2>
                           <p className="text-sm text-[#B3B3B3]">As favoritas da comunidade</p>
                         </div>
-                        <Star className="w-5 h-5 text-[#8B5CF6]" />
+                        <Star className="w-5 h-5 text-[#c0c0c8]" />
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
                         {topRated.map((song, i) => {
@@ -513,7 +513,7 @@ export default function Home() {
                                 </div>
                               )}
                               <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm">
-                                <Star className="w-3 h-3 text-[#8B5CF6] fill-current" />
+                                <Star className="w-3 h-3 text-[#c0c0c8] fill-current" />
                                 <span className="text-[11px] font-bold text-white">{song.rating.toFixed(1)}</span>
                               </div>
                               {!scheduled && (
@@ -521,7 +521,7 @@ export default function Home() {
                                   whileHover={{ scale: 1.08 }}
                                   whileTap={{ scale: 0.9 }}
                                   onClick={(e) => { e.stopPropagation(); dispatchPlaySong(song); }}
-                                  className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#8B5CF6] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
+                                  className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#c0c0c8] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
                                 >
                                   {currentPlayingSong?.id === song.id ? (
                                     <Pause className="w-5 h-5 text-white fill-white" />
@@ -570,7 +570,7 @@ export default function Home() {
                             {song.cover_url ? (
                               <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover" />
                             ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/20 to-[#1a1030] flex items-center justify-center">
+                              <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/20 to-[#1a1030] flex items-center justify-center">
                                 <Music2 className="w-8 h-8 text-[#535353]" />
                               </div>
                             )}
@@ -582,7 +582,7 @@ export default function Home() {
                                   whileHover={{ scale: 1.08 }}
                                   whileTap={{ scale: 0.9 }}
                                   onClick={(e) => { e.stopPropagation(); dispatchPlaySong(song); }}
-                                  className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#8B5CF6] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
+                                  className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#c0c0c8] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
                                 >
                                   {currentPlayingSong?.id === song.id ? (
                                     <Pause className="w-5 h-5 text-white fill-white" />
@@ -593,7 +593,7 @@ export default function Home() {
                                 <motion.button
                                   whileTap={{ scale: 0.9 }}
                                   onClick={(e) => toggleFavorite(song, e)}
-                                  className={`absolute top-2 right-2 p-1.5 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity ${song.is_favorite ? 'text-[#8B5CF6]' : 'text-white hover:text-[#8B5CF6]'}`}
+                                  className={`absolute top-2 right-2 p-1.5 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity ${song.is_favorite ? 'text-[#c0c0c8]' : 'text-white hover:text-[#c0c0c8]'}`}
                                 >
                                   <Heart className={`w-4 h-4 ${song.is_favorite ? 'fill-current' : ''}`} />
                                 </motion.button>
@@ -635,7 +635,7 @@ export default function Home() {
                               {album.cover_url ? (
                                 <img src={album.cover_url} alt={album.title} className="w-full h-full object-cover" />
                               ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-purple-900/60 to-violet-950 flex items-center justify-center">
+                                <div className="w-full h-full bg-gradient-to-br from-zinc-800/60 to-zinc-900 flex items-center justify-center">
                                   <Music2 className="w-8 h-8 text-[#535353]" />
                                 </div>
                               )}
@@ -675,7 +675,7 @@ export default function Home() {
                                 {artist.profile_picture ? (
                                   <img src={artist.profile_picture} alt="" className="w-full h-full object-cover" />
                                 ) : (
-                                  <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/30 to-purple-900 flex items-center justify-center">
+                                  <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 to-zinc-800 flex items-center justify-center">
                                     <User className="w-10 h-10 text-[#535353]" />
                                   </div>
                                 )}
@@ -716,7 +716,7 @@ export default function Home() {
                       {currentPlayingSong.cover_url ? (
                         <img src={currentPlayingSong.cover_url} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/20 to-purple-950 flex items-center justify-center">
+                        <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/20 to-zinc-900 flex items-center justify-center">
                           <Music2 className="w-6 h-6 text-[#535353]" />
                         </div>
                       )}
@@ -747,7 +747,7 @@ export default function Home() {
                               {artist.profile_picture ? (
                                 <img src={artist.profile_picture} alt="" className="w-full h-full object-cover" />
                               ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/30 to-purple-900 flex items-center justify-center">
+                                <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 to-zinc-800 flex items-center justify-center">
                                   <User className="w-5 h-5 text-[#535353]" />
                                 </div>
                               )}
@@ -788,7 +788,7 @@ export default function Home() {
                             {album.cover_url ? (
                               <img src={album.cover_url} alt="" className="w-full h-full object-cover" />
                             ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-purple-900/60 to-violet-950 flex items-center justify-center">
+                              <div className="w-full h-full bg-gradient-to-br from-zinc-800/60 to-zinc-900 flex items-center justify-center">
                                 <Music2 className="w-5 h-5 text-[#535353]" />
                               </div>
                             )}
@@ -812,7 +812,7 @@ export default function Home() {
               <div className="w-20 h-20 rounded-full bg-[#282828] flex items-center justify-center mb-4">
                 <Music2 className="w-10 h-10 text-[#535353]" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Bem-vindo ao ATLANTIX</h2>
+              <h2 className="text-2xl font-bold text-white mb-2">Bem-vindo ao HAUSS MUSIC</h2>
               <p className="text-[#B3B3B3] max-w-md">Sua plataforma de streaming musical. Explore músicas, crie playlists e descubra novos artistas.</p>
             </div>
           )}

@@ -136,7 +136,7 @@ export default function Player() {
           transition={{ duration: 4, repeat: Infinity }}
           className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full"
           style={{
-            background: 'radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(200,200,210,0.4) 0%, transparent 70%)',
             filter: 'blur(100px)'
           }}
         />
@@ -148,7 +148,7 @@ export default function Player() {
           transition={{ duration: 5, repeat: Infinity, delay: 1 }}
           className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full"
           style={{
-            background: 'radial-gradient(circle, rgba(192,132,252,0.3) 0%, transparent 60%)',
+            background: 'radial-gradient(circle, rgba(210,210,218,0.3) 0%, transparent 60%)',
             filter: 'blur(80px)'
           }}
         />
@@ -171,7 +171,7 @@ export default function Player() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowQueue(!showQueue)}
-            className={`p-2 rounded-full transition-colors ${showQueue ? 'bg-violet-500/30 text-violet-400' : 'bg-white/5 hover:bg-white/10 text-white'}`}
+            className={`p-2 rounded-full transition-colors ${showQueue ? 'bg-zinc-400/30 text-zinc-300' : 'bg-white/5 hover:bg-white/10 text-white'}`}
           >
             <ListMusic className="w-5 h-5" />
           </motion.button>

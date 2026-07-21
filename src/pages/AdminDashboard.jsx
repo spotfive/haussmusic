@@ -316,7 +316,7 @@ export default function AdminDashboard() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#8B5CF6] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#c0c0c8] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -336,9 +336,9 @@ export default function AdminDashboard() {
   }
 
   const adminStats = [
-    { icon: Music, value: songs.length, label: 'Músicas', color: 'from-cyan-500 to-blue-500' },
-    { icon: Users, value: users.length, label: 'Usuários', color: 'from-violet-500 to-purple-500' },
-    { icon: ImageIcon, value: banners.length, label: 'Banners', color: 'from-pink-500 to-rose-500' },
+    { icon: Music, value: songs.length, label: 'Músicas', color: 'from-zinc-300 to-zinc-500' },
+    { icon: Users, value: users.length, label: 'Usuários', color: 'from-neutral-400 to-neutral-600' },
+    { icon: ImageIcon, value: banners.length, label: 'Banners', color: 'from-slate-300 to-slate-500' },
   ];
 
   return (
@@ -381,22 +381,22 @@ export default function AdminDashboard() {
        <div className="px-6 lg:px-8 pt-6">
          <Tabs defaultValue={initialTab} className="w-full">
           <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl inline-flex">
-            <TabsTrigger value="banners" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white">
+            <TabsTrigger value="banners" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
               <ImageIcon className="w-4 h-4 mr-2" />Banners
             </TabsTrigger>
-            <TabsTrigger value="songs" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white">
+            <TabsTrigger value="songs" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
               <Music className="w-4 h-4 mr-2" />Músicas
             </TabsTrigger>
-            <TabsTrigger value="users" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white">
+            <TabsTrigger value="users" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
               <Users className="w-4 h-4 mr-2" />Usuários
             </TabsTrigger>
-            <TabsTrigger value="labels" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white">
+            <TabsTrigger value="labels" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
               <Music2 className="w-4 h-4 mr-2" />Gravadoras
             </TabsTrigger>
-            <TabsTrigger value="tools" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white">
+            <TabsTrigger value="tools" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
               <Settings className="w-4 h-4 mr-2" />Ferramentas
             </TabsTrigger>
-            <TabsTrigger value="logo" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white">
+            <TabsTrigger value="logo" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
               <Sparkles className="w-4 h-4 mr-2" />Logo
             </TabsTrigger>
           </TabsList>
@@ -407,7 +407,7 @@ export default function AdminDashboard() {
               {/* Creator Panel */}
               <div className="lg:col-span-2 bg-[#181818] rounded-2xl border border-white/5 p-6">
                 <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <Plus className="w-5 h-5 text-[#8B5CF6]" /> Criar Banner
+                  <Plus className="w-5 h-5 text-[#c0c0c8]" /> Criar Banner
                 </h2>
                 <div className="space-y-3">
                   <Input placeholder="Título do banner" value={newBanner.title}
@@ -427,9 +427,9 @@ export default function AdminDashboard() {
                       onChange={(e) => setNewBanner(prev => ({ ...prev, priority: parseInt(e.target.value) || 0 }))}
                       className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600" />
                   </div>
-                  <label className="block p-6 border-2 border-dashed border-white/10 rounded-xl hover:border-[#8B5CF6]/50 transition-colors cursor-pointer text-center">
+                  <label className="block p-6 border-2 border-dashed border-white/10 rounded-xl hover:border-[#c0c0c8]/50 transition-colors cursor-pointer text-center">
                     {uploading ? (
-                      <div className="flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin text-[#8B5CF6]" /><span className="text-zinc-400 text-sm">Enviando...</span></div>
+                      <div className="flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin text-[#c0c0c8]" /><span className="text-zinc-400 text-sm">Enviando...</span></div>
                     ) : newBanner.image_url ? (
                       <img src={newBanner.image_url} alt="Preview" className="w-full h-28 object-cover rounded-lg" />
                     ) : (
@@ -440,7 +440,7 @@ export default function AdminDashboard() {
                   <Button
                     onClick={() => createBannerMutation.mutate(newBanner)}
                     disabled={!newBanner.title || !newBanner.image_url || createBannerMutation.isPending}
-                    className="w-full bg-[#8B5CF6] hover:bg-[#A78BFA] rounded-xl h-11"
+                    className="w-full bg-[#c0c0c8] hover:bg-[#e5e5ea] rounded-xl h-11"
                   >
                     {createBannerMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
                     Criar Banner
@@ -464,7 +464,7 @@ export default function AdminDashboard() {
                         <h3 className="font-semibold text-white text-sm truncate">{banner.title}</h3>
                         <p className="text-xs text-zinc-400 truncate">{banner.artist_name}</p>
                         <div className="flex items-center gap-3 mt-1">
-                          <span className="text-[10px] text-[#8B5CF6] bg-[#8B5CF6]/10 px-2 py-0.5 rounded-full">Prioridade {banner.priority}</span>
+                          <span className="text-[10px] text-[#c0c0c8] bg-[#c0c0c8]/10 px-2 py-0.5 rounded-full">Prioridade {banner.priority}</span>
                           {banner.link_url && <span className="text-[10px] text-zinc-500 truncate">{banner.link_url}</span>}
                         </div>
                       </div>
@@ -490,7 +490,7 @@ export default function AdminDashboard() {
             <div className="bg-[#181818] rounded-2xl border border-white/5 overflow-hidden">
               <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Music className="w-5 h-5 text-[#8B5CF6]" /> Músicas Recentes ({songs.length})
+                  <Music className="w-5 h-5 text-[#c0c0c8]" /> Músicas Recentes ({songs.length})
                 </h2>
               </div>
               <div className="divide-y divide-white/5">
@@ -528,7 +528,7 @@ export default function AdminDashboard() {
             <div className="bg-[#181818] rounded-2xl border border-white/5 overflow-hidden">
               <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Users className="w-5 h-5 text-[#8B5CF6]" /> Gerenciar Usuários ({users.length})
+                  <Users className="w-5 h-5 text-[#c0c0c8]" /> Gerenciar Usuários ({users.length})
                 </h2>
               </div>
               <div className="divide-y divide-white/5">
@@ -538,7 +538,7 @@ export default function AdminDashboard() {
                     {u.profile_picture ? (
                       <img src={u.profile_picture} alt="" className="w-11 h-11 rounded-xl object-cover flex-shrink-0 ring-1 ring-white/10" />
                     ) : (
-                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#8B5CF6]/40 to-[#A78BFA]/40 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#c0c0c8]/40 to-[#e5e5ea]/40 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                         {(u.display_name || u.full_name)?.[0]?.toUpperCase() || 'U'}
                       </div>
                     )}
@@ -558,7 +558,7 @@ export default function AdminDashboard() {
                           u.role === 'admin' ? 'bg-red-500/15 text-red-400' : 'bg-zinc-800 text-zinc-400'
                         }`}>{u.role === 'admin' ? 'Admin' : 'Usuário'}</span>
                         <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                          u.user_type === 'artista' ? 'bg-[#8B5CF6]/15 text-[#A78BFA]' :
+                          u.user_type === 'artista' ? 'bg-[#c0c0c8]/15 text-[#e5e5ea]' :
                           u.user_type === 'gravadora' ? 'bg-cyan-500/15 text-cyan-400' :
                           u.user_type === 'staff' ? 'bg-amber-500/15 text-amber-400' :
                           'bg-zinc-800 text-zinc-500'
@@ -607,7 +607,7 @@ export default function AdminDashboard() {
                   <div className="space-y-4 mt-2">
                     <div className="flex flex-col items-center gap-3">
                       <div className="relative group">
-                        <div className="w-24 h-24 rounded-2xl overflow-hidden ring-2 ring-white/10 bg-gradient-to-br from-[#8B5CF6] to-[#A78BFA]">
+                        <div className="w-24 h-24 rounded-2xl overflow-hidden ring-2 ring-white/10 bg-gradient-to-br from-[#c0c0c8] to-[#e5e5ea]">
                           {editingUser.profile_picture ? (
                             <img src={editingUser.profile_picture} alt="" className="w-full h-full object-cover" />
                           ) : (
@@ -637,7 +637,7 @@ export default function AdminDashboard() {
                     <Button
                       onClick={() => updateUserMutation.mutate({ userId: editingUser.id, data: { display_name: editingUser.display_name, profile_picture: editingUser.profile_picture } })}
                       disabled={updateUserMutation.isPending}
-                      className="w-full bg-[#8B5CF6] hover:bg-[#A78BFA] rounded-xl h-11">
+                      className="w-full bg-[#c0c0c8] hover:bg-[#e5e5ea] rounded-xl h-11">
                       {updateUserMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Salvando...</> : <><Save className="w-4 h-4 mr-2" />Salvar Alterações</>}
                     </Button>
                   </div>
@@ -652,12 +652,12 @@ export default function AdminDashboard() {
               {/* Create Label Panel */}
               <div className="lg:col-span-2 bg-[#181818] rounded-2xl border border-white/5 p-6">
                 <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <Plus className="w-5 h-5 text-[#8B5CF6]" /> Criar Gravadora
+                  <Plus className="w-5 h-5 text-[#c0c0c8]" /> Criar Gravadora
                 </h2>
                 <div className="space-y-3">
                   <Input placeholder="Nome da gravadora" value={newLabelForm.name} onChange={(e) => setNewLabelForm(prev => ({ ...prev, name: e.target.value }))} className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600" />
-                  <label className="block p-4 border-2 border-dashed border-white/10 rounded-xl hover:border-[#8B5CF6]/50 transition-colors cursor-pointer text-center">
-                    {uploadingLabelLogo ? (<div className="flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin text-[#8B5CF6]" /><span className="text-zinc-400 text-sm">Enviando...</span></div>) : newLabelForm.logo_url ? (<img src={newLabelForm.logo_url} alt="Preview" className="w-full h-20 object-cover rounded-lg" />) : (<div className="flex flex-col items-center gap-2"><Upload className="w-6 h-6 text-zinc-600" /><span className="text-zinc-500 text-xs">Clique para enviar logo</span></div>)}
+                  <label className="block p-4 border-2 border-dashed border-white/10 rounded-xl hover:border-[#c0c0c8]/50 transition-colors cursor-pointer text-center">
+                    {uploadingLabelLogo ? (<div className="flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin text-[#c0c0c8]" /><span className="text-zinc-400 text-sm">Enviando...</span></div>) : newLabelForm.logo_url ? (<img src={newLabelForm.logo_url} alt="Preview" className="w-full h-20 object-cover rounded-lg" />) : (<div className="flex flex-col items-center gap-2"><Upload className="w-6 h-6 text-zinc-600" /><span className="text-zinc-500 text-xs">Clique para enviar logo</span></div>)}
                     <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { setCropperImage(ev.target.result); setCropperTarget('labelLogo'); }; reader.readAsDataURL(file); }} />
                   </label>
                   <div>
@@ -687,16 +687,16 @@ export default function AdminDashboard() {
                       {newLabelForm.representatives.map(repId => { const rep = users.find(u => u.id === repId); return (<div key={repId} className="flex items-center justify-between text-xs bg-white/5 p-2 rounded"><span className="text-white truncate">{rep?.display_name || rep?.full_name || 'Sem nome'}</span><button onClick={() => setNewLabelForm(prev => ({ ...prev, representatives: prev.representatives.filter(id => id !== repId) }))} className="text-red-400 hover:text-red-300">✕</button></div>); })}
                     </div>
                   )}
-                  <Button onClick={() => createLabelMutation.mutate(newLabelForm)} disabled={!newLabelForm.name || createLabelMutation.isPending} className="w-full bg-[#8B5CF6] hover:bg-[#A78BFA] rounded-xl h-11">
+                  <Button onClick={() => createLabelMutation.mutate(newLabelForm)} disabled={!newLabelForm.name || createLabelMutation.isPending} className="w-full bg-[#c0c0c8] hover:bg-[#e5e5ea] rounded-xl h-11">
                     {createLabelMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}Criar Gravadora
                   </Button>
                 </div>
               </div>
               {/* Labels List */}
               <div className="lg:col-span-3 bg-[#181818] rounded-2xl border border-white/5 overflow-hidden">
-                <div className="px-4 py-3 border-b border-white/5"><h2 className="text-lg font-bold text-white flex items-center gap-2"><Music2 className="w-5 h-5 text-[#8B5CF6]" /> Gerenciar Gravadoras</h2></div>
+                <div className="px-4 py-3 border-b border-white/5"><h2 className="text-lg font-bold text-white flex items-center gap-2"><Music2 className="w-5 h-5 text-[#c0c0c8]" /> Gerenciar Gravadoras</h2></div>
                 <div className="divide-y divide-white/5">
-                  {labels.map((label) => (<div key={label.id} className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">{label.profile_picture ? (<img src={label.profile_picture} alt="" className="w-11 h-11 rounded-xl object-cover flex-shrink-0 ring-1 ring-white/10" />) : (<div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500/40 to-blue-500/40 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{label.name?.[0]?.toUpperCase() || 'G'}</div>)}<div className="flex-1 min-w-0"><p className="text-sm font-semibold text-white truncate">{label.name}</p>{label.managed_artists && label.managed_artists.length > 0 && (<p className="text-xs text-[#8B5CF6] mt-1">{label.managed_artists.length} artista(s)</p>)}</div><div className="flex gap-2"><Button variant="ghost" size="sm" onClick={() => setEditingUser({ ...label, isLabel: true })} className="h-8 px-2.5 text-xs rounded-lg bg-white/5 hover:bg-white/10"><Edit2 className="w-3.5 h-3.5 mr-1" /> Gerenciar</Button><Button variant="ghost" size="sm" onClick={() => { if (confirm('Excluir esta gravadora?')) deleteLabelMutation.mutate(label.id); }} className="h-8 px-2.5 text-xs rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300"><Trash2 className="w-3.5 h-3.5" /></Button></div></div>))}{labels.length === 0 && (<div className="text-center py-16"><Music2 className="w-12 h-12 text-zinc-700 mx-auto mb-3" /><p className="text-zinc-500">Nenhuma gravadora criada</p></div>)}
+                  {labels.map((label) => (<div key={label.id} className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">{label.profile_picture ? (<img src={label.profile_picture} alt="" className="w-11 h-11 rounded-xl object-cover flex-shrink-0 ring-1 ring-white/10" />) : (<div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500/40 to-blue-500/40 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{label.name?.[0]?.toUpperCase() || 'G'}</div>)}<div className="flex-1 min-w-0"><p className="text-sm font-semibold text-white truncate">{label.name}</p>{label.managed_artists && label.managed_artists.length > 0 && (<p className="text-xs text-[#c0c0c8] mt-1">{label.managed_artists.length} artista(s)</p>)}</div><div className="flex gap-2"><Button variant="ghost" size="sm" onClick={() => setEditingUser({ ...label, isLabel: true })} className="h-8 px-2.5 text-xs rounded-lg bg-white/5 hover:bg-white/10"><Edit2 className="w-3.5 h-3.5 mr-1" /> Gerenciar</Button><Button variant="ghost" size="sm" onClick={() => { if (confirm('Excluir esta gravadora?')) deleteLabelMutation.mutate(label.id); }} className="h-8 px-2.5 text-xs rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300"><Trash2 className="w-3.5 h-3.5" /></Button></div></div>))}{labels.length === 0 && (<div className="text-center py-16"><Music2 className="w-12 h-12 text-zinc-700 mx-auto mb-3" /><p className="text-zinc-500">Nenhuma gravadora criada</p></div>)}
                 </div>
               </div>
             </div>
@@ -706,8 +706,8 @@ export default function AdminDashboard() {
           <TabsContent value="logo" className="mt-6">
             <div className="max-w-md mx-auto bg-[#181818] rounded-2xl border border-white/5 p-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-[#8B5CF6]/10 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-[#8B5CF6]" />
+                <div className="w-10 h-10 rounded-xl bg-[#c0c0c8]/10 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-[#c0c0c8]" />
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-white">Logo da Plataforma</h2>
@@ -721,17 +721,17 @@ export default function AdminDashboard() {
                   {logoUrl ? (
                     <img src={logoUrl} alt="Logo" className="w-10 h-10 rounded-full object-cover" />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-[#8B5CF6] flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-[#c0c0c8] flex items-center justify-center">
                       <Music2 className="w-5 h-5 text-black" />
                     </div>
                   )}
                 </div>
 
                 {/* Upload */}
-                <label className="block p-5 border-2 border-dashed border-white/10 rounded-xl hover:border-[#8B5CF6]/50 transition-colors cursor-pointer text-center">
+                <label className="block p-5 border-2 border-dashed border-white/10 rounded-xl hover:border-[#c0c0c8]/50 transition-colors cursor-pointer text-center">
                   {uploadingLogo ? (
                     <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="w-5 h-5 animate-spin text-[#8B5CF6]" />
+                      <Loader2 className="w-5 h-5 animate-spin text-[#c0c0c8]" />
                       <span className="text-zinc-400 text-sm">Enviando...</span>
                     </div>
                   ) : (
@@ -788,9 +788,9 @@ export default function AdminDashboard() {
                   Sincronizar Agora
                 </Button>
               </div>
-              <div className="bg-[#181818] rounded-2xl border border-white/5 p-6 hover:border-[#8B5CF6]/20 transition-colors">
-                <div className="w-10 h-10 rounded-xl bg-[#8B5CF6]/10 flex items-center justify-center mb-4">
-                  <BarChart3 className="w-5 h-5 text-[#8B5CF6]" />
+              <div className="bg-[#181818] rounded-2xl border border-white/5 p-6 hover:border-[#c0c0c8]/20 transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-[#c0c0c8]/10 flex items-center justify-center mb-4">
+                  <BarChart3 className="w-5 h-5 text-[#c0c0c8]" />
                 </div>
                 <h3 className="font-bold text-white mb-2">Verificar Posts</h3>
                 <p className="text-sm text-zinc-400 mb-4">Exibe estatísticas de posts (álbuns, EPs, singles) no sistema.</p>
@@ -804,7 +804,7 @@ export default function AdminDashboard() {
                       toast.info(`Total: ${allPosts.length} | Álbuns: ${albums} | EPs: ${eps} | Singles: ${singles}`, { duration: 6000 });
                     } catch { toast.error('Erro ao verificar'); }
                   }}
-                  className="bg-[#8B5CF6]/20 hover:bg-[#8B5CF6]/30 text-[#A78BFA] rounded-xl">
+                  className="bg-[#c0c0c8]/20 hover:bg-[#c0c0c8]/30 text-[#e5e5ea] rounded-xl">
                   Verificar Posts
                 </Button>
               </div>
@@ -828,9 +828,9 @@ export default function AdminDashboard() {
             
             <Tabs defaultValue="dados" className="w-full">
               <TabsList className="bg-white/5 border-b border-white/10 p-0 rounded-none m-0 w-full justify-start">
-                <TabsTrigger value="dados" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#8B5CF6] data-[state=active]:bg-transparent">Dados da Gravadora</TabsTrigger>
-                <TabsTrigger value="representantes" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#8B5CF6] data-[state=active]:bg-transparent">Representantes</TabsTrigger>
-                <TabsTrigger value="artistas" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#8B5CF6] data-[state=active]:bg-transparent">Artistas Associados</TabsTrigger>
+                <TabsTrigger value="dados" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#c0c0c8] data-[state=active]:bg-transparent">Dados da Gravadora</TabsTrigger>
+                <TabsTrigger value="representantes" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#c0c0c8] data-[state=active]:bg-transparent">Representantes</TabsTrigger>
+                <TabsTrigger value="artistas" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#c0c0c8] data-[state=active]:bg-transparent">Artistas Associados</TabsTrigger>
               </TabsList>
 
               {/* Dados Tab */}
@@ -872,7 +872,7 @@ export default function AdminDashboard() {
                       });
                     }}
                     disabled={updateLabelDetailsMutation.isPending}
-                    className="flex-1 bg-[#8B5CF6] hover:bg-[#A78BFA] h-9"
+                    className="flex-1 bg-[#c0c0c8] hover:bg-[#e5e5ea] h-9"
                   >
                     Salvar Alterações
                   </Button>
@@ -1020,7 +1020,7 @@ export default function AdminDashboard() {
                    });
                  }}
                  disabled={updateLabelDetailsMutation.isPending}
-                 className="flex-1 bg-[#8B5CF6] hover:bg-[#A78BFA] h-9"
+                 className="flex-1 bg-[#c0c0c8] hover:bg-[#e5e5ea] h-9"
                >
                  Salvar Tudo
                </Button>

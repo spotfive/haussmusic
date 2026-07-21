@@ -59,7 +59,7 @@ export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFav
         isScheduled ? 'opacity-60 cursor-default' : 'cursor-pointer'
       } ${
         isCurrentSong 
-          ? 'bg-[#8B5CF6]/[0.08]' 
+          ? 'bg-[#c0c0c8]/[0.08]' 
           : isScheduled ? '' : 'hover:bg-[#282828]'
       }`}
       onClick={() => {
@@ -78,17 +78,17 @@ export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFav
     >
       {/* Active indicator */}
       {isCurrentSong && (
-        <div className="absolute left-0 top-2 bottom-2 w-[3px] bg-[#8B5CF6] rounded-full" />
+        <div className="absolute left-0 top-2 bottom-2 w-[3px] bg-[#c0c0c8] rounded-full" />
       )}
 
       {/* Index / Play */}
       <div className="w-8 flex items-center justify-center flex-shrink-0">
-        <span className={`text-xs font-mono tabular-nums group-hover:hidden ${isCurrentSong ? 'text-[#8B5CF6]' : 'text-[#535353]'}`}>
+        <span className={`text-xs font-mono tabular-nums group-hover:hidden ${isCurrentSong ? 'text-[#c0c0c8]' : 'text-[#535353]'}`}>
           {String(index + 1).padStart(2, '0')}
         </span>
         <motion.button
           whileTap={{ scale: 0.85 }}
-          className="hidden group-hover:flex items-center justify-center w-7 h-7 rounded-full bg-[#8B5CF6] text-white"
+          className="hidden group-hover:flex items-center justify-center w-7 h-7 rounded-full bg-[#c0c0c8] text-white"
           onClick={(e) => { e.stopPropagation(); onPlay(song); }}
         >
           {isCurrentSong && isPlaying ? (
@@ -115,7 +115,7 @@ export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFav
               {[...Array(3)].map((_, i) => (
                 <motion.div
                   key={i}
-                  className="w-[2px] bg-[#8B5CF6] rounded-full"
+                  className="w-[2px] bg-[#c0c0c8] rounded-full"
                   animate={{ height: ['30%', '100%', '30%'] }}
                   transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.15 }}
                 />
@@ -127,7 +127,7 @@ export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFav
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <h4 className={`text-sm font-medium truncate transition-colors ${isCurrentSong ? 'text-[#8B5CF6]' : 'text-white'}`}>
+        <h4 className={`text-sm font-medium truncate transition-colors ${isCurrentSong ? 'text-[#c0c0c8]' : 'text-white'}`}>
           {song.title}
         </h4>
         <p className="text-xs text-[#B3B3B3] truncate">
@@ -168,7 +168,7 @@ export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFav
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onFavorite(song); }}
-            className={`p-1.5 rounded-lg transition-colors ${song.is_favorite ? 'text-[#8B5CF6]' : 'text-[#696969] hover:text-white hover:bg-[#333]'}`}
+            className={`p-1.5 rounded-lg transition-colors ${song.is_favorite ? 'text-[#c0c0c8]' : 'text-[#696969] hover:text-white hover:bg-[#333]'}`}
           >
             <Heart className={`w-3.5 h-3.5 ${song.is_favorite ? 'fill-current' : ''}`} />
           </button>

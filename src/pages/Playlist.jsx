@@ -136,7 +136,7 @@ export default function Playlist() {
     <div className="min-h-screen pb-40 lg:pb-32 relative z-40">
       {/* Header */}
       <div className="relative h-80 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-900/50 to-fuchsia-900/50" />
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-800/50 to-neutral-800/50" />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
 
         <div className="relative h-full flex items-end px-6 lg:px-8 pb-8">
@@ -145,7 +145,7 @@ export default function Playlist() {
              <motion.div
                initial={{ opacity: 0, scale: 0.9 }}
                animate={{ opacity: 1, scale: 1 }}
-               className="w-56 h-56 rounded-2xl overflow-hidden shadow-2xl flex-shrink-0 bg-gradient-to-br from-violet-600 to-fuchsia-600"
+               className="w-56 h-56 rounded-2xl overflow-hidden shadow-2xl flex-shrink-0 bg-gradient-to-br from-zinc-500 to-neutral-500"
              >
                {(() => {
                  // Se houver cover_url customizada, usa ela
@@ -209,7 +209,7 @@ export default function Playlist() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                <div className="text-sm text-violet-400 uppercase mb-2">Playlist</div>
+                <div className="text-sm text-zinc-300 uppercase mb-2">Playlist</div>
                 <h1 className="text-5xl font-black text-white mb-3">{playlist.name}</h1>
                 {playlist.description && (
                   <p className="text-zinc-400 mb-4">{playlist.description}</p>
@@ -238,7 +238,7 @@ export default function Playlist() {
           whileTap={{ scale: 0.95 }}
           onClick={handlePlayAll}
           disabled={songs.length === 0}
-          className="px-8 py-3 rounded-full bg-violet-500 hover:bg-violet-400 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-bold flex items-center gap-2 shadow-lg shadow-violet-500/30"
+          className="px-8 py-3 rounded-full bg-zinc-400 hover:bg-zinc-300 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-bold flex items-center gap-2 shadow-lg shadow-zinc-400/30"
         >
           {isPlaying && currentSong?.id === songs[0]?.id ? (
             <Pause className="w-5 h-5 fill-current" />
@@ -252,7 +252,7 @@ export default function Playlist() {
           variant="ghost"
           size="icon"
           onClick={handleEditClick}
-          className="text-violet-400 hover:bg-violet-500/10"
+          className="text-zinc-300 hover:bg-zinc-400/10"
         >
           <Edit2 className="w-5 h-5" />
         </Button>
@@ -303,10 +303,10 @@ export default function Playlist() {
                   <img src={editForm.cover_url} alt="Capa" className="w-full h-32 object-cover" />
                 </div>
               )}
-              <label className="block p-4 border-2 border-dashed border-zinc-700 rounded-lg hover:border-violet-400 transition-colors cursor-pointer text-center">
+              <label className="block p-4 border-2 border-dashed border-zinc-700 rounded-lg hover:border-zinc-300 transition-colors cursor-pointer text-center">
                 {uploading ? (
                   <div className="flex items-center justify-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
+                    <Loader2 className="w-4 h-4 animate-spin text-zinc-300" />
                     <span className="text-zinc-400 text-sm">Enviando...</span>
                   </div>
                 ) : (
@@ -321,7 +321,7 @@ export default function Playlist() {
             <Button
               onClick={() => updatePlaylistMutation.mutate(editForm)}
               disabled={!editForm.name || updatePlaylistMutation.isPending}
-              className="w-full bg-gradient-to-r from-violet-500 to-purple-600"
+              className="w-full bg-gradient-to-r from-zinc-400 to-zinc-500"
             >
               Salvar Alterações
             </Button>

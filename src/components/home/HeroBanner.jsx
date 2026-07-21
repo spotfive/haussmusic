@@ -21,7 +21,7 @@ export default function HeroBanner({ banners }) {
     <div className="relative w-full h-[500px] rounded-2xl overflow-hidden mb-8">
       {/* Glowing border */}
       <div className="absolute inset-0 rounded-2xl pointer-events-none z-50" style={{
-        boxShadow: 'inset 0 0 0 1px rgba(139,92,246,0.2), 0 0 40px rgba(139,92,246,0.1)'
+        boxShadow: 'inset 0 0 0 1px rgba(200,200,210,0.2), 0 0 40px rgba(200,200,210,0.1)'
       }} />
       
       {/* Immersive background */}
@@ -35,7 +35,7 @@ export default function HeroBanner({ banners }) {
           className="absolute inset-0"
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
-          <div className="absolute inset-0 bg-gradient-to-r from-violet-900/20 to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-zinc-800/20 to-transparent z-10" />
           <motion.img
             src={currentBanner.image_url}
             alt={currentBanner.title}
@@ -46,7 +46,7 @@ export default function HeroBanner({ banners }) {
           
           {/* Scan lines effect */}
           <div className="absolute inset-0 z-10 opacity-10 pointer-events-none" style={{
-            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139,92,246,0.3) 2px, rgba(139,92,246,0.3) 4px)'
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(200,200,210,0.3) 2px, rgba(200,200,210,0.3) 4px)'
           }} />
         </motion.div>
       </AnimatePresence>
@@ -66,17 +66,17 @@ export default function HeroBanner({ banners }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4 bg-gradient-to-r from-violet-600/30 to-fuchsia-600/30 border border-violet-500/30 backdrop-blur-xl"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4 bg-gradient-to-r from-zinc-500/30 to-neutral-500/30 border border-zinc-400/30 backdrop-blur-xl"
               style={{
-                boxShadow: '0 0 20px rgba(139,92,246,0.3)'
+                boxShadow: '0 0 20px rgba(200,200,210,0.3)'
               }}
             >
               <motion.span
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="w-2 h-2 rounded-full bg-violet-400"
+                className="w-2 h-2 rounded-full bg-zinc-300"
               />
-              <span className="text-xs font-semibold text-violet-300 uppercase tracking-wider">Novo Lançamento</span>
+              <span className="text-xs font-semibold text-zinc-200 uppercase tracking-wider">Novo Lançamento</span>
             </motion.div>
 
             <motion.h2
@@ -85,7 +85,7 @@ export default function HeroBanner({ banners }) {
               transition={{ delay: 0.3 }}
               className="text-5xl lg:text-6xl font-black text-white mb-3 leading-tight"
               style={{
-                textShadow: '0 2px 40px rgba(0,0,0,0.8), 0 0 30px rgba(139,92,246,0.3)'
+                textShadow: '0 2px 40px rgba(0,0,0,0.8), 0 0 30px rgba(200,200,210,0.3)'
               }}
             >
               {currentBanner.title}
@@ -115,12 +115,12 @@ export default function HeroBanner({ banners }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(139,92,246,0.5)' }}
+              whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(200,200,210,0.5)' }}
               whileTap={{ scale: 0.95 }}
               className="group relative px-8 py-3.5 rounded-full font-bold text-white overflow-hidden"
               style={{
-                background: 'linear-gradient(135deg, rgba(139,92,246,0.9), rgba(192,132,252,0.9))',
-                boxShadow: '0 8px 24px rgba(139,92,246,0.4)'
+                background: 'linear-gradient(135deg, rgba(200,200,210,0.9), rgba(210,210,218,0.9))',
+                boxShadow: '0 8px 24px rgba(200,200,210,0.4)'
               }}
             >
               <motion.div

@@ -517,12 +517,12 @@ export default function Layout({ children, currentPageName }) {
                 <motion.div
                   whileTap={{ scale: 0.9 }}
                   className={`flex flex-col items-center gap-1 py-2 rounded-xl transition-colors ${
-                    isActive ? 'text-[#8B5CF6]' : 'text-[#B3B3B3]'
+                    isActive ? 'text-[#c0c0c8]' : 'text-[#B3B3B3]'
                   }`}
                 >
                   <item.icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.5]'}`} />
-                  <span className={`text-[10px] font-medium ${isActive ? 'text-[#8B5CF6]' : 'text-[#B3B3B3]'}`}>{item.label}</span>
-                  {isActive && <div className="w-1 h-1 rounded-full bg-[#8B5CF6]" />}
+                  <span className={`text-[10px] font-medium ${isActive ? 'text-[#c0c0c8]' : 'text-[#B3B3B3]'}`}>{item.label}</span>
+                  {isActive && <div className="w-1 h-1 rounded-full bg-[#c0c0c8]" />}
                 </motion.div>
               </Link>
             );

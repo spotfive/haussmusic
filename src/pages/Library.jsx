@@ -125,10 +125,10 @@ export default function Library() {
     <div className="min-h-screen pb-40 lg:pb-32 bg-[#121212]">
       {/* Header */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#8B5CF6]/10 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#c0c0c8]/10 via-transparent to-transparent" />
         <div className="relative px-4 lg:px-6 pt-8 pb-6">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#A78BFA] flex items-center justify-center shadow-lg shadow-[#8B5CF6]/20">
+            <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-gradient-to-br from-[#c0c0c8] to-[#e5e5ea] flex items-center justify-center shadow-lg shadow-[#c0c0c8]/20">
               <ListMusic className="w-7 lg:w-8 h-7 lg:h-8 text-white" />
             </div>
             <div>
@@ -139,17 +139,17 @@ export default function Library() {
           {/* Stats Row */}
           <div className="flex flex-wrap gap-3 lg:gap-4">
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#181818] border border-[#282828]">
-              <Music2 className="w-4 h-4 text-[#8B5CF6]" />
+              <Music2 className="w-4 h-4 text-[#c0c0c8]" />
               <span className="text-sm text-white font-medium">{favoriteSongs.length}</span>
               <span className="text-xs text-[#B3B3B3]">curtidas</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#181818] border border-[#282828]">
-              <Disc3 className="w-4 h-4 text-[#A78BFA]" />
+              <Disc3 className="w-4 h-4 text-[#e5e5ea]" />
               <span className="text-sm text-white font-medium">{likedReleases.length}</span>
               <span className="text-xs text-[#B3B3B3]">álbuns</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#181818] border border-[#282828]">
-              <ListMusic className="w-4 h-4 text-[#8B5CF6]" />
+              <ListMusic className="w-4 h-4 text-[#c0c0c8]" />
               <span className="text-sm text-white font-medium">{playlists.length}</span>
               <span className="text-xs text-[#B3B3B3]">playlists</span>
             </div>
@@ -162,7 +162,7 @@ export default function Library() {
         <Tabs defaultValue="favorites" className="w-full">
           <TabsList className="bg-[#181818] border border-[#282828] p-1 rounded-xl mb-6 w-full grid grid-cols-3">
             {tabs.map(tab => (
-              <TabsTrigger key={tab.value} value={tab.value} className="data-[state=active]:bg-[#8B5CF6]/20 data-[state=active]:text-[#A78BFA] rounded-lg gap-2 text-xs sm:text-sm">
+              <TabsTrigger key={tab.value} value={tab.value} className="data-[state=active]:bg-[#c0c0c8]/20 data-[state=active]:text-[#e5e5ea] rounded-lg gap-2 text-xs sm:text-sm">
                 <tab.icon className="w-4 h-4" />
                 <span className="hidden sm:inline">{tab.label}</span>
               </TabsTrigger>
@@ -187,7 +187,7 @@ export default function Library() {
                           {r.cover_url ? (
                             <img src={r.cover_url} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400" />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/30 to-[#1a1030] flex items-center justify-center">
+                            <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 to-[#1a1030] flex items-center justify-center">
                               <Disc3 className="w-10 h-10 text-[#535353]" />
                             </div>
                           )}
@@ -214,7 +214,7 @@ export default function Library() {
                   </div>
                   <Button
                     onClick={() => { if (favoriteSongs[0]) handlePlay(favoriteSongs[0]); }}
-                    className="w-10 h-10 rounded-full bg-[#8B5CF6] hover:bg-[#A78BFA] p-0 shadow-lg shadow-[#8B5CF6]/30"
+                    className="w-10 h-10 rounded-full bg-[#c0c0c8] hover:bg-[#e5e5ea] p-0 shadow-lg shadow-[#c0c0c8]/30"
                   >
                     <Play className="w-5 h-5 text-white fill-white ml-0.5" />
                   </Button>
@@ -249,7 +249,7 @@ export default function Library() {
               </div>
               <Dialog open={showAddPlaylist} onOpenChange={setShowAddPlaylist}>
                 <DialogTrigger asChild>
-                  <Button className="bg-[#8B5CF6] hover:bg-[#A78BFA] text-white rounded-full px-5 shadow-lg shadow-[#8B5CF6]/20">
+                  <Button className="bg-[#c0c0c8] hover:bg-[#e5e5ea] text-white rounded-full px-5 shadow-lg shadow-[#c0c0c8]/20">
                     <Plus className="w-4 h-4 mr-2" />Nova
                   </Button>
                 </DialogTrigger>
@@ -264,7 +264,7 @@ export default function Library() {
                       <label className="text-sm text-[#B3B3B3] mb-1 block">Descrição</label>
                       <Textarea value={newPlaylist.description} onChange={(e) => setNewPlaylist(p => ({ ...p, description: e.target.value }))} placeholder="Descrição da playlist" className="bg-[#282828] border-[#383838] text-white" />
                     </div>
-                    <Button onClick={() => createPlaylistMutation.mutate({ ...newPlaylist, song_ids: [], cover_url: '' })} disabled={!newPlaylist.name || createPlaylistMutation.isPending} className="w-full bg-[#8B5CF6] hover:bg-[#A78BFA]">
+                    <Button onClick={() => createPlaylistMutation.mutate({ ...newPlaylist, song_ids: [], cover_url: '' })} disabled={!newPlaylist.name || createPlaylistMutation.isPending} className="w-full bg-[#c0c0c8] hover:bg-[#e5e5ea]">
                       {createPlaylistMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                       Criar Playlist
                     </Button>
@@ -287,8 +287,8 @@ export default function Library() {
 
                           if (covers.length === 0) {
                             return (
-                              <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/30 via-purple-900/50 to-[#1a1030] flex items-center justify-center">
-                                <ListMusic className="w-12 h-12 text-[#535353] group-hover:text-[#8B5CF6]/40 transition-colors" />
+                              <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 via-zinc-800/50 to-[#1a1030] flex items-center justify-center">
+                                <ListMusic className="w-12 h-12 text-[#535353] group-hover:text-[#c0c0c8]/40 transition-colors" />
                               </div>
                             );
                           } else if (covers.length === 1) {
@@ -319,7 +319,7 @@ export default function Library() {
                         <motion.div
                           whileHover={{ scale: 1.08 }}
                           whileTap={{ scale: 0.9 }}
-                          className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-[#8B5CF6] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
+                          className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-[#c0c0c8] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
                         >
                           <Play className="w-5 h-5 text-white fill-white ml-0.5" />
                         </motion.div>
@@ -337,7 +337,7 @@ export default function Library() {
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Nenhuma playlist</h3>
                 <p className="text-[#B3B3B3] max-w-xs mx-auto mb-6">Crie sua primeira playlist e organize suas músicas favoritas</p>
-                <Button onClick={() => setShowAddPlaylist(true)} className="bg-[#8B5CF6] hover:bg-[#A78BFA] text-white rounded-full px-6">
+                <Button onClick={() => setShowAddPlaylist(true)} className="bg-[#c0c0c8] hover:bg-[#e5e5ea] text-white rounded-full px-6">
                   <Plus className="w-4 h-4 mr-2" />Criar Playlist
                 </Button>
               </div>
@@ -349,8 +349,8 @@ export default function Library() {
             <div className="max-w-2xl mx-auto">
               <div className="bg-[#181818] rounded-2xl p-6 lg:p-8 border border-[#282828]">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-xl bg-[#8B5CF6]/20 flex items-center justify-center">
-                    <UserCircle className="w-5 h-5 text-[#A78BFA]" />
+                  <div className="w-10 h-10 rounded-xl bg-[#c0c0c8]/20 flex items-center justify-center">
+                    <UserCircle className="w-5 h-5 text-[#e5e5ea]" />
                   </div>
                   <h2 className="text-xl font-bold text-white">Editar Perfil</h2>
                 </div>

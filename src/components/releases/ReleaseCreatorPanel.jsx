@@ -234,7 +234,7 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
                 >
                   <div className="flex flex-col items-center gap-3">
                     <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
-                      <Loader2 className="w-10 h-10 text-[#A78BFA]" />
+                      <Loader2 className="w-10 h-10 text-[#e5e5ea]" />
                     </motion.div>
                     <p className="text-white/80 text-sm font-medium">Enviando {uploadingWhat}...</p>
                   </div>
@@ -254,7 +254,7 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
             <div className="p-6 md:p-8 space-y-8 max-h-[80vh] overflow-y-auto">
               {/* ===== HEADER ===== */}
               <div className="text-center pt-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#8B5CF6]/10 text-[#A78BFA] text-xs font-semibold mb-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#c0c0c8]/10 text-[#e5e5ea] text-xs font-semibold mb-3">
                   <Sparkles className="w-3.5 h-3.5" />
                   {releaseToEdit ? 'Editando lançamento' : 'Novo lançamento'}
                 </div>
@@ -267,7 +267,7 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
               {/* ===== TYPE SELECTOR ===== */}
               <section>
                 <label className="flex items-center gap-2 text-sm font-semibold text-zinc-300 mb-3">
-                  <Tag className="w-4 h-4 text-[#8B5CF6]" /> Tipo de Lançamento
+                  <Tag className="w-4 h-4 text-[#c0c0c8]" /> Tipo de Lançamento
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {TYPES.map(({ value, label, desc, icon: Icon }) => (
@@ -277,11 +277,11 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
                       onClick={() => setFormData(p => ({ ...p, type: value }))}
                       className={`flex flex-col items-center gap-1 py-4 px-3 rounded-2xl border transition-all ${
                         formData.type === value
-                          ? 'border-[#8B5CF6] bg-[#8B5CF6]/10'
+                          ? 'border-[#c0c0c8] bg-[#c0c0c8]/10'
                           : 'border-white/5 bg-white/[0.03] hover:border-white/10 hover:bg-white/[0.05]'
                       }`}
                     >
-                      <Icon className={`w-5 h-5 ${formData.type === value ? 'text-[#A78BFA]' : 'text-zinc-500'}`} />
+                      <Icon className={`w-5 h-5 ${formData.type === value ? 'text-[#e5e5ea]' : 'text-zinc-500'}`} />
                       <span className={`text-sm font-bold ${formData.type === value ? 'text-white' : 'text-zinc-400'}`}>{label}</span>
                       <span className="text-[10px] text-zinc-600">{desc}</span>
                     </motion.button>
@@ -292,14 +292,14 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
               {/* ===== BASIC INFO ===== */}
               <section className="space-y-4">
                 <label className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
-                  <Mic className="w-4 h-4 text-[#8B5CF6]" /> Informações Básicas
+                  <Mic className="w-4 h-4 text-[#c0c0c8]" /> Informações Básicas
                 </label>
                 <div className="grid gap-3">
                   <input
                     type="text" value={formData.title}
                     onChange={e => setFormData(p => ({ ...p, title: e.target.value }))}
                     placeholder="Título do lançamento *"
-                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-[#8B5CF6]/40 transition-colors"
+                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-[#c0c0c8]/40 transition-colors"
                   />
                   <div className="grid grid-cols-2 gap-3">
                     <input
@@ -307,20 +307,20 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
                       onChange={e => setFormData(p => ({ ...p, artist: e.target.value }))}
                       placeholder="Nome do artista *"
                       disabled={!!managedArtist}
-                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-[#8B5CF6]/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-[#c0c0c8]/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                     />
                     <input
                       type="text" value={formData.featuring}
                       onChange={e => setFormData(p => ({ ...p, featuring: e.target.value }))}
                       placeholder="Participações (feat.)"
-                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-[#8B5CF6]/40 transition-colors"
+                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-[#c0c0c8]/40 transition-colors"
                     />
                   </div>
                   <div className={`grid ${formData.is_scheduled ? 'grid-cols-1' : 'grid-cols-2'} gap-3`}>
                     <select
                       value={formData.genre}
                       onChange={e => setFormData(p => ({ ...p, genre: e.target.value }))}
-                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-white text-sm focus:outline-none focus:border-[#8B5CF6]/40 transition-colors [&>option]:bg-[#1a1a1a]"
+                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-white text-sm focus:outline-none focus:border-[#c0c0c8]/40 transition-colors [&>option]:bg-[#1a1a1a]"
                     >
                       {GENRES.map(g => <option key={g} value={g}>{GENRE_LABELS[g]}</option>)}
                     </select>
@@ -328,7 +328,7 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
                       <input
                         type="date" value={formData.release_date} max={getTodayDate()}
                         onChange={e => setFormData(p => ({ ...p, release_date: e.target.value }))}
-                        className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-white text-sm focus:outline-none focus:border-[#8B5CF6]/40 transition-colors"
+                        className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-white text-sm focus:outline-none focus:border-[#c0c0c8]/40 transition-colors"
                       />
                     )}
                   </div>
@@ -341,7 +341,7 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
                     type="checkbox"
                     checked={formData.is_scheduled}
                     onChange={(e) => setFormData(p => ({ ...p, is_scheduled: e.target.checked, scheduled_datetime: e.target.checked ? p.scheduled_datetime : '' }))}
-                    className="w-4 h-4 rounded border-white/20 bg-white/5 text-[#8B5CF6] focus:ring-[#8B5CF6] focus:ring-offset-0"
+                    className="w-4 h-4 rounded border-white/20 bg-white/5 text-[#c0c0c8] focus:ring-[#c0c0c8] focus:ring-offset-0"
                   />
                   <div className="flex-1">
                     <span className="text-sm font-medium text-white">Agendar estreia na plataforma</span>
@@ -352,9 +352,9 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
-                    className="flex items-center gap-3 p-3 rounded-2xl bg-[#8B5CF6]/5 border border-[#8B5CF6]/15"
+                    className="flex items-center gap-3 p-3 rounded-2xl bg-[#c0c0c8]/5 border border-[#c0c0c8]/15"
                   >
-                    <Clock className="w-4 h-4 text-[#A78BFA] shrink-0" />
+                    <Clock className="w-4 h-4 text-[#e5e5ea] shrink-0" />
                     <input
                       type="datetime-local"
                       value={formData.scheduled_datetime ? (() => {
@@ -371,7 +371,7 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
                         const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
                         return local.toISOString().slice(0, 16);
                       })()}
-                      className="flex-1 px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:border-[#8B5CF6]/40 transition-colors"
+                      className="flex-1 px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:border-[#c0c0c8]/40 transition-colors"
                     />
                   </motion.div>
                 )}
@@ -380,13 +380,13 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
               {/* ===== MEDIA ===== */}
               <section>
                 <label className="flex items-center gap-2 text-sm font-semibold text-zinc-300 mb-3">
-                  <Image className="w-4 h-4 text-[#8B5CF6]" /> Capa & Vídeo
+                  <Image className="w-4 h-4 text-[#c0c0c8]" /> Capa & Vídeo
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   {/* Cover */}
                   <label className="relative group cursor-pointer">
                     <div className={`aspect-square rounded-2xl border-2 border-dashed overflow-hidden transition-all ${
-                      formData.cover_url ? 'border-[#8B5CF6]/40' : 'border-white/[0.08] hover:border-white/20'
+                      formData.cover_url ? 'border-[#c0c0c8]/40' : 'border-white/[0.08] hover:border-white/20'
                     }`}>
                       {formData.cover_url ? (
                         <img src={formData.cover_url} alt="" className="w-full h-full object-cover" />
@@ -410,7 +410,7 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
                   {/* Video */}
                   <label className="relative group cursor-pointer">
                     <div className={`aspect-square rounded-2xl border-2 border-dashed overflow-hidden transition-all ${
-                      formData.background_video_url ? 'border-[#8B5CF6]/40' : 'border-white/[0.08] hover:border-white/20'
+                      formData.background_video_url ? 'border-[#c0c0c8]/40' : 'border-white/[0.08] hover:border-white/20'
                     }`}>
                       {formData.background_video_url ? (
                         <video src={formData.background_video_url} className="w-full h-full object-cover" muted loop autoPlay playsInline />
@@ -437,14 +437,14 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
               <section>
                 <div className="flex items-center justify-between mb-3">
                   <label className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
-                    <Music className="w-4 h-4 text-[#8B5CF6]" /> Faixas
+                    <Music className="w-4 h-4 text-[#c0c0c8]" /> Faixas
                     {formData.tracks.length > 0 && (
                       <span className="text-xs font-normal text-zinc-500 ml-1">
                         ({formData.tracks.length} — {totalDuration()})
                       </span>
                     )}
                   </label>
-                  <label className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#8B5CF6]/15 hover:bg-[#8B5CF6]/25 text-[#A78BFA] rounded-full text-sm font-medium cursor-pointer transition-colors">
+                  <label className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#c0c0c8]/15 hover:bg-[#c0c0c8]/25 text-[#e5e5ea] rounded-full text-sm font-medium cursor-pointer transition-colors">
                     <Plus className="w-4 h-4" />
                     Adicionar
                     <input type="file" accept="audio/*" multiple className="hidden" onChange={e => {
@@ -542,7 +542,7 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
                   whileTap={{ scale: 0.97 }}
                   onClick={() => handleSave('published')}
                   disabled={saving || !formData.title || !formData.artist || formData.tracks.length === 0}
-                  className="flex-[2] py-3 rounded-2xl bg-[#8B5CF6] hover:bg-[#9B6CF7] text-white text-sm font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#8B5CF6]/25"
+                  className="flex-[2] py-3 rounded-2xl bg-[#c0c0c8] hover:bg-[#9B6CF7] text-white text-sm font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#c0c0c8]/25"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   {releaseToEdit ? 'Atualizar lançamento' : 'Publicar lançamento'}

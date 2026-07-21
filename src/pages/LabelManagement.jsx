@@ -85,7 +85,7 @@ export default function LabelManagement() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#8B5CF6] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#c0c0c8] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -118,7 +118,7 @@ export default function LabelManagement() {
           </div>
         </div>
         <div className="bg-white/5 rounded-xl border border-white/10 px-4 py-3 inline-block mt-4">
-          <p className="text-sm text-zinc-300">Total de gravadoras: <span className="font-bold text-[#8B5CF6]">{labels.length}</span></p>
+          <p className="text-sm text-zinc-300">Total de gravadoras: <span className="font-bold text-[#c0c0c8]">{labels.length}</span></p>
         </div>
       </motion.div>
 
@@ -143,14 +143,14 @@ export default function LabelManagement() {
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-white truncate text-sm">{label.name || 'Sem nome'}</h3>
                 {label.representatives && label.representatives.length > 0 && (
-                  <p className="text-xs text-[#8B5CF6]">{label.representatives.length} representante(s)</p>
+                  <p className="text-xs text-[#c0c0c8]">{label.representatives.length} representante(s)</p>
                 )}
               </div>
             </div>
 
             {label.managed_artists && label.managed_artists.length > 0 && (
               <div className="bg-white/5 rounded-lg p-2 mb-3">
-                <p className="text-xs text-[#8B5CF6] font-medium">{label.managed_artists.length} artista(s) associado(s)</p>
+                <p className="text-xs text-[#c0c0c8] font-medium">{label.managed_artists.length} artista(s) associado(s)</p>
               </div>
             )}
 
@@ -158,7 +158,7 @@ export default function LabelManagement() {
               <Button
                 size="sm"
                 onClick={(e) => { e.stopPropagation(); setEditingLabel({ ...label }); }}
-                className="flex-1 h-8 bg-[#8B5CF6] hover:bg-[#A78BFA] text-xs rounded-lg"
+                className="flex-1 h-8 bg-[#c0c0c8] hover:bg-[#e5e5ea] text-xs rounded-lg"
               >
                 <Edit2 className="w-3 h-3 mr-1" /> Editar
               </Button>
@@ -196,9 +196,9 @@ export default function LabelManagement() {
 
             <Tabs defaultValue="dados" className="w-full">
               <TabsList className="bg-white/5 border-b border-white/10 p-0 rounded-none m-0 w-full justify-start">
-                <TabsTrigger value="dados" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#8B5CF6] data-[state=active]:bg-transparent">Dados</TabsTrigger>
-                <TabsTrigger value="artistas" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#8B5CF6] data-[state=active]:bg-transparent">Artistas Associados</TabsTrigger>
-                <TabsTrigger value="representantes" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#8B5CF6] data-[state=active]:bg-transparent">Representantes</TabsTrigger>
+                <TabsTrigger value="dados" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#c0c0c8] data-[state=active]:bg-transparent">Dados</TabsTrigger>
+                <TabsTrigger value="artistas" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#c0c0c8] data-[state=active]:bg-transparent">Artistas Associados</TabsTrigger>
+                <TabsTrigger value="representantes" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#c0c0c8] data-[state=active]:bg-transparent">Representantes</TabsTrigger>
               </TabsList>
 
               {/* Dados Tab */}
@@ -221,7 +221,7 @@ export default function LabelManagement() {
                        });
                      }}
                      disabled={updateLabelMutation.isPending}
-                     className="flex-1 bg-[#8B5CF6] hover:bg-[#A78BFA] h-9"
+                     className="flex-1 bg-[#c0c0c8] hover:bg-[#e5e5ea] h-9"
                    >
                      {updateLabelMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar Alterações'}
                    </Button>
@@ -350,7 +350,7 @@ export default function LabelManagement() {
                   });
                 }}
                 disabled={updateLabelMutation.isPending}
-                className="flex-1 bg-[#8B5CF6] hover:bg-[#A78BFA] h-9"
+                className="flex-1 bg-[#c0c0c8] hover:bg-[#e5e5ea] h-9"
               >
                 Salvar Tudo
               </Button>

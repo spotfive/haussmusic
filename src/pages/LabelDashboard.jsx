@@ -163,10 +163,10 @@ export default function LabelDashboard() {
   const totalLikes = labelPosts.reduce((acc, post) => acc + (post.likes || 0), 0);
 
   const stats = [
-    { icon: Music, value: managedArtists.length, label: 'Artistas', color: 'from-cyan-500 to-blue-500', bg: 'bg-cyan-500/10', text: 'text-cyan-400' },
-    { icon: Eye, value: totalPlays, label: 'Reproduções', color: 'from-violet-500 to-purple-500', bg: 'bg-violet-500/10', text: 'text-violet-400' },
-    { icon: Heart, value: totalLikes, label: 'Curtidas', color: 'from-pink-500 to-rose-500', bg: 'bg-pink-500/10', text: 'text-pink-400' },
-    { icon: Disc, value: labelPosts.length, label: 'Lançamentos', color: 'from-amber-500 to-orange-500', bg: 'bg-amber-500/10', text: 'text-amber-400' },
+    { icon: Music, value: managedArtists.length, label: 'Artistas', color: 'from-zinc-300 to-zinc-500', bg: 'bg-zinc-400/10', text: 'text-zinc-300' },
+    { icon: Eye, value: totalPlays, label: 'Reproduções', color: 'from-neutral-400 to-neutral-600', bg: 'bg-neutral-400/10', text: 'text-neutral-300' },
+    { icon: Heart, value: totalLikes, label: 'Curtidas', color: 'from-slate-300 to-slate-500', bg: 'bg-slate-400/10', text: 'text-slate-300' },
+    { icon: Disc, value: labelPosts.length, label: 'Lançamentos', color: 'from-zinc-200 to-zinc-400', bg: 'bg-zinc-300/10', text: 'text-zinc-200' },
   ];
 
   const availableReps = allUsers.filter(u => !representatives.find(r => r.id === u.id) && u.id !== user?.id);
@@ -175,7 +175,7 @@ export default function LabelDashboard() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#8B5CF6] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#c0c0c8] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -195,7 +195,7 @@ export default function LabelDashboard() {
     <div className="min-h-screen pb-32">
       {/* Hero Header */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#8B5CF6]/20 via-[#121212] to-[#A78BFA]/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#c0c0c8]/20 via-[#121212] to-[#e5e5ea]/10" />
         <div className="relative px-6 lg:px-8 pt-8 pb-8">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
             {/* Avatar & Logo */}
@@ -218,7 +218,7 @@ export default function LabelDashboard() {
                 input.click();
               }}
             >
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden ring-2 ring-[#8B5CF6]/30 shadow-2xl shadow-[#8B5CF6]/20 bg-gradient-to-br from-[#8B5CF6] to-[#A78BFA] flex items-center justify-center">
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden ring-2 ring-[#c0c0c8]/30 shadow-2xl shadow-[#c0c0c8]/20 bg-gradient-to-br from-[#c0c0c8] to-[#e5e5ea] flex items-center justify-center">
                 {user.profile_picture ? (
                   <img src={user.profile_picture} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -238,7 +238,7 @@ export default function LabelDashboard() {
               className="flex-1"
             >
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#8B5CF6] bg-[#8B5CF6]/10 px-3 py-1 rounded-full">Gravadora</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#c0c0c8] bg-[#c0c0c8]/10 px-3 py-1 rounded-full">Gravadora</span>
               </div>
               <h1 className="text-3xl md:text-5xl font-black text-white mb-1">
                 {user.gravadora_name || user.display_name || user.full_name}
@@ -257,7 +257,7 @@ export default function LabelDashboard() {
                   if (selectedArtistId) setShowReleaseCreator(true);
                   else toast.error('Selecione um artista primeiro');
                 }}
-                className="bg-[#8B5CF6] hover:bg-[#A78BFA] text-white rounded-full px-6 py-6 h-auto text-base font-bold shadow-lg shadow-[#8B5CF6]/30"
+                className="bg-[#c0c0c8] hover:bg-[#e5e5ea] text-white rounded-full px-6 py-6 h-auto text-base font-bold shadow-lg shadow-[#c0c0c8]/30"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Novo Lançamento
@@ -326,19 +326,19 @@ export default function LabelDashboard() {
       <div className="px-6 lg:px-8 pt-6">
         <Tabs defaultValue="releases" className="w-full">
           <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl grid w-full grid-cols-4">
-            <TabsTrigger value="releases" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white text-xs">
+            <TabsTrigger value="releases" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white text-xs">
               <Disc className="w-4 h-4 mr-1" />
               Lançamentos
             </TabsTrigger>
-            <TabsTrigger value="artists" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white text-xs">
+            <TabsTrigger value="artists" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white text-xs">
               <Users className="w-4 h-4 mr-1" />
               Artistas
             </TabsTrigger>
-            <TabsTrigger value="representatives" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white text-xs">
+            <TabsTrigger value="representatives" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white text-xs">
               <Users className="w-4 h-4 mr-1" />
               Representantes
             </TabsTrigger>
-            <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white text-xs">
+            <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white text-xs">
               ⚙️ Dados
             </TabsTrigger>
           </TabsList>
@@ -366,7 +366,7 @@ export default function LabelDashboard() {
                         {post.cover_url ? (
                           <img src={post.cover_url} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/40 to-[#A78BFA]/40 flex items-center justify-center">
+                          <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/40 to-[#e5e5ea]/40 flex items-center justify-center">
                             <Disc className="w-16 h-16 text-white/20" />
                           </div>
                         )}
@@ -374,7 +374,7 @@ export default function LabelDashboard() {
                           <motion.div
                             initial={{ opacity: 0, scale: 0.5 }}
                             whileHover={{ opacity: 1, scale: 1 }}
-                            className="w-12 h-12 rounded-full bg-[#8B5CF6] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-2xl"
+                            className="w-12 h-12 rounded-full bg-[#c0c0c8] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-2xl"
                             onClick={(e) => {
                               e.stopPropagation();
                               window.location.href = `/Release?id=${post.id}`;
@@ -422,8 +422,8 @@ export default function LabelDashboard() {
                   animate={{ opacity: 1 }}
                   className="text-center py-20 bg-[#181818] rounded-2xl border border-white/5"
                 >
-                  <div className="w-20 h-20 rounded-full bg-[#8B5CF6]/10 flex items-center justify-center mx-auto mb-4">
-                    <Disc className="w-10 h-10 text-[#8B5CF6]" />
+                  <div className="w-20 h-20 rounded-full bg-[#c0c0c8]/10 flex items-center justify-center mx-auto mb-4">
+                    <Disc className="w-10 h-10 text-[#c0c0c8]" />
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">Nenhum lançamento ainda</h3>
                   <p className="text-zinc-400">Selecione um artista e comece a publicar.</p>
@@ -455,7 +455,7 @@ export default function LabelDashboard() {
                         {artist.profile_picture ? (
                           <img src={artist.profile_picture} alt={artist.display_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/40 to-[#A78BFA]/40 flex items-center justify-center">
+                          <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/40 to-[#e5e5ea]/40 flex items-center justify-center">
                             <Music className="w-16 h-16 text-white/20" />
                           </div>
                         )}
@@ -472,7 +472,7 @@ export default function LabelDashboard() {
                               setSelectedArtistId(artist.id);
                               setShowReleaseCreator(true);
                             }}
-                            className="flex-1 h-8 bg-[#8B5CF6]/20 hover:bg-[#8B5CF6]/30 text-[#A78BFA] text-xs"
+                            className="flex-1 h-8 bg-[#c0c0c8]/20 hover:bg-[#c0c0c8]/30 text-[#e5e5ea] text-xs"
                           >
                             Publicar
                           </Button>
@@ -500,8 +500,8 @@ export default function LabelDashboard() {
                   animate={{ opacity: 1 }}
                   className="text-center py-20 bg-[#181818] rounded-2xl border border-white/5"
                 >
-                  <div className="w-20 h-20 rounded-full bg-[#8B5CF6]/10 flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-10 h-10 text-[#8B5CF6]" />
+                  <div className="w-20 h-20 rounded-full bg-[#c0c0c8]/10 flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-10 h-10 text-[#c0c0c8]" />
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">Nenhum artista gerenciado</h3>
                   <p className="text-zinc-400">Solicite a um admin para vincular artistas à sua gravadora.</p>
@@ -528,7 +528,7 @@ export default function LabelDashboard() {
                       transition={{ delay: index * 0.05 }}
                       className="flex items-center gap-4 bg-[#181818] rounded-xl p-4 border border-white/5 hover:border-white/10 transition-colors"
                     >
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#8B5CF6] to-[#A78BFA] flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#c0c0c8] to-[#e5e5ea] flex items-center justify-center flex-shrink-0">
                         {rep.profile_picture ? (
                           <img src={rep.profile_picture} alt="" className="w-full h-full rounded-full object-cover" />
                         ) : (
@@ -562,7 +562,7 @@ export default function LabelDashboard() {
                   animate={{ opacity: 1 }}
                   className="text-center py-12 bg-[#181818] rounded-2xl border border-white/5"
                 >
-                  <Users className="w-10 h-10 text-[#8B5CF6] mx-auto mb-3" />
+                  <Users className="w-10 h-10 text-[#c0c0c8] mx-auto mb-3" />
                   <h3 className="text-lg font-bold text-white mb-1">Nenhum representante</h3>
                   <p className="text-sm text-zinc-400 mb-4">Adicione um representante para ajudar a gerenciar a gravadora</p>
                 </motion.div>
@@ -571,7 +571,7 @@ export default function LabelDashboard() {
               {/* Add Rep Button */}
               <Dialog open={showAddRep} onOpenChange={setShowAddRep}>
                 <DialogTrigger asChild>
-                  <Button className="mt-4 w-full bg-[#8B5CF6] hover:bg-[#A78BFA] text-white">
+                  <Button className="mt-4 w-full bg-[#c0c0c8] hover:bg-[#e5e5ea] text-white">
                     <UserPlus className="w-4 h-4 mr-2" />
                     Adicionar Representante
                   </Button>
@@ -599,11 +599,11 @@ export default function LabelDashboard() {
                             className="flex items-center justify-between bg-[#181818] rounded-lg p-3 border border-white/5"
                           >
                             <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <div className="w-10 h-10 rounded-full bg-[#8B5CF6]/20 flex items-center justify-center flex-shrink-0">
+                              <div className="w-10 h-10 rounded-full bg-[#c0c0c8]/20 flex items-center justify-center flex-shrink-0">
                                 {u.profile_picture ? (
                                   <img src={u.profile_picture} alt="" className="w-full h-full rounded-full object-cover" />
                                 ) : (
-                                  <Users className="w-5 h-5 text-[#8B5CF6]" />
+                                  <Users className="w-5 h-5 text-[#c0c0c8]" />
                                 )}
                               </div>
                               <div className="min-w-0">
@@ -615,7 +615,7 @@ export default function LabelDashboard() {
                               size="sm"
                               onClick={() => addRepresentativeMutation.mutate(u.id)}
                               disabled={addRepresentativeMutation.isPending}
-                              className="h-8 bg-[#8B5CF6] hover:bg-[#A78BFA] text-white text-xs ml-2"
+                              className="h-8 bg-[#c0c0c8] hover:bg-[#e5e5ea] text-white text-xs ml-2"
                             >
                               {addRepresentativeMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Adicionar'}
                             </Button>

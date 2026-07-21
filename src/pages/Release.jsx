@@ -179,7 +179,7 @@ export default function Release() {
           ) : release.cover_url ? (
             <img src={release.cover_url} alt="" className="w-full h-full object-cover scale-110 blur-3xl opacity-40" />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-violet-900/50 to-purple-900/50" />
+            <div className="w-full h-full bg-gradient-to-br from-zinc-800/50 to-zinc-800/50" />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
         </div>
@@ -196,7 +196,7 @@ export default function Release() {
               {release.cover_url ? (
                 <img src={release.cover_url} alt={release.title} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center">
+                <div className="w-full h-full bg-gradient-to-br from-zinc-500 to-zinc-500 flex items-center justify-center">
                   <Music2 className="w-20 h-20 text-white/50" />
                 </div>
               )}

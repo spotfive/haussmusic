@@ -43,7 +43,7 @@ export default function SocialShareButtons({ url, title = 'Confira isto!' }) {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         onClick={handleInstagramShare}
-        className="p-2 rounded-full bg-gradient-to-br from-pink-500/10 to-purple-500/10 hover:from-pink-500/20 hover:to-purple-500/20 text-pink-500 transition-colors"
+        className="p-2 rounded-full bg-gradient-to-br from-pink-500/10 to-zinc-400/10 hover:from-pink-500/20 hover:to-zinc-400/20 text-pink-500 transition-colors"
         title="Compartilhar no Instagram"
       >
         <Instagram className="w-4 h-4" />

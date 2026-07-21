@@ -118,8 +118,8 @@ export default function ImageCropper({ imageUrl, onSave, onCancel, aspectRatio =
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#8B5CF6]/15 flex items-center justify-center">
-              <Crop className="w-4 h-4 text-[#A78BFA]" />
+            <div className="w-8 h-8 rounded-xl bg-[#c0c0c8]/15 flex items-center justify-center">
+              <Crop className="w-4 h-4 text-[#e5e5ea]" />
             </div>
             <h3 className="text-base font-bold text-white">{title}</h3>
           </div>
@@ -155,11 +155,11 @@ export default function ImageCropper({ imageUrl, onSave, onCancel, aspectRatio =
             }} />
             {/* Corner guides */}
             {[['top-0 left-0','border-t-2 border-l-2 rounded-tl-lg'], ['top-0 right-0','border-t-2 border-r-2 rounded-tr-lg'], ['bottom-0 left-0','border-b-2 border-l-2 rounded-bl-lg'], ['bottom-0 right-0','border-b-2 border-r-2 rounded-br-lg']].map(([pos, style]) => (
-              <div key={pos} className={`absolute ${pos} w-6 h-6 border-[#8B5CF6] ${style} pointer-events-none`} />
+              <div key={pos} className={`absolute ${pos} w-6 h-6 border-[#c0c0c8] ${style} pointer-events-none`} />
             ))}
             {!imageLoaded && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-8 h-8 border-2 border-[#8B5CF6] border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-2 border-[#c0c0c8] border-t-transparent rounded-full animate-spin" />
               </div>
             )}
           </div>
@@ -177,7 +177,7 @@ export default function ImageCropper({ imageUrl, onSave, onCancel, aspectRatio =
                 value={zoom}
                 onChange={e => setZoom(parseFloat(e.target.value))}
                 className="w-full"
-                style={{ background: `linear-gradient(to right, #8B5CF6 0%, #8B5CF6 ${((zoom - 0.5) / 3.5) * 100}%, #333 ${((zoom - 0.5) / 3.5) * 100}%, #333 100%)` }}
+                style={{ background: `linear-gradient(to right, #c0c0c8 0%, #c0c0c8 ${((zoom - 0.5) / 3.5) * 100}%, #333 ${((zoom - 0.5) / 3.5) * 100}%, #333 100%)` }}
               />
             </div>
             <button onClick={() => setZoom(z => Math.min(4, z + 0.1))} className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-all">
@@ -200,7 +200,7 @@ export default function ImageCropper({ imageUrl, onSave, onCancel, aspectRatio =
           <button
             onClick={handleSave}
             disabled={saving || !imageLoaded}
-            className="flex-[2] py-3 rounded-2xl bg-[#8B5CF6] hover:bg-[#9B6CF7] text-white text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#8B5CF6]/25"
+            className="flex-[2] py-3 rounded-2xl bg-[#c0c0c8] hover:bg-[#9B6CF7] text-white text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#c0c0c8]/25"
           >
             {saving ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

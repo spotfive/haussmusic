@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 const tours = {
   home: [
     {
-      title: "Bem-vindo ao ATLANTIX! 🎵",
+      title: "Bem-vindo ao HAUSS MUSIC! 🎵",
       message: "Olá! Eu sou o Atty, seu guia musical. Vou te mostrar como navegar pela plataforma!",
       position: 'center'
     },
@@ -55,7 +55,7 @@ export default function MascotGuide({ page }) {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    const hasSeenGuide = localStorage.getItem('atlantix_guide_completed');
+    const hasSeenGuide = localStorage.getItem('hauss_guide_completed');
     if (!hasSeenGuide && page === 'home') {
       setTimeout(() => setShowGuide(true), 1000);
     }
@@ -75,7 +75,7 @@ export default function MascotGuide({ page }) {
   const handleDismiss = () => {
     setShowGuide(false);
     setDismissed(true);
-    localStorage.setItem('atlantix_guide_completed', 'true');
+    localStorage.setItem('hauss_guide_completed', 'true');
   };
 
   const positionClasses = {
@@ -106,9 +106,9 @@ export default function MascotGuide({ page }) {
               setCurrentStep(0);
               setShowGuide(true);
             }}
-            className="fixed bottom-24 right-6 z-50 w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 shadow-2xl shadow-violet-500/50 flex items-center justify-center group"
+            className="fixed bottom-24 right-6 z-50 w-16 h-16 rounded-full bg-gradient-to-br from-zinc-400 via-zinc-400 to-neutral-400 shadow-2xl shadow-zinc-400/50 flex items-center justify-center group"
             style={{
-              boxShadow: '0 0 40px rgba(139,92,246,0.6), inset 0 0 20px rgba(255,255,255,0.3)'
+              boxShadow: '0 0 40px rgba(200,200,210,0.6), inset 0 0 20px rgba(255,255,255,0.3)'
             }}
           >
             <motion.div
@@ -151,7 +151,7 @@ export default function MascotGuide({ page }) {
                     y: [0, -5, 0]
                   }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute -top-16 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex items-center justify-center"
+                  className="absolute -top-16 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-zinc-500 flex items-center justify-center"
                   style={{
                     boxShadow: '0 10px 40px rgba(59,130,246,0.6), inset 0 0 20px rgba(255,255,255,0.3)'
                   }}
@@ -182,7 +182,7 @@ export default function MascotGuide({ page }) {
                 </motion.div>
 
                 {/* Guide card */}
-                <div className="mt-12 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 rounded-3xl p-6 border border-violet-500/30 shadow-2xl">
+                <div className="mt-12 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 rounded-3xl p-6 border border-zinc-400/30 shadow-2xl">
                   <button
                     onClick={handleDismiss}
                     className="absolute top-3 right-3 p-2 hover:bg-white/10 rounded-full transition-colors"
@@ -204,7 +204,7 @@ export default function MascotGuide({ page }) {
                           key={i}
                           className={`h-1.5 rounded-full transition-all ${
                             i === currentStep 
-                              ? 'w-8 bg-gradient-to-r from-violet-500 to-fuchsia-500' 
+                              ? 'w-8 bg-gradient-to-r from-zinc-400 to-neutral-400' 
                               : 'w-1.5 bg-zinc-700'
                           }`}
                         />
@@ -213,7 +213,7 @@ export default function MascotGuide({ page }) {
 
                     <Button
                       onClick={handleNext}
-                      className="bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600"
+                      className="bg-gradient-to-r from-zinc-400 to-neutral-400 hover:from-zinc-500 hover:to-neutral-500"
                     >
                       {currentStep < tourSteps.length - 1 ? (
                         <>
@@ -242,7 +242,7 @@ export default function MascotGuide({ page }) {
                         repeat: Infinity,
                         delay: i * 0.6
                       }}
-                      className="absolute w-1 h-1 bg-violet-400 rounded-full"
+                      className="absolute w-1 h-1 bg-zinc-300 rounded-full"
                       style={{
                         left: `${20 + i * 15}%`,
                         bottom: '10%'

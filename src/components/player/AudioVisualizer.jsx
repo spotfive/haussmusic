@@ -16,8 +16,8 @@ export default function AudioVisualizer({ isPlaying }) {
             className="w-1.5 rounded-full"
             style={{
               background: `linear-gradient(to top, 
-                rgba(139,92,246,0.8) 0%, 
-                rgba(192,132,252,0.9) 50%, 
+                rgba(200,200,210,0.8) 0%, 
+                rgba(210,210,218,0.9) 50%, 
                 rgba(226,232,240,0.7) 100%)`
             }}
             animate={{

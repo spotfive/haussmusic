@@ -96,24 +96,24 @@ export default function ArtistDashboard() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#8B5CF6] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#c0c0c8] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   const stats = [
-    { icon: Music, value: mySongs.length, label: 'Músicas', color: 'from-cyan-500 to-blue-500', bg: 'bg-cyan-500/10', text: 'text-cyan-400' },
-    { icon: Eye, value: totalPlays, label: 'Reproduções', color: 'from-violet-500 to-purple-500', bg: 'bg-violet-500/10', text: 'text-violet-400' },
-    { icon: Heart, value: totalLikes, label: 'Curtidas', color: 'from-pink-500 to-rose-500', bg: 'bg-pink-500/10', text: 'text-pink-400' },
-    { icon: Disc, value: myReleases.length, label: 'Lançamentos', color: 'from-amber-500 to-orange-500', bg: 'bg-amber-500/10', text: 'text-amber-400' },
-    { icon: Users, value: myFollowers.length, label: 'Seguidores', color: 'from-emerald-500 to-teal-500', bg: 'bg-emerald-500/10', text: 'text-emerald-400' },
+    { icon: Music, value: mySongs.length, label: 'Músicas', color: 'from-zinc-300 to-zinc-500', bg: 'bg-zinc-400/10', text: 'text-zinc-300' },
+    { icon: Eye, value: totalPlays, label: 'Reproduções', color: 'from-neutral-400 to-neutral-600', bg: 'bg-neutral-400/10', text: 'text-neutral-300' },
+    { icon: Heart, value: totalLikes, label: 'Curtidas', color: 'from-slate-300 to-slate-500', bg: 'bg-slate-400/10', text: 'text-slate-300' },
+    { icon: Disc, value: myReleases.length, label: 'Lançamentos', color: 'from-zinc-200 to-zinc-400', bg: 'bg-zinc-300/10', text: 'text-zinc-200' },
+    { icon: Users, value: myFollowers.length, label: 'Seguidores', color: 'from-neutral-300 to-neutral-500', bg: 'bg-neutral-300/10', text: 'text-neutral-200' },
   ];
 
   return (
     <div className="min-h-screen pb-32">
       {/* Hero Header */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#8B5CF6]/20 via-[#121212] to-[#A78BFA]/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#c0c0c8]/20 via-[#121212] to-[#e5e5ea]/10" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
         <div className="relative px-6 lg:px-8 pt-8 pb-8">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
@@ -123,11 +123,11 @@ export default function ArtistDashboard() {
               animate={{ opacity: 1, scale: 1 }}
               className="relative flex-shrink-0"
             >
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden ring-2 ring-[#8B5CF6]/30 shadow-2xl shadow-[#8B5CF6]/20">
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden ring-2 ring-[#c0c0c8]/30 shadow-2xl shadow-[#c0c0c8]/20">
                 {user.profile_picture ? (
                   <img src={user.profile_picture} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6] to-[#A78BFA] flex items-center justify-center">
+                  <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8] to-[#e5e5ea] flex items-center justify-center">
                     <Mic className="w-12 h-12 text-white/60" />
                   </div>
                 )}
@@ -149,7 +149,7 @@ export default function ArtistDashboard() {
               className="flex-1"
             >
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#8B5CF6] bg-[#8B5CF6]/10 px-3 py-1 rounded-full">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#c0c0c8] bg-[#c0c0c8]/10 px-3 py-1 rounded-full">
                   {user.user_type === 'staff' ? 'Staff' : 'Artista'}
                 </span>
                 {user.verified && (
@@ -175,7 +175,7 @@ export default function ArtistDashboard() {
             >
               <Button
                 onClick={() => setShowReleaseCreator(true)}
-                className="bg-[#8B5CF6] hover:bg-[#A78BFA] text-white rounded-full px-6 py-6 h-auto text-base font-bold shadow-lg shadow-[#8B5CF6]/30"
+                className="bg-[#c0c0c8] hover:bg-[#e5e5ea] text-white rounded-full px-6 py-6 h-auto text-base font-bold shadow-lg shadow-[#c0c0c8]/30"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Novo Lançamento
@@ -222,11 +222,11 @@ export default function ArtistDashboard() {
       <div className="px-6 lg:px-8 pt-6">
         <Tabs defaultValue="releases" className="w-full">
           <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl">
-            <TabsTrigger value="releases" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white">
+            <TabsTrigger value="releases" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
               <Disc className="w-4 h-4 mr-2" />
               Lançamentos
             </TabsTrigger>
-            <TabsTrigger value="songs" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white">
+            <TabsTrigger value="songs" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
               <Music className="w-4 h-4 mr-2" />
               Músicas
             </TabsTrigger>
@@ -257,7 +257,7 @@ export default function ArtistDashboard() {
                         {release.cover_url ? (
                           <img src={release.cover_url} alt={release.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/40 to-[#A78BFA]/40 flex items-center justify-center">
+                          <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/40 to-[#e5e5ea]/40 flex items-center justify-center">
                             <Disc className="w-16 h-16 text-white/20" />
                           </div>
                         )}
@@ -265,7 +265,7 @@ export default function ArtistDashboard() {
                           <motion.div
                             initial={{ opacity: 0, scale: 0.5 }}
                             whileHover={{ opacity: 1, scale: 1 }}
-                            className="w-12 h-12 rounded-full bg-[#8B5CF6] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-2xl"
+                            className="w-12 h-12 rounded-full bg-[#c0c0c8] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-2xl"
                             onClick={(e) => {
                               e.stopPropagation();
                               if (release.tracks?.[0]) {
@@ -289,7 +289,7 @@ export default function ArtistDashboard() {
                         <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={(e) => { e.stopPropagation(); setEditingRelease(release); setShowReleaseCreator(true); }}
-                            className="p-1.5 bg-black/60 backdrop-blur-sm hover:bg-[#8B5CF6] rounded-lg transition-colors"
+                            className="p-1.5 bg-black/60 backdrop-blur-sm hover:bg-[#c0c0c8] rounded-lg transition-colors"
                           >
                             <Edit2 className="w-3.5 h-3.5 text-white" />
                           </button>
@@ -329,12 +329,12 @@ export default function ArtistDashboard() {
                   animate={{ opacity: 1 }}
                   className="text-center py-20 bg-[#181818] rounded-2xl border border-white/5"
                 >
-                  <div className="w-20 h-20 rounded-full bg-[#8B5CF6]/10 flex items-center justify-center mx-auto mb-4">
-                    <Disc className="w-10 h-10 text-[#8B5CF6]" />
+                  <div className="w-20 h-20 rounded-full bg-[#c0c0c8]/10 flex items-center justify-center mx-auto mb-4">
+                    <Disc className="w-10 h-10 text-[#c0c0c8]" />
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">Nenhum lançamento ainda</h3>
                   <p className="text-zinc-400 mb-6 max-w-md mx-auto">Comece a construir seu catálogo musical criando seu primeiro single, EP ou álbum.</p>
-                  <Button onClick={() => setShowReleaseCreator(true)} className="bg-[#8B5CF6] hover:bg-[#A78BFA] rounded-full">
+                  <Button onClick={() => setShowReleaseCreator(true)} className="bg-[#c0c0c8] hover:bg-[#e5e5ea] rounded-full">
                     <Plus className="w-4 h-4 mr-2" />
                     Criar Primeiro Lançamento
                   </Button>
@@ -378,8 +378,8 @@ export default function ArtistDashboard() {
                         {song.cover_url ? (
                           <img src={song.cover_url} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0" />
                         ) : (
-                          <div className="w-10 h-10 rounded bg-gradient-to-br from-[#8B5CF6]/30 to-[#A78BFA]/30 flex items-center justify-center flex-shrink-0">
-                            <Music className="w-4 h-4 text-[#8B5CF6]" />
+                          <div className="w-10 h-10 rounded bg-gradient-to-br from-[#c0c0c8]/30 to-[#e5e5ea]/30 flex items-center justify-center flex-shrink-0">
+                            <Music className="w-4 h-4 text-[#c0c0c8]" />
                           </div>
                         )}
                         <div className="min-w-0">
@@ -401,8 +401,8 @@ export default function ArtistDashboard() {
                   animate={{ opacity: 1 }}
                   className="text-center py-20 bg-[#181818] rounded-2xl border border-white/5"
                 >
-                  <div className="w-20 h-20 rounded-full bg-[#8B5CF6]/10 flex items-center justify-center mx-auto mb-4">
-                    <Music className="w-10 h-10 text-[#8B5CF6]" />
+                  <div className="w-20 h-20 rounded-full bg-[#c0c0c8]/10 flex items-center justify-center mx-auto mb-4">
+                    <Music className="w-10 h-10 text-[#c0c0c8]" />
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">Nenhuma música ainda</h3>
                   <p className="text-zinc-400">Suas músicas aparecerão aqui após criar lançamentos.</p>
