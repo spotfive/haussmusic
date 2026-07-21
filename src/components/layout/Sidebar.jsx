@@ -104,7 +104,7 @@ export default function Sidebar({ currentPage }) {
         )}
 
         {/* Label Dashboard link */}
-        {user?.user_type === 'gravadora' && (
+        {(user?.user_type === 'gravadora' || user?.role === 'admin') && (
           <Link to={createPageUrl('LabelDashboard')} className="w-full">
             <motion.div
               whileHover={{ scale: 1.05 }}
@@ -122,7 +122,7 @@ export default function Sidebar({ currentPage }) {
         )}
 
         {/* Label Management link (for staff) */}
-        {user?.user_type === 'staff' && (
+        {(user?.user_type === 'staff' || user?.role === 'admin') && (
           <Link to={createPageUrl('LabelManagement')} className="w-full">
             <motion.div
               whileHover={{ scale: 1.05 }}
