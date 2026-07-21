@@ -6,7 +6,6 @@ import { User, Music2, Heart, Play, Loader2, Users, UserPlus, UserCheck, Share2,
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
-import SocialShareButtons from '@/components/songs/SocialShareButtons';
 import { TikTokIcon, SpotifyIcon } from '@/components/social/SocialBrandIcons';
 
 function VerifiedBadge() {
@@ -202,7 +201,6 @@ export default function ArtistProfile() {
                   <Icon className="w-4 h-4" />
                 </a>
               ))}
-              <SocialShareButtons url={window.location.href} title={`🎤 ${artist.display_name || artist.full_name}`} />
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
