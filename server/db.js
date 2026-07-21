@@ -163,7 +163,8 @@ db.exec(`
     following_id text not null,
     following_name text,
     created_by text,
-    created_date text not null
+    created_date text not null,
+    updated_date text
   );
 
   create table if not exists ratings (
@@ -182,7 +183,8 @@ db.exec(`
     item_id text not null,
     item_type text not null,
     created_by text,
-    created_date text not null
+    created_date text not null,
+    updated_date text
   );
 
   create table if not exists app_settings (
@@ -201,6 +203,8 @@ db.exec(`
 for (const [table, column, definition] of [
   ['artists', 'created_by', 'text'],
   ['app_settings', 'created_by', 'text'],
+  ['follows', 'updated_date', 'text'],
+  ['user_favorites', 'updated_date', 'text'],
 ]) {
   const cols = db.prepare(`pragma table_info(${table})`).all();
   if (!cols.some((c) => c.name === column)) {

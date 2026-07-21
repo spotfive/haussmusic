@@ -32,6 +32,23 @@ export default function ProfileEditor({ user, onUpdate }) {
   const handleUploadPhoto = async (e, target) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // The cropper flattens everything onto a canvas and exports a single
+    // static JPEG frame — that would kill the animation on a GIF, so upload
+    // those as-is instead of sending them through it.
+    if (file.type === 'image/gif') {
+      setUploading(true);
+      try {
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        setProfileData(prev => ({ ...prev, [target === 'banner' ? 'profile_banner' : 'profile_picture']: file_url }));
+      } catch {
+        toast.error('Erro ao enviar imagem');
+      } finally {
+        setUploading(false);
+      }
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (ev) => { setTempImage(ev.target.result); setCropperTarget(target); setShowCropper(true); };
     reader.readAsDataURL(file);
@@ -105,7 +122,7 @@ export default function ProfileEditor({ user, onUpdate }) {
         </label>
       </div>
       <p className="text-xs text-zinc-500 -mt-4 text-center">
-        Esse banner aparece no seu perfil e no destaque de "Mais Ouvidas" quando sua música estiver em alta.
+        Esse banner aparece no seu perfil e no destaque de "Mais Ouvidas" quando sua música estiver em alta. Aceita GIF animado.
       </p>
 
       {/* Profile Picture */}
