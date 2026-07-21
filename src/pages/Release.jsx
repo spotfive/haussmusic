@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Play, Pause, Heart, Clock, Calendar, Music2, User, ArrowLeft, Timer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import BackgroundMedia from '@/components/media/BackgroundMedia';
 
 export default function Release() {
   const navigate = useNavigate();
@@ -168,12 +169,8 @@ export default function Release() {
         {/* Background */}
         <div className="absolute inset-0">
           {release.background_video_url ? (
-            <video
+            <BackgroundMedia
               src={release.background_video_url}
-              loop
-              muted
-              autoPlay
-              playsInline
               className="w-full h-full object-cover"
             />
           ) : release.cover_url ? (

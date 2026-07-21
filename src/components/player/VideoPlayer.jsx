@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Maximize2 } from 'lucide-react';
+import BackgroundMedia from '@/components/media/BackgroundMedia';
 
 export default function VideoPlayer({ song, isPlaying, onClose, onExpand }) {
   const videoRef = useRef(null);
@@ -15,16 +16,13 @@ export default function VideoPlayer({ song, isPlaying, onClose, onExpand }) {
         exit={{ x: 400, opacity: 0 }}
         className="fixed right-4 bottom-32 w-80 h-60 z-40 rounded-2xl overflow-hidden shadow-2xl bg-black"
       >
-        <video
-          ref={videoRef}
+        <BackgroundMedia
           src={song.background_video_url}
-          loop
-          muted
-          autoPlay
-          playsInline
+          alt={song.title}
+          videoRef={videoRef}
           className="w-full h-full object-cover"
         />
-        
+
         <div className="absolute top-3 right-3 flex items-center gap-2">
           <motion.button
             whileHover={{ scale: 1.1 }}

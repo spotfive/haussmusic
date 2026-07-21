@@ -4,6 +4,7 @@ import { X, Upload, Plus, Trash2, GripVertical, Image, Video, Save, Loader2, Mus
 import { base44 } from '@/api/base44Client';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import ImageCropper from '@/components/profile/ImageCropper';
+import BackgroundMedia from '@/components/media/BackgroundMedia';
 
 const GENRES = ['pop', 'rock', 'hip-hop', 'electronic', 'jazz', 'r&b', 'latin', 'indie', 'forró', 'other'];
 const GENRE_LABELS = { pop: 'Pop', rock: 'Rock', 'hip-hop': 'Hip-Hop', electronic: 'Eletrônico', jazz: 'Jazz', 'r&b': 'R&B', latin: 'Latino', indie: 'Indie', forró: 'Forró', other: 'Outro' };
@@ -413,22 +414,22 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
                       formData.background_video_url ? 'border-[#c0c0c8]/40' : 'border-white/[0.08] hover:border-white/20'
                     }`}>
                       {formData.background_video_url ? (
-                        <video src={formData.background_video_url} className="w-full h-full object-cover" muted loop autoPlay playsInline />
+                        <BackgroundMedia src={formData.background_video_url} alt="Fundo" className="w-full h-full object-cover" />
                       ) : (
                         <div className="h-full flex flex-col items-center justify-center gap-2 bg-white/[0.02]">
                           <div className="w-10 h-10 rounded-full bg-white/[0.05] flex items-center justify-center">
                             <Video className="w-5 h-5 text-zinc-500" />
                           </div>
-                          <span className="text-xs text-zinc-500 text-center px-2">Vídeo de Fundo<br/>(opcional)</span>
+                          <span className="text-xs text-zinc-500 text-center px-2">Vídeo ou GIF de Fundo<br/>(opcional)</span>
                         </div>
                       )}
                       {formData.background_video_url && (
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                          <span className="text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Alterar vídeo</span>
+                          <span className="text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Alterar vídeo/GIF</span>
                         </div>
                       )}
                     </div>
-                    <input type="file" accept="video/*" className="hidden" onChange={e => handleUpload(e, 'video')} />
+                    <input type="file" accept="video/*,image/gif" className="hidden" onChange={e => handleUpload(e, 'video')} />
                   </label>
                 </div>
               </section>

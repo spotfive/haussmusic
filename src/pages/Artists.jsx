@@ -387,22 +387,22 @@ export default function Artists() {
                         </div>
 
                         <div>
-                          <label className="text-sm text-zinc-400 mb-1 block">Vídeo de Fundo (opcional)</label>
+                          <label className="text-sm text-zinc-400 mb-1 block">Vídeo ou GIF de Fundo (opcional)</label>
                           <label className="flex flex-col items-center justify-center gap-2 p-6 lg:p-8 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer hover:border-zinc-500 transition-colors">
                             {uploadingVideo ? (
                               <Loader2 className="w-6 lg:w-8 h-6 lg:h-8 animate-spin text-zinc-400" />
                             ) : newPost.background_video_url ? (
                               <div className="flex flex-col items-center gap-2 text-green-400">
                                 <Music2 className="w-6 h-6" />
-                                <span className="text-xs lg:text-sm text-center">Vídeo carregado</span>
+                                <span className="text-xs lg:text-sm text-center">Vídeo/GIF carregado</span>
                               </div>
                             ) : (
                               <>
                                 <Upload className="w-6 lg:w-8 h-6 lg:h-8 text-zinc-500" />
-                                <span className="text-xs lg:text-sm text-zinc-500 text-center">Vídeo de fundo</span>
+                                <span className="text-xs lg:text-sm text-zinc-500 text-center">Vídeo ou GIF de fundo</span>
                               </>
                             )}
-                            <input type="file" accept="video/*" className="hidden" onChange={handleUploadVideo} />
+                            <input type="file" accept="video/*,image/gif" className="hidden" onChange={handleUploadVideo} />
                           </label>
                         </div>
                       </div>
@@ -532,14 +532,14 @@ export default function Artists() {
                 <div className="bg-white/5 rounded-lg p-4 border border-white/10">
                   <h4 className="font-semibold text-zinc-400 mb-2 flex items-center gap-2">
                     <Music2 className="w-4 h-4" />
-                    Vídeo de Fundo
+                    Vídeo ou GIF de Fundo
                   </h4>
                   <ul className="text-sm text-zinc-400 space-y-1">
-                    <li>• <span className="text-white">Formato:</span> MP4, MOV, WEBM</li>
+                    <li>• <span className="text-white">Formato:</span> MP4, MOV, WEBM ou GIF</li>
                     <li>• <span className="text-white">Resolução máxima:</span> 1920x1080 (Full HD)</li>
                     <li>• <span className="text-white">Tamanho máximo:</span> 50MB</li>
                     <li>• <span className="text-white">Duração:</span> 15-30 segundos</li>
-                    <li>• <span className="text-white">Recomendação:</span> Vídeo em loop</li>
+                    <li>• <span className="text-white">Recomendação:</span> Vídeo ou GIF em loop</li>
                   </ul>
                 </div>
 

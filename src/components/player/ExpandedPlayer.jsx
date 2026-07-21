@@ -4,6 +4,7 @@ import {
   Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Repeat, Repeat1, 
   Maximize2, Heart, X, MoreHorizontal
 } from 'lucide-react';
+import BackgroundMedia from '@/components/media/BackgroundMedia';
 
 export default function ExpandedPlayer({ 
   song, 
@@ -100,13 +101,10 @@ export default function ExpandedPlayer({
       {/* Main Content - Full Screen Video/Cover */}
       <div className="flex-1 relative overflow-hidden">
         {song.background_video_url ? (
-          <video
-            ref={videoRef}
+          <BackgroundMedia
             src={song.background_video_url}
-            loop
-            muted
-            autoPlay
-            playsInline
+            alt={song.title}
+            videoRef={videoRef}
             className="w-full h-full object-cover"
           />
         ) : (

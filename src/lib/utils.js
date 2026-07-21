@@ -11,6 +11,16 @@ export const isIframe = window.self !== window.top;
 // Decodes (without verifying) the payload of a Google Identity Services ID token (JWT).
 // Safe here because there is no server: the decoded claims are only used to
 // look up/create the matching local user, never as a trust boundary.
+// "Background video" fields also accept animated GIFs (image, not video).
+// Data-URL uploads carry their real mime type; fall back to the extension
+// for plain URLs.
+export function isImageBackground(url) {
+  if (!url) return false;
+  if (url.startsWith('data:image/')) return true;
+  if (url.startsWith('data:video/')) return false;
+  return /\.(gif|png|jpe?g|webp)(\?|#|$)/i.test(url);
+}
+
 export function decodeJwtPayload(token) {
   const base64Url = token.split('.')[1];
   const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');

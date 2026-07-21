@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import BackgroundMedia from '@/components/media/BackgroundMedia';
 
 export default function RightSidebar({ song, isPlaying, onClose, isFavorite, onFavoriteToggle }) {
   const videoRef = useRef(null);
@@ -73,10 +74,10 @@ export default function RightSidebar({ song, isPlaying, onClose, isFavorite, onF
         {/* Media */}
         <div className="relative w-full aspect-square bg-black">
           {song.background_video_url ? (
-            <video
-              ref={videoRef}
+            <BackgroundMedia
               src={song.background_video_url}
-              loop muted autoPlay playsInline
+              alt={song.title}
+              videoRef={videoRef}
               className="w-full h-full object-cover"
             />
           ) : song.cover_url ? (
