@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Upload, Trash2, Save, Loader2, Image as ImageIcon, Music, Music2, Users, BarChart3, Settings, Shield, Edit2, Camera, Radio, Eye, Sparkles, Search } from 'lucide-react';
+import { Plus, Upload, Trash2, Save, Loader2, Image as ImageIcon, Music, Music2, Users, BarChart3, Settings, Shield, Edit2, Camera, Radio, Eye, Sparkles, Search, TrendingUp } from 'lucide-react';
 import ImageCropper from '@/components/profile/ImageCropper';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -818,6 +818,40 @@ export default function AdminDashboard() {
                   }}
                   className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-xl">
                   Adicionar Música Teste
+                </Button>
+              </div>
+              <div className="bg-[#181818] rounded-2xl border border-white/5 p-6 hover:border-[#c0c0c8]/20 transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-[#c0c0c8]/10 flex items-center justify-center mb-4">
+                  <TrendingUp className="w-5 h-5 text-[#c0c0c8]" />
+                </div>
+                <h3 className="font-bold text-white mb-2">Postar Minha Música (Mais Ouvida)</h3>
+                <p className="text-sm text-zinc-400 mb-4">Cria uma música com o seu nome como artista e mais plays que qualquer outra, pra ela virar o destaque "Mais Ouvidas" da Home.</p>
+                <Button
+                  onClick={async () => {
+                    try {
+                      const maxPlays = songs.reduce((max, s) => Math.max(max, s.plays || 0), 0);
+                      const artistName = user?.display_name || user?.full_name || 'Eu';
+                      await base44.entities.Song.create({
+                        title: 'Minha Faixa',
+                        artist: artistName,
+                        album: '',
+                        type: 'single',
+                        genre: 'pop',
+                        cover_url: '',
+                        audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+                        duration: 226,
+                        plays: maxPlays + 1000,
+                        rating: 0,
+                        rating_count: 0,
+                        is_favorite: false,
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['songs'] });
+                      queryClient.invalidateQueries({ queryKey: ['featured-artist'] });
+                      toast.success('Música postada e em destaque como mais ouvida!');
+                    } catch { toast.error('Erro ao postar música'); }
+                  }}
+                  className="bg-[#c0c0c8]/20 hover:bg-[#c0c0c8]/30 text-[#e5e5ea] rounded-xl">
+                  Postar e Destacar
                 </Button>
               </div>
               <div className="bg-[#181818] rounded-2xl border border-white/5 p-6 hover:border-[#c0c0c8]/20 transition-colors">
