@@ -121,23 +121,6 @@ export default function Sidebar({ currentPage }) {
           </Link>
         )}
 
-        {/* Label Management link (for staff) */}
-        {(user?.user_type === 'staff' || user?.role === 'admin') && (
-          <Link to={createPageUrl('LabelManagement')} className="w-full">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`relative flex flex-col items-center justify-center gap-1 py-3 rounded-xl transition-all duration-200 ${
-                isActive('LabelManagement')
-                  ? 'text-[#c0c0c8]'
-                  : 'text-[#B3B3B3] hover:text-white'
-              }`}
-            >
-              <Music2 className="w-6 h-6" />
-              <span className="text-[9px] font-medium leading-none">Gravadoras</span>
-            </motion.div>
-          </Link>
-        )}
 
         {/* Admin link */}
         {user?.role === 'admin' && (
