@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Home, Search, Library, Music2, Trophy, Shield, Award } from 'lucide-react';
+import { Home, Search, Library, Music2, Trophy, Shield, Award, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useAuth } from '@/lib/AuthContext';
@@ -19,7 +19,7 @@ const libraryItems = [
 ];
 
 export default function Sidebar({ currentPage }) {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const { data: appSettings = [] } = useQuery({
     queryKey: ['appSettings'],
@@ -137,6 +137,20 @@ export default function Sidebar({ currentPage }) {
             >
               <Shield className="w-6 h-6" />
               <span className="text-[9px] font-medium leading-none">Admin</span>
+            </motion.div>
+          </Link>
+        )}
+
+        {/* Login link (anonymous visitors) */}
+        {!isAuthenticated && (
+          <Link to="/AuthPage" className="w-full mt-auto">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative flex flex-col items-center justify-center gap-1 py-3 rounded-xl transition-all duration-200 text-[#c0c0c8] hover:text-white"
+            >
+              <LogIn className="w-6 h-6" />
+              <span className="text-[9px] font-medium leading-none">Entrar</span>
             </motion.div>
           </Link>
         )}

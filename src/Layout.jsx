@@ -10,13 +10,13 @@ import ExpandedMobilePlayer from '@/components/layout/ExpandedMobilePlayer';
 import ProfileSetup from '@/components/profile/ProfileSetup';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Home, Search, Library, Music2, Trophy, Award } from 'lucide-react';
+import { Home, Search, Library, Music2, Trophy, Award, LogIn } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { hasUserType } from '@/lib/utils';
 
 export default function Layout({ children, currentPageName }) {
   const queryClient = useQueryClient();
-  const { user, refreshUser } = useAuth();
+  const { user, isAuthenticated, refreshUser } = useAuth();
 
   // ===== PLAYER STATE =====
   const audioA = useRef(null);
@@ -379,6 +379,7 @@ export default function Layout({ children, currentPageName }) {
       : [{ icon: Music2, label: 'Artistas', page: 'Artists' }]
     ),
     { icon: Trophy, label: 'Rankings', page: 'Rankings' },
+    ...(isAuthenticated ? [] : [{ icon: LogIn, label: 'Entrar', page: 'AuthPage' }]),
   ];
 
   return (
