@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { User, Music2, Heart, Play, Loader2, Users, UserPlus, UserCheck, Share2, Check } from 'lucide-react';
+import { User, Music2, Heart, Play, Loader2, Users, UserPlus, UserCheck, Share2, Check, Instagram, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import SocialShareButtons from '@/components/songs/SocialShareButtons';
+import { TikTokIcon, SpotifyIcon } from '@/components/social/SocialBrandIcons';
 
 function VerifiedBadge() {
   return (
@@ -122,6 +123,13 @@ export default function ArtistProfile() {
 
   const isOwnProfile = currentUser?.id === artistId;
 
+  const socialLinks = [
+    { key: 'instagram', url: artist.social_links?.instagram, label: 'Instagram', Icon: Instagram },
+    { key: 'tiktok', url: artist.social_links?.tiktok, label: 'TikTok', Icon: TikTokIcon },
+    { key: 'youtube', url: artist.social_links?.youtube, label: 'YouTube', Icon: Youtube },
+    { key: 'spotify', url: artist.social_links?.spotify, label: 'Spotify', Icon: SpotifyIcon },
+  ].filter(link => !!link.url);
+
   return (
     <div className="min-h-screen pb-32">
       {/* Hero Header */}
@@ -182,6 +190,18 @@ export default function ArtistProfile() {
 
             {/* Buttons */}
             <div className="flex items-center gap-3">
+              {socialLinks.map(({ key, url, label, Icon }) => (
+                <a
+                  key={key}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={label}
+                  className="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-all"
+                >
+                  <Icon className="w-4 h-4" />
+                </a>
+              ))}
               <SocialShareButtons url={window.location.href} title={`🎤 ${artist.display_name || artist.full_name}`} />
               <motion.button
                 whileHover={{ scale: 1.05 }}

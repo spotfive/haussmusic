@@ -2,16 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Music, Heart, Eye, Calendar, Edit2, Trash2, Play, Users, Plus, Clock, Disc, Mic } from 'lucide-react';
+import { Music, Heart, Eye, Calendar, Edit2, Trash2, Play, Users, Plus, Clock, Disc, Mic, Instagram, Youtube, Share2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import ReleaseCreatorPanel from '@/components/releases/ReleaseCreatorPanel';
+import { TikTokIcon, SpotifyIcon } from '@/components/social/SocialBrandIcons';
 import { toast } from 'sonner';
 
 export default function ArtistDashboard() {
   const [user, setUser] = useState(null);
   const [showReleaseCreator, setShowReleaseCreator] = useState(false);
   const [editingRelease, setEditingRelease] = useState(null);
+  const [showSocialLinks, setShowSocialLinks] = useState(false);
+  const [socialLinksForm, setSocialLinksForm] = useState({ instagram: '', tiktok: '', youtube: '', spotify: '' });
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -20,8 +25,19 @@ export default function ArtistDashboard() {
         window.location.href = '/';
       }
       setUser(u);
+      setSocialLinksForm({ instagram: '', tiktok: '', youtube: '', spotify: '', ...(u.social_links || {}) });
     }).catch(() => window.location.href = '/');
   }, []);
+
+  const saveSocialLinksMutation = useMutation({
+    mutationFn: (social_links) => base44.auth.updateMe({ social_links }),
+    onSuccess: (updatedUser) => {
+      setUser(updatedUser);
+      setShowSocialLinks(false);
+      toast.success('Redes sociais atualizadas!');
+    },
+    onError: () => toast.error('Erro ao salvar redes sociais'),
+  });
 
   const { data: myReleases = [] } = useQuery({
     queryKey: ['my-releases', user?.email],
@@ -167,12 +183,21 @@ export default function ArtistDashboard() {
               <p className="text-zinc-400 text-sm md:text-base">Dashboard do Artista — Gerencie seus lançamentos e acompanhe suas métricas</p>
             </motion.div>
 
-            {/* Quick Action */}
+            {/* Quick Actions */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3 }}
+              className="flex items-center gap-3"
             >
+              <Button
+                variant="outline"
+                onClick={() => setShowSocialLinks(true)}
+                className="rounded-full px-5 py-6 h-auto text-base font-bold border-white/15 bg-white/5 hover:bg-white/10 text-white"
+              >
+                <Share2 className="w-5 h-5 mr-2" />
+                Redes Sociais
+              </Button>
               <Button
                 onClick={() => setShowReleaseCreator(true)}
                 className="btn-metal rounded-full px-6 py-6 h-auto text-base font-bold shadow-lg shadow-[#c0c0c8]/30"
@@ -425,6 +450,73 @@ export default function ArtistDashboard() {
           queryClient.invalidateQueries({ queryKey: ['my-songs'] });
         }}
       />
+
+      {/* Social Links Dialog */}
+      <Dialog open={showSocialLinks} onOpenChange={setShowSocialLinks}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 text-white">
+          <DialogHeader>
+            <DialogTitle>Redes Sociais</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-zinc-400 -mt-2">
+            Cole o link do seu perfil em cada rede. Deixe em branco pra não mostrar o botão.
+          </p>
+          <div className="space-y-3 py-2">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
+                <Instagram className="w-5 h-5 text-[#e5e5ea]" />
+              </div>
+              <Input
+                value={socialLinksForm.instagram}
+                onChange={(e) => setSocialLinksForm(prev => ({ ...prev, instagram: e.target.value }))}
+                placeholder="https://instagram.com/seuartista"
+                className="bg-white/5 border-white/10 text-white"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
+                <TikTokIcon className="w-4 h-4 text-[#e5e5ea]" />
+              </div>
+              <Input
+                value={socialLinksForm.tiktok}
+                onChange={(e) => setSocialLinksForm(prev => ({ ...prev, tiktok: e.target.value }))}
+                placeholder="https://tiktok.com/@seuartista"
+                className="bg-white/5 border-white/10 text-white"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
+                <Youtube className="w-5 h-5 text-[#e5e5ea]" />
+              </div>
+              <Input
+                value={socialLinksForm.youtube}
+                onChange={(e) => setSocialLinksForm(prev => ({ ...prev, youtube: e.target.value }))}
+                placeholder="https://youtube.com/@seuartista"
+                className="bg-white/5 border-white/10 text-white"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
+                <SpotifyIcon className="w-4 h-4 text-[#e5e5ea]" />
+              </div>
+              <Input
+                value={socialLinksForm.spotify}
+                onChange={(e) => setSocialLinksForm(prev => ({ ...prev, spotify: e.target.value }))}
+                placeholder="https://open.spotify.com/artist/..."
+                className="bg-white/5 border-white/10 text-white"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => saveSocialLinksMutation.mutate(socialLinksForm)}
+              disabled={saveSocialLinksMutation.isPending}
+              className="w-full"
+            >
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
