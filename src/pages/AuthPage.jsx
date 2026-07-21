@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 import { Mail, Lock, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -59,6 +60,21 @@ export default function AuthPage() {
       setLoading(false);
     }
   };
+
+  const handleGoogleSuccess = useCallback(async (profile) => {
+    try {
+      await base44.auth.loginWithGoogle(profile);
+      toast.success('Login realizado com sucesso!');
+      window.location.href = '/';
+    } catch (error) {
+      toast.error('Erro ao entrar com Google. Tente novamente.');
+      console.error(error);
+    }
+  }, []);
+
+  const handleGoogleError = useCallback(() => {
+    toast.error('Não foi possível conectar com o Google.');
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 flex items-center justify-center p-4">
@@ -202,6 +218,16 @@ export default function AuthPage() {
               {loading ? 'Aguarde...' : mode === 'login' ? 'Entrar' : 'Criar conta'}
             </Button>
           </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4 my-6">
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="text-sm text-zinc-500">ou</span>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
+
+          {/* Google login */}
+          <GoogleSignInButton onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
         </div>
       </motion.div>
     </div>

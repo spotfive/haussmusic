@@ -148,6 +148,41 @@ const auth = {
   redirectToLogin() {
     if (hasWindow) window.location.href = '/AuthPage';
   },
+  // profile decoded from a Google "Sign in with Google" ID token: { sub, email, name, picture }
+  async loginWithGoogle(profile) {
+    if (!profile?.email) {
+      const err = new Error('Google profile missing email');
+      throw err;
+    }
+    const userRows = readTable('User');
+    let user = userRows.find(u => u.email?.toLowerCase() === profile.email.toLowerCase());
+
+    if (!user) {
+      user = {
+        id: genId(),
+        created_date: nowIso(),
+        updated_date: nowIso(),
+        email: profile.email,
+        full_name: profile.name || profile.email.split('@')[0],
+        display_name: profile.name || profile.email.split('@')[0],
+        profile_picture: profile.picture || '',
+        bio: '',
+        user_type: 'ouvinte',
+        role: userRows.length === 0 ? 'admin' : 'user',
+        profile_completed: true,
+        verified: false,
+        managed_artists: [],
+        google_id: profile.sub,
+      };
+      writeTable('User', [...userRows, user]);
+    } else if (profile.picture && !user.profile_picture) {
+      user = { ...user, profile_picture: profile.picture, updated_date: nowIso() };
+      writeTable('User', userRows.map(u => (u.id === user.id ? user : u)));
+    }
+
+    storage?.setItem(SESSION_KEY, user.id);
+    return user;
+  },
 };
 
 async function handleRegister({ email, password, username, display_name }) {
