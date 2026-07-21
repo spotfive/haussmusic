@@ -213,7 +213,7 @@ export default function AuthPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-zinc-400 to-neutral-500 hover:from-zinc-500 hover:to-neutral-600 text-white font-bold py-3"
+              className="w-full py-3"
             >
               {loading ? 'Aguarde...' : mode === 'login' ? 'Entrar' : 'Criar conta'}
             </Button>

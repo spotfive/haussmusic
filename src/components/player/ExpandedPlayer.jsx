@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Repeat, Repeat1, 
-  Maximize2, Heart, X, MoreHorizontal
+  Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Repeat, Repeat1, Heart, X, MoreHorizontal
 } from 'lucide-react';
 import BackgroundMedia from '@/components/media/BackgroundMedia';
 

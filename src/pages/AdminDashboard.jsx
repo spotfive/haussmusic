@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Upload, Trash2, Save, Loader2, Image as ImageIcon, Music, Music2, Users, BarChart3, Settings, Shield, Edit2, Camera, Disc, Radio, Eye, Sparkles, Search } from 'lucide-react';
+import { Plus, Upload, Trash2, Save, Loader2, Image as ImageIcon, Music, Music2, Users, BarChart3, Settings, Shield, Edit2, Camera, Radio, Eye, Sparkles, Search } from 'lucide-react';
 import ImageCropper from '@/components/profile/ImageCropper';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -381,22 +381,22 @@ export default function AdminDashboard() {
        <div className="px-6 lg:px-8 pt-6">
          <Tabs defaultValue={initialTab} className="w-full">
           <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl inline-flex">
-            <TabsTrigger value="banners" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
+            <TabsTrigger value="banners" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900">
               <ImageIcon className="w-4 h-4 mr-2" />Banners
             </TabsTrigger>
-            <TabsTrigger value="songs" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
+            <TabsTrigger value="songs" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900">
               <Music className="w-4 h-4 mr-2" />Músicas
             </TabsTrigger>
-            <TabsTrigger value="users" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
+            <TabsTrigger value="users" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900">
               <Users className="w-4 h-4 mr-2" />Usuários
             </TabsTrigger>
-            <TabsTrigger value="labels" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
+            <TabsTrigger value="labels" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900">
               <Music2 className="w-4 h-4 mr-2" />Gravadoras
             </TabsTrigger>
-            <TabsTrigger value="tools" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
+            <TabsTrigger value="tools" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900">
               <Settings className="w-4 h-4 mr-2" />Ferramentas
             </TabsTrigger>
-            <TabsTrigger value="logo" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
+            <TabsTrigger value="logo" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900">
               <Sparkles className="w-4 h-4 mr-2" />Logo
             </TabsTrigger>
           </TabsList>
@@ -440,7 +440,7 @@ export default function AdminDashboard() {
                   <Button
                     onClick={() => createBannerMutation.mutate(newBanner)}
                     disabled={!newBanner.title || !newBanner.image_url || createBannerMutation.isPending}
-                    className="w-full bg-[#c0c0c8] hover:bg-[#e5e5ea] rounded-xl h-11"
+                    className="w-full btn-metal rounded-xl h-11"
                   >
                     {createBannerMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
                     Criar Banner
@@ -637,7 +637,7 @@ export default function AdminDashboard() {
                     <Button
                       onClick={() => updateUserMutation.mutate({ userId: editingUser.id, data: { display_name: editingUser.display_name, profile_picture: editingUser.profile_picture } })}
                       disabled={updateUserMutation.isPending}
-                      className="w-full bg-[#c0c0c8] hover:bg-[#e5e5ea] rounded-xl h-11">
+                      className="w-full btn-metal rounded-xl h-11">
                       {updateUserMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Salvando...</> : <><Save className="w-4 h-4 mr-2" />Salvar Alterações</>}
                     </Button>
                   </div>
@@ -687,7 +687,7 @@ export default function AdminDashboard() {
                       {newLabelForm.representatives.map(repId => { const rep = users.find(u => u.id === repId); return (<div key={repId} className="flex items-center justify-between text-xs bg-white/5 p-2 rounded"><span className="text-white truncate">{rep?.display_name || rep?.full_name || 'Sem nome'}</span><button onClick={() => setNewLabelForm(prev => ({ ...prev, representatives: prev.representatives.filter(id => id !== repId) }))} className="text-red-400 hover:text-red-300">✕</button></div>); })}
                     </div>
                   )}
-                  <Button onClick={() => createLabelMutation.mutate(newLabelForm)} disabled={!newLabelForm.name || createLabelMutation.isPending} className="w-full bg-[#c0c0c8] hover:bg-[#e5e5ea] rounded-xl h-11">
+                  <Button onClick={() => createLabelMutation.mutate(newLabelForm)} disabled={!newLabelForm.name || createLabelMutation.isPending} className="w-full btn-metal rounded-xl h-11">
                     {createLabelMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}Criar Gravadora
                   </Button>
                 </div>
@@ -872,7 +872,7 @@ export default function AdminDashboard() {
                       });
                     }}
                     disabled={updateLabelDetailsMutation.isPending}
-                    className="flex-1 bg-[#c0c0c8] hover:bg-[#e5e5ea] h-9"
+                    className="flex-1 btn-metal h-9"
                   >
                     Salvar Alterações
                   </Button>
@@ -1020,7 +1020,7 @@ export default function AdminDashboard() {
                    });
                  }}
                  disabled={updateLabelDetailsMutation.isPending}
-                 className="flex-1 bg-[#c0c0c8] hover:bg-[#e5e5ea] h-9"
+                 className="flex-1 btn-metal h-9"
                >
                  Salvar Tudo
                </Button>

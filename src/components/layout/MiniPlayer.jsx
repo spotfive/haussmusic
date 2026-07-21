@@ -159,9 +159,9 @@ export default function MiniPlayer({
               className="w-12 h-12 rounded-full bg-[#c0c0c8] flex items-center justify-center shadow-md flex-shrink-0"
             >
               {isPlaying ? (
-                <Pause className="w-5 h-5 text-white fill-white" />
+                <Pause className="w-5 h-5 text-black fill-black" />
               ) : (
-                <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                <Play className="w-5 h-5 text-black fill-black ml-0.5" />
               )}
             </motion.button>
 

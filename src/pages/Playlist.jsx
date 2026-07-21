@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Play, Pause, Heart, ArrowLeft, Music2, Trash2, Clock, Edit2, Upload, Loader2 } from 'lucide-react';
+import { Play, Pause, ArrowLeft, Music2, Trash2, Clock, Edit2, Upload, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -321,7 +321,7 @@ export default function Playlist() {
             <Button
               onClick={() => updatePlaylistMutation.mutate(editForm)}
               disabled={!editForm.name || updatePlaylistMutation.isPending}
-              className="w-full bg-gradient-to-r from-zinc-400 to-zinc-500"
+              className="w-full"
             >
               Salvar Alterações
             </Button>

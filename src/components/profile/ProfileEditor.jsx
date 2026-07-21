@@ -129,7 +129,7 @@ export default function ProfileEditor({ user, onUpdate }) {
         <Button
           onClick={handleSave}
           disabled={saving || !profileData.display_name}
-          className="w-full bg-gradient-to-r from-zinc-400 to-zinc-500 hover:from-zinc-500 hover:to-zinc-600"
+          className="w-full"
         >
           {saving ? (
             <>

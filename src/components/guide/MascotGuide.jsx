@@ -211,10 +211,7 @@ export default function MascotGuide({ page }) {
                       ))}
                     </div>
 
-                    <Button
-                      onClick={handleNext}
-                      className="bg-gradient-to-r from-zinc-400 to-neutral-400 hover:from-zinc-500 hover:to-neutral-500"
-                    >
+                    <Button onClick={handleNext}>
                       {currentStep < tourSteps.length - 1 ? (
                         <>
                           Próximo

@@ -128,7 +128,7 @@ export default function ProfileSetup({ user, onComplete }) {
           <Button
             onClick={handleComplete}
             disabled={saving || !profileData.full_name.trim()}
-            className="w-full bg-gradient-to-r from-zinc-400 to-zinc-500 hover:from-zinc-500 hover:to-zinc-600 h-12"
+            className="w-full h-12"
           >
             {saving ? (
               <>

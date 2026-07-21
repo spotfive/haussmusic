@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { X, ZoomIn, ZoomOut, RotateCcw, Check, Crop } from 'lucide-react';
 
 export default function ImageCropper({ imageUrl, onSave, onCancel, aspectRatio = 1, title = 'Recortar Imagem' }) {

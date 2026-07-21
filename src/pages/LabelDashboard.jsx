@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Music, Eye, Heart, Users, AlertCircle, Disc, Edit2, Trash2, Play, Calendar, Trash, UserPlus, Search, Loader2 } from 'lucide-react';
+import { Plus, Music, Eye, Heart, Users, AlertCircle, Disc, Trash2, Play, Calendar, Trash, UserPlus, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -257,7 +257,7 @@ export default function LabelDashboard() {
                   if (selectedArtistId) setShowReleaseCreator(true);
                   else toast.error('Selecione um artista primeiro');
                 }}
-                className="bg-[#c0c0c8] hover:bg-[#e5e5ea] text-white rounded-full px-6 py-6 h-auto text-base font-bold shadow-lg shadow-[#c0c0c8]/30"
+                className="btn-metal rounded-full px-6 py-6 h-auto text-base font-bold shadow-lg shadow-[#c0c0c8]/30"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Novo Lançamento
@@ -326,19 +326,19 @@ export default function LabelDashboard() {
       <div className="px-6 lg:px-8 pt-6">
         <Tabs defaultValue="releases" className="w-full">
           <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl grid w-full grid-cols-4">
-            <TabsTrigger value="releases" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white text-xs">
+            <TabsTrigger value="releases" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900 text-xs">
               <Disc className="w-4 h-4 mr-1" />
               Lançamentos
             </TabsTrigger>
-            <TabsTrigger value="artists" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white text-xs">
+            <TabsTrigger value="artists" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900 text-xs">
               <Users className="w-4 h-4 mr-1" />
               Artistas
             </TabsTrigger>
-            <TabsTrigger value="representatives" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white text-xs">
+            <TabsTrigger value="representatives" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900 text-xs">
               <Users className="w-4 h-4 mr-1" />
               Representantes
             </TabsTrigger>
-            <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white text-xs">
+            <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900 text-xs">
               ⚙️ Dados
             </TabsTrigger>
           </TabsList>
@@ -571,7 +571,7 @@ export default function LabelDashboard() {
               {/* Add Rep Button */}
               <Dialog open={showAddRep} onOpenChange={setShowAddRep}>
                 <DialogTrigger asChild>
-                  <Button className="mt-4 w-full bg-[#c0c0c8] hover:bg-[#e5e5ea] text-white">
+                  <Button className="mt-4 w-full btn-metal">
                     <UserPlus className="w-4 h-4 mr-2" />
                     Adicionar Representante
                   </Button>
@@ -615,7 +615,7 @@ export default function LabelDashboard() {
                               size="sm"
                               onClick={() => addRepresentativeMutation.mutate(u.id)}
                               disabled={addRepresentativeMutation.isPending}
-                              className="h-8 bg-[#c0c0c8] hover:bg-[#e5e5ea] text-white text-xs ml-2"
+                              className="h-8 btn-metal text-xs ml-2"
                             >
                               {addRepresentativeMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Adicionar'}
                             </Button>

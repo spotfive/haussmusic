@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Home, Search, Library, Music2, Trophy, Plus, Users, Code, Settings, Shield, Award } from 'lucide-react';
+import { Home, Search, Library, Music2, Trophy, Shield, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { useAuth } from '@/lib/AuthContext';
 
 const navItems = [
   { icon: Home, label: 'Início', page: 'Home' },
@@ -17,15 +18,7 @@ const libraryItems = [
 ];
 
 export default function Sidebar({ currentPage }) {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-    const interval = setInterval(() => {
-      base44.auth.me().then(setUser).catch(() => {});
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+  const { user } = useAuth();
 
   const { data: appSettings = [] } = useQuery({
     queryKey: ['appSettings'],

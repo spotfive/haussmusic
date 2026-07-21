@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, Plus, Trash2, GripVertical, Image, Video, Save, Loader2, Music, Calendar, Tag, Mic, Disc, Sparkles, Clock, Crop } from 'lucide-react';
+import { X, Upload, Plus, Trash2, GripVertical, Image, Video, Save, Loader2, Music, Tag, Mic, Disc, Sparkles, Clock } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import ImageCropper from '@/components/profile/ImageCropper';

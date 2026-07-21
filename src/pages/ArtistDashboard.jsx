@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { TrendingUp, Music, Heart, Eye, Calendar, Award, Edit2, Trash2, Play, Users, Plus, Clock, Disc, Mic } from 'lucide-react';
+import { Music, Heart, Eye, Calendar, Edit2, Trash2, Play, Users, Plus, Clock, Disc, Mic } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ReleaseCreatorPanel from '@/components/releases/ReleaseCreatorPanel';
@@ -175,7 +175,7 @@ export default function ArtistDashboard() {
             >
               <Button
                 onClick={() => setShowReleaseCreator(true)}
-                className="bg-[#c0c0c8] hover:bg-[#e5e5ea] text-white rounded-full px-6 py-6 h-auto text-base font-bold shadow-lg shadow-[#c0c0c8]/30"
+                className="btn-metal rounded-full px-6 py-6 h-auto text-base font-bold shadow-lg shadow-[#c0c0c8]/30"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Novo Lançamento
@@ -222,11 +222,11 @@ export default function ArtistDashboard() {
       <div className="px-6 lg:px-8 pt-6">
         <Tabs defaultValue="releases" className="w-full">
           <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl">
-            <TabsTrigger value="releases" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
+            <TabsTrigger value="releases" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900">
               <Disc className="w-4 h-4 mr-2" />
               Lançamentos
             </TabsTrigger>
-            <TabsTrigger value="songs" className="rounded-lg data-[state=active]:bg-[#c0c0c8] data-[state=active]:text-white">
+            <TabsTrigger value="songs" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900">
               <Music className="w-4 h-4 mr-2" />
               Músicas
             </TabsTrigger>
@@ -334,7 +334,7 @@ export default function ArtistDashboard() {
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">Nenhum lançamento ainda</h3>
                   <p className="text-zinc-400 mb-6 max-w-md mx-auto">Comece a construir seu catálogo musical criando seu primeiro single, EP ou álbum.</p>
-                  <Button onClick={() => setShowReleaseCreator(true)} className="bg-[#c0c0c8] hover:bg-[#e5e5ea] rounded-full">
+                  <Button onClick={() => setShowReleaseCreator(true)} className="btn-metal rounded-full">
                     <Plus className="w-4 h-4 mr-2" />
                     Criar Primeiro Lançamento
                   </Button>

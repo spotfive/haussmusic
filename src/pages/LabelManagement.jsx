@@ -158,7 +158,7 @@ export default function LabelManagement() {
               <Button
                 size="sm"
                 onClick={(e) => { e.stopPropagation(); setEditingLabel({ ...label }); }}
-                className="flex-1 h-8 bg-[#c0c0c8] hover:bg-[#e5e5ea] text-xs rounded-lg"
+                className="flex-1 h-8 btn-metal text-xs rounded-lg"
               >
                 <Edit2 className="w-3 h-3 mr-1" /> Editar
               </Button>
@@ -221,7 +221,7 @@ export default function LabelManagement() {
                        });
                      }}
                      disabled={updateLabelMutation.isPending}
-                     className="flex-1 bg-[#c0c0c8] hover:bg-[#e5e5ea] h-9"
+                     className="flex-1 btn-metal h-9"
                    >
                      {updateLabelMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar Alterações'}
                    </Button>
@@ -350,7 +350,7 @@ export default function LabelManagement() {
                   });
                 }}
                 disabled={updateLabelMutation.isPending}
-                className="flex-1 bg-[#c0c0c8] hover:bg-[#e5e5ea] h-9"
+                className="flex-1 btn-metal h-9"
               >
                 Salvar Tudo
               </Button>

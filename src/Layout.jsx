@@ -11,10 +11,12 @@ import ProfileSetup from '@/components/profile/ProfileSetup';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Home, Search, Library, Music2, Trophy, Award } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function Layout({ children, currentPageName }) {
   const queryClient = useQueryClient();
-  
+  const { user, refreshUser } = useAuth();
+
   // ===== PLAYER STATE =====
   const audioA = useRef(null);
   const audioB = useRef(null);
@@ -33,9 +35,9 @@ export default function Layout({ children, currentPageName }) {
   const [shuffledSongs, setShuffledSongs] = useState([]);
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [showMobilePlayer, setShowMobilePlayer] = useState(false);
-  const [user, setUser] = useState(null);
-  const [needsProfile, setNeedsProfile] = useState(false);
   const [crossfadeEnabled, setCrossfadeEnabled] = useState(false);
+
+  const needsProfile = !!user && !user.profile_completed && !user.display_name && !user.full_name;
   
   // ===== CROSSFADE CONFIG =====
   const CROSSFADE_DURATION = 5; // 5 seconds
@@ -54,23 +56,6 @@ export default function Layout({ children, currentPageName }) {
       currentAudioRef.current = audioA.current;
       nextAudioRef.current = audioB.current;
     }
-  }, []);
-
-  // ===== Check user profile =====
-  useEffect(() => {
-    const checkProfile = async () => {
-      try {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
-        setNeedsProfile(!currentUser.profile_completed && !currentUser.display_name && !currentUser.full_name);
-      } catch (error) {
-        setNeedsProfile(false);
-      }
-    };
-    checkProfile();
-    const handleProfileUpdate = () => checkProfile();
-    window.addEventListener('profileUpdated', handleProfileUpdate);
-    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
   }, []);
 
   // ===== Listen for song play events =====
@@ -401,12 +386,9 @@ export default function Layout({ children, currentPageName }) {
       
       {/* Profile Setup Modal */}
       {needsProfile && user && (
-        <ProfileSetup 
-          user={user} 
-          onComplete={() => {
-            setNeedsProfile(false);
-            base44.auth.me().then(setUser);
-          }} 
+        <ProfileSetup
+          user={user}
+          onComplete={refreshUser}
         />
       )}
 

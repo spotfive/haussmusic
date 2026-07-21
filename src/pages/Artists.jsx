@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Music2, Heart, Calendar, Loader2, Upload, X, Sparkles, TrendingUp, Clock, Info } from 'lucide-react';
+import { Plus, Music2, Heart, Calendar, Loader2, Upload, X, Sparkles, TrendingUp, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
@@ -240,7 +240,7 @@ export default function Artists() {
             {canCreatePosts && (
               <Dialog open={showCreatePost} onOpenChange={setShowCreatePost}>
                 <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-zinc-400 to-zinc-500 hover:from-zinc-500 hover:to-zinc-600">
+                  <Button>
                     <Plus className="w-4 h-4 mr-2" />
                     Novo Lançamento
                   </Button>
@@ -492,7 +492,7 @@ export default function Artists() {
                     <Button
                       onClick={() => createPostMutation.mutate(newPost)}
                       disabled={!newPost.title || !newPost.artist || !newPost.cover_url || createPostMutation.isPending}
-                      className="w-full bg-gradient-to-r from-zinc-400 to-zinc-500 py-5 lg:py-6 text-base lg:text-lg"
+                      className="w-full py-5 lg:py-6 text-base lg:text-lg"
                     >
                       {createPostMutation.isPending ? (
                         <Loader2 className="w-5 h-5 animate-spin mr-2" />

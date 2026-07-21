@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Play, Pause, Heart, Music2, TrendingUp, Star, Calendar, Clock, User, X, Timer, Disc3 } from 'lucide-react';
+import { Play, Pause, Heart, Music2, TrendingUp, Star, Calendar, User, Timer } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -284,9 +284,9 @@ export default function Home() {
                           className="w-12 h-12 rounded-full bg-[#c0c0c8] flex items-center justify-center shadow-lg shadow-[#c0c0c8]/40"
                         >
                           {currentPlayingSong?.id === featuredSong.id ? (
-                            <Pause className="w-6 h-6 text-white fill-white" />
+                            <Pause className="w-6 h-6 text-black fill-black" />
                           ) : (
-                            <Play className="w-6 h-6 text-white fill-white ml-0.5" />
+                            <Play className="w-6 h-6 text-black fill-black ml-0.5" />
                           )}
                         </motion.button>
                       )}
@@ -353,9 +353,9 @@ export default function Home() {
                                   className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#c0c0c8] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
                                 >
                                   {currentPlayingSong?.id === song.id ? (
-                                    <Pause className="w-5 h-5 text-white fill-white" />
+                                    <Pause className="w-5 h-5 text-black fill-black" />
                                   ) : (
-                                    <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                                    <Play className="w-5 h-5 text-black fill-black ml-0.5" />
                                   )}
                                 </motion.button>
                               )}
@@ -467,9 +467,9 @@ export default function Home() {
                                   className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#c0c0c8] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
                                 >
                                   {currentPlayingSong?.id === song.id ? (
-                                    <Pause className="w-5 h-5 text-white fill-white" />
+                                    <Pause className="w-5 h-5 text-black fill-black" />
                                   ) : (
-                                    <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                                    <Play className="w-5 h-5 text-black fill-black ml-0.5" />
                                   )}
                                 </motion.button>
                               )}
@@ -524,9 +524,9 @@ export default function Home() {
                                   className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#c0c0c8] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
                                 >
                                   {currentPlayingSong?.id === song.id ? (
-                                    <Pause className="w-5 h-5 text-white fill-white" />
+                                    <Pause className="w-5 h-5 text-black fill-black" />
                                   ) : (
-                                    <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                                    <Play className="w-5 h-5 text-black fill-black ml-0.5" />
                                   )}
                                 </motion.button>
                               )}
@@ -585,9 +585,9 @@ export default function Home() {
                                   className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#c0c0c8] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
                                 >
                                   {currentPlayingSong?.id === song.id ? (
-                                    <Pause className="w-5 h-5 text-white fill-white" />
+                                    <Pause className="w-5 h-5 text-black fill-black" />
                                   ) : (
-                                    <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                                    <Play className="w-5 h-5 text-black fill-black ml-0.5" />
                                   )}
                                 </motion.button>
                                 <motion.button

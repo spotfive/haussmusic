@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Share2, Copy, Check } from 'lucide-react';
+import { Share2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function ShareMusicButton({ song }) {

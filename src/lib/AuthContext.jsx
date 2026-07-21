@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
       appPublicSettings: null,
       logout,
       navigateToLogin,
-      checkAppState: checkUserAuth,
+      refreshUser: checkUserAuth,
     }}>
       {children}
     </AuthContext.Provider>

@@ -126,9 +126,9 @@ export default function ExpandedMobilePlayer({
                 className="w-20 h-20 rounded-full bg-[#c0c0c8] flex items-center justify-center shadow-2xl flex-shrink-0"
               >
                 {isPlaying ? (
-                  <Pause className="w-8 h-8 text-white fill-white" />
+                  <Pause className="w-8 h-8 text-black fill-black" />
                 ) : (
-                  <Play className="w-8 h-8 text-white fill-white ml-1" />
+                  <Play className="w-8 h-8 text-black fill-black ml-1" />
                 )}
               </motion.button>
 

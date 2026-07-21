@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Heart, ListMusic, UserCircle, Disc3, Music2, Play, Pause, Loader2, Star, Timer } from 'lucide-react';
+import { Plus, Heart, ListMusic, UserCircle, Disc3, Music2, Play, Loader2, Timer } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -214,9 +214,9 @@ export default function Library() {
                   </div>
                   <Button
                     onClick={() => { if (favoriteSongs[0]) handlePlay(favoriteSongs[0]); }}
-                    className="w-10 h-10 rounded-full bg-[#c0c0c8] hover:bg-[#e5e5ea] p-0 shadow-lg shadow-[#c0c0c8]/30"
+                    className="w-10 h-10 rounded-full btn-metal p-0 shadow-lg shadow-[#c0c0c8]/30"
                   >
-                    <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                    <Play className="w-5 h-5 text-black fill-black ml-0.5" />
                   </Button>
                 </div>
                 <div className="bg-[#181818] rounded-xl overflow-hidden border border-[#282828]">
@@ -249,7 +249,7 @@ export default function Library() {
               </div>
               <Dialog open={showAddPlaylist} onOpenChange={setShowAddPlaylist}>
                 <DialogTrigger asChild>
-                  <Button className="bg-[#c0c0c8] hover:bg-[#e5e5ea] text-white rounded-full px-5 shadow-lg shadow-[#c0c0c8]/20">
+                  <Button className="btn-metal rounded-full px-5 shadow-lg shadow-[#c0c0c8]/20">
                     <Plus className="w-4 h-4 mr-2" />Nova
                   </Button>
                 </DialogTrigger>
@@ -264,7 +264,7 @@ export default function Library() {
                       <label className="text-sm text-[#B3B3B3] mb-1 block">Descrição</label>
                       <Textarea value={newPlaylist.description} onChange={(e) => setNewPlaylist(p => ({ ...p, description: e.target.value }))} placeholder="Descrição da playlist" className="bg-[#282828] border-[#383838] text-white" />
                     </div>
-                    <Button onClick={() => createPlaylistMutation.mutate({ ...newPlaylist, song_ids: [], cover_url: '' })} disabled={!newPlaylist.name || createPlaylistMutation.isPending} className="w-full bg-[#c0c0c8] hover:bg-[#e5e5ea]">
+                    <Button onClick={() => createPlaylistMutation.mutate({ ...newPlaylist, song_ids: [], cover_url: '' })} disabled={!newPlaylist.name || createPlaylistMutation.isPending} className="w-full btn-metal">
                       {createPlaylistMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                       Criar Playlist
                     </Button>
@@ -321,7 +321,7 @@ export default function Library() {
                           whileTap={{ scale: 0.9 }}
                           className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-[#c0c0c8] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-xl translate-y-2 group-hover:translate-y-0"
                         >
-                          <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                          <Play className="w-5 h-5 text-black fill-black ml-0.5" />
                         </motion.div>
                       </div>
                       <p className="font-bold text-white text-sm truncate">{pl.name}</p>
@@ -337,7 +337,7 @@ export default function Library() {
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Nenhuma playlist</h3>
                 <p className="text-[#B3B3B3] max-w-xs mx-auto mb-6">Crie sua primeira playlist e organize suas músicas favoritas</p>
-                <Button onClick={() => setShowAddPlaylist(true)} className="bg-[#c0c0c8] hover:bg-[#e5e5ea] text-white rounded-full px-6">
+                <Button onClick={() => setShowAddPlaylist(true)} className="btn-metal rounded-full px-6">
                   <Plus className="w-4 h-4 mr-2" />Criar Playlist
                 </Button>
               </div>
