@@ -1,0 +1,247 @@
+// Self-hosted database for HAUSS MUSIC: a single SQLite file on disk.
+// No external database service — this is the whole point of this backend.
+// Uses Node's built-in node:sqlite (Node 22.5+), so there's no native
+// module to compile — works the same on Windows, Docker, any VPS.
+const path = require('path');
+const fs = require('fs');
+const { DatabaseSync } = require('node:sqlite');
+
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
+fs.mkdirSync(DATA_DIR, { recursive: true });
+
+const sqlite = new DatabaseSync(path.join(DATA_DIR, 'hauss.db'));
+sqlite.exec('PRAGMA journal_mode = WAL');
+
+// Thin shim so the rest of this file can keep the better-sqlite3-style
+// db.prepare(sql).run/get/all(...params) call shape.
+const db = {
+  exec: (sql) => sqlite.exec(sql),
+  prepare: (sql) => {
+    const stmt = sqlite.prepare(sql);
+    return {
+      run: (...params) => stmt.run(...params),
+      get: (...params) => stmt.get(...params),
+      all: (...params) => stmt.all(...params),
+    };
+  },
+};
+
+db.exec(`
+  create table if not exists users (
+    id text primary key,
+    email text unique not null,
+    username text unique,
+    password_hash text,
+    google_id text,
+    display_name text,
+    full_name text,
+    profile_picture text,
+    profile_banner text,
+    bio text,
+    user_type text not null default 'ouvinte',
+    role text not null default 'user',
+    verified integer not null default 0,
+    profile_completed integer not null default 0,
+    managed_artists text not null default '[]',
+    representatives text not null default '[]',
+    social_links text not null default '{}',
+    created_date text not null,
+    updated_date text not null
+  );
+
+  create table if not exists songs (
+    id text primary key,
+    title text not null,
+    artist text not null,
+    featuring text,
+    album text,
+    type text default 'single',
+    cover_url text,
+    background_video_url text,
+    audio_url text,
+    duration real,
+    genre text,
+    lyrics text default '[]',
+    plays real not null default 0,
+    is_favorite integer not null default 0,
+    rating real not null default 0,
+    rating_count real not null default 0,
+    artist_id text,
+    label_id text,
+    label_name text,
+    label_logo text,
+    published_by_label integer not null default 0,
+    created_by text,
+    created_date text not null,
+    updated_date text not null
+  );
+
+  create table if not exists posts (
+    id text primary key,
+    title text not null,
+    artist text not null,
+    artist_id text,
+    artist_email text,
+    featuring text,
+    description text,
+    cover_url text,
+    background_video_url text,
+    type text not null default 'single',
+    genre text,
+    release_date text,
+    tracks text not null default '[]',
+    status text not null default 'draft',
+    is_featured integer not null default 0,
+    is_scheduled integer not null default 0,
+    scheduled_datetime text,
+    label_id text,
+    label_name text,
+    label_logo text,
+    published_by_label integer not null default 0,
+    likes real not null default 0,
+    plays real not null default 0,
+    rating real not null default 0,
+    rating_count real not null default 0,
+    created_by text,
+    created_date text not null,
+    updated_date text not null
+  );
+
+  create table if not exists playlists (
+    id text primary key,
+    name text not null,
+    description text,
+    cover_url text,
+    song_ids text not null default '[]',
+    is_public integer not null default 1,
+    created_by text,
+    created_date text not null,
+    updated_date text not null
+  );
+
+  create table if not exists banners (
+    id text primary key,
+    title text not null,
+    description text,
+    image_url text not null,
+    artist_name text not null,
+    release_date text,
+    link_url text,
+    is_active integer not null default 1,
+    priority real not null default 0,
+    created_by text,
+    created_date text not null,
+    updated_date text not null
+  );
+
+  create table if not exists labels (
+    id text primary key,
+    name text not null,
+    profile_picture text,
+    representatives text not null default '[]',
+    managed_artists text not null default '[]',
+    created_by text,
+    created_date text not null,
+    updated_date text not null
+  );
+
+  create table if not exists artists (
+    id text primary key,
+    user_id text,
+    display_name text,
+    email text,
+    profile_picture text,
+    verified integer not null default 0,
+    user_type text not null default 'artista',
+    created_date text not null,
+    updated_date text not null
+  );
+
+  create table if not exists follows (
+    id text primary key,
+    following_id text not null,
+    following_name text,
+    created_by text,
+    created_date text not null
+  );
+
+  create table if not exists ratings (
+    id text primary key,
+    item_id text not null,
+    item_type text not null,
+    rating real not null,
+    comment text,
+    created_by text,
+    created_date text not null,
+    updated_date text not null
+  );
+
+  create table if not exists user_favorites (
+    id text primary key,
+    item_id text not null,
+    item_type text not null,
+    created_by text,
+    created_date text not null
+  );
+
+  create table if not exists app_settings (
+    id text primary key,
+    key text not null unique,
+    value text,
+    created_date text not null,
+    updated_date text not null
+  );
+`);
+
+// entity name (as used by the frontend) -> { table, json: [...], bool: [...] }
+const ENTITIES = {
+  User: { table: 'users', json: ['managed_artists', 'representatives', 'social_links'], bool: ['verified', 'profile_completed'] },
+  Song: { table: 'songs', json: ['lyrics'], bool: ['is_favorite', 'published_by_label'] },
+  Post: { table: 'posts', json: ['tracks'], bool: ['is_featured', 'is_scheduled', 'published_by_label'] },
+  Playlist: { table: 'playlists', json: ['song_ids'], bool: ['is_public'] },
+  Banner: { table: 'banners', json: [], bool: ['is_active'] },
+  Label: { table: 'labels', json: ['representatives', 'managed_artists'], bool: [] },
+  Artist: { table: 'artists', json: [], bool: ['verified'] },
+  Follow: { table: 'follows', json: [], bool: [] },
+  Rating: { table: 'ratings', json: [], bool: [] },
+  UserFavorite: { table: 'user_favorites', json: [], bool: [] },
+  AppSettings: { table: 'app_settings', json: [], bool: [] },
+};
+
+function getEntityConfig(name) {
+  const config = ENTITIES[name];
+  if (!config) {
+    const err = new Error(`Unknown entity "${name}"`);
+    err.status = 404;
+    throw err;
+  }
+  return config;
+}
+
+// SQLite has no bool/json/array types: serialize going in, parse coming out.
+function serializeRow(config, data) {
+  const row = { ...data };
+  for (const key of config.json) {
+    if (key in row) row[key] = JSON.stringify(row[key] ?? (Array.isArray(row[key]) ? [] : {}));
+  }
+  for (const key of config.bool) {
+    if (key in row) row[key] = row[key] ? 1 : 0;
+  }
+  return row;
+}
+
+function deserializeRow(config, row) {
+  if (!row) return row;
+  const out = { ...row };
+  for (const key of config.json) {
+    if (key in out) {
+      try { out[key] = JSON.parse(out[key]); } catch { out[key] = Array.isArray(out[key]) ? [] : {}; }
+    }
+  }
+  for (const key of config.bool) {
+    if (key in out) out[key] = !!out[key];
+  }
+  return out;
+}
+
+module.exports = { db, ENTITIES, getEntityConfig, serializeRow, deserializeRow };
