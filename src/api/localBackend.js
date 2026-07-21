@@ -7,6 +7,11 @@ const DB_PREFIX = 'hauss_db_';
 const SESSION_KEY = 'hauss_session_user_id';
 const SEED_FLAG_KEY = 'hauss_seeded_v1';
 
+// Emails that always get the 'admin' role, on registration/login and
+// retroactively if the account already existed with a different role.
+const ADMIN_EMAILS = ['steffanbaum123@gmail.com'];
+const isAdminEmail = (email) => !!email && ADMIN_EMAILS.includes(email.toLowerCase());
+
 const hasWindow = typeof window !== 'undefined';
 const storage = hasWindow ? window.localStorage : null;
 
@@ -26,6 +31,18 @@ function readTable(name) {
 function writeTable(name, rows) {
   if (!storage) return;
   storage.setItem(DB_PREFIX + name, JSON.stringify(rows));
+}
+
+// Promotes a user to admin (and persists it) if their email is on the
+// admin allowlist but their stored role hasn't caught up yet.
+function ensureAdminRole(user) {
+  if (!user || !isAdminEmail(user.email) || user.role === 'admin') return user;
+  const rows = readTable('User');
+  const idx = rows.findIndex(u => u.id === user.id);
+  if (idx === -1) return user;
+  rows[idx] = { ...rows[idx], role: 'admin', updated_date: nowIso() };
+  writeTable('User', rows);
+  return rows[idx];
 }
 
 async function sha256Hex(text) {
@@ -119,7 +136,7 @@ const auth = {
       err.status = 401;
       throw err;
     }
-    return user;
+    return ensureAdminRole(user);
   },
   async updateMe(data) {
     const uid = storage?.getItem(SESSION_KEY);
@@ -168,7 +185,7 @@ const auth = {
         profile_picture: profile.picture || '',
         bio: '',
         user_type: 'ouvinte',
-        role: userRows.length === 0 ? 'admin' : 'user',
+        role: isAdminEmail(profile.email) || userRows.length === 0 ? 'admin' : 'user',
         profile_completed: true,
         verified: false,
         managed_artists: [],
@@ -180,6 +197,7 @@ const auth = {
       writeTable('User', userRows.map(u => (u.id === user.id ? user : u)));
     }
 
+    user = ensureAdminRole(user);
     storage?.setItem(SESSION_KEY, user.id);
     return user;
   },
@@ -209,7 +227,7 @@ async function handleRegister({ email, password, username, display_name }) {
     profile_picture: '',
     bio: '',
     user_type: 'ouvinte',
-    role: userRows.length === 0 ? 'admin' : 'user',
+    role: isAdminEmail(email) || userRows.length === 0 ? 'admin' : 'user',
     profile_completed: false,
     verified: false,
     managed_artists: [],
@@ -240,8 +258,9 @@ async function handleLogin({ login, password }) {
   if (!credential) return { error: 'Usuário não encontrado' };
   if (credential.password_hash !== password_hash) return { error: 'Senha incorreta' };
 
-  const user = readTable('User').find(u => u.id === credential.user_id);
+  let user = readTable('User').find(u => u.id === credential.user_id);
   if (!user) return { error: 'Usuário não encontrado' };
+  user = ensureAdminRole(user);
 
   storage?.setItem(SESSION_KEY, user.id);
   return { success: true, user };
