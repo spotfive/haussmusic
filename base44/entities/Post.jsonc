@@ -1,0 +1,137 @@
+{
+  "name": "Post",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo do lan\u00e7amento"
+    },
+    "artist": {
+      "type": "string",
+      "description": "Nome do artista"
+    },
+    "artist_id": {
+      "type": "string",
+      "description": "ID do artista (para sincroniza\u00e7\u00e3o)"
+    },
+    "featuring": {
+      "type": "string",
+      "description": "Participa\u00e7\u00f5es (feat.)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o ou conceito do lan\u00e7amento"
+    },
+    "cover_url": {
+      "type": "string",
+      "description": "Capa do lan\u00e7amento"
+    },
+    "background_video_url": {
+      "type": "string",
+      "description": "V\u00eddeo de fundo opcional"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "single",
+        "album",
+        "ep"
+      ],
+      "default": "single",
+      "description": "Tipo de lan\u00e7amento"
+    },
+    "genre": {
+      "type": "string",
+      "enum": [
+        "pop",
+        "rock",
+        "hip-hop",
+        "electronic",
+        "jazz",
+        "classical",
+        "r&b",
+        "indie",
+        "latin",
+        "forr\u00f3",
+        "other"
+      ],
+      "description": "G\u00eanero musical"
+    },
+    "release_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de lan\u00e7amento"
+    },
+    "tracks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "audio_url": {
+            "type": "string"
+          },
+          "duration": {
+            "type": "number"
+          },
+          "order": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Faixas do lan\u00e7amento"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "hidden"
+      ],
+      "default": "draft",
+      "description": "Status do lan\u00e7amento"
+    },
+    "is_scheduled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o lan\u00e7amento est\u00e1 programado para estreia futura"
+    },
+    "scheduled_datetime": {
+      "type": "string",
+      "description": "Data/hora de estreia no formato ISO 8601 (UTC)"
+    },
+    "label_id": {
+      "type": "string",
+      "description": "ID da gravadora (se publicado por uma gravadora)"
+    },
+    "label_name": {
+      "type": "string",
+      "description": "Nome da gravadora"
+    },
+    "likes": {
+      "type": "number",
+      "default": 0
+    },
+    "plays": {
+      "type": "number",
+      "default": 0
+    },
+    "rating": {
+      "type": "number",
+      "default": 0,
+      "description": "Avalia\u00e7\u00e3o m\u00e9dia (0-5)"
+    },
+    "rating_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de avalia\u00e7\u00f5es"
+    }
+  },
+  "required": [
+    "title",
+    "artist",
+    "type"
+  ]
+}

@@ -1,0 +1,702 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Plus, Music, Eye, Heart, Users, AlertCircle, Disc, Edit2, Trash2, Play, Calendar, Trash, UserPlus, Search, Loader2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import ReleaseCreatorPanel from '@/components/releases/ReleaseCreatorPanel';
+import ImageCropper from '@/components/profile/ImageCropper';
+
+export default function LabelDashboard() {
+  const [user, setUser] = useState(null);
+  const [selectedArtistId, setSelectedArtistId] = useState('');
+  const [showReleaseCreator, setShowReleaseCreator] = useState(false);
+  const [cropperImage, setCropperImage] = useState(null);
+  const [searchRepresentative, setSearchRepresentative] = useState('');
+  const [showAddRep, setShowAddRep] = useState(false);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    base44.auth.me().then(u => {
+      if (u.user_type !== 'gravadora' && u.user_type !== 'staff' && u.role !== 'admin') {
+        window.location.href = '/';
+      }
+      setUser(u);
+    }).catch(() => window.location.href = '/');
+  }, []);
+
+  const { data: managedArtists = [] } = useQuery({
+    queryKey: ['managedArtists', user?.id],
+    queryFn: async () => {
+      if (!user?.managed_artists || user.managed_artists.length === 0) return [];
+      const artists = await Promise.all(
+        user.managed_artists.map(id => base44.entities.User.get(id).catch(() => null))
+      );
+      return artists.filter(Boolean);
+    },
+    enabled: !!user,
+  });
+
+  const { data: labelPosts = [] } = useQuery({
+    queryKey: ['labelPosts', user?.id],
+    queryFn: () => base44.entities.Post.filter({ label_id: user?.id }, '-release_date', 50),
+    enabled: !!user,
+    refetchInterval: 5000,
+  });
+
+  const { data: labelSongs = [] } = useQuery({
+    queryKey: ['labelSongs', user?.id],
+    queryFn: () => base44.entities.Song.filter({ label_id: user?.id }, '-created_date', 100),
+    enabled: !!user,
+  });
+
+  const { data: allUsers = [] } = useQuery({
+    queryKey: ['allUsers'],
+    queryFn: () => base44.entities.User.list('-created_date', 100),
+  });
+
+  const { data: representatives = [] } = useQuery({
+    queryKey: ['representatives', user?.id],
+    queryFn: async () => {
+      if (!user?.representatives || user.representatives.length === 0) return [];
+      const reps = await Promise.all(
+        user.representatives.map(id => base44.entities.User.get(id).catch(() => null))
+      );
+      return reps.filter(Boolean);
+    },
+    enabled: !!user,
+  });
+
+  const deletePostMutation = useMutation({
+    mutationFn: async (postId) => {
+      const allSongs = await base44.entities.Song.list();
+      const posts = await base44.entities.Post.list();
+      const post = posts.find(p => p.id === postId);
+      if (post) {
+        const songsToDelete = allSongs.filter(s => s.label_id === user.id && s.album === post.title);
+        await Promise.all(songsToDelete.map(song => base44.entities.Song.delete(song.id)));
+      }
+      await base44.entities.Post.delete(postId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['labelPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['labelSongs'] });
+      toast.success('Lançamento excluído');
+    },
+  });
+
+  const updateLabelMutation = useMutation({
+    mutationFn: async (data) => {
+      await base44.entities.User.update(user.id, data);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['auth'] });
+      const updatedUser = await base44.auth.me();
+      setUser(updatedUser);
+      toast.success('Gravadora atualizada');
+    }
+  });
+
+  const addRepresentativeMutation = useMutation({
+    mutationFn: async (repId) => {
+      const reps = user.representatives || [];
+      if (!reps.includes(repId)) {
+        await base44.entities.User.update(user.id, { representatives: [...reps, repId] });
+        await base44.entities.User.update(repId, { user_type: 'gravadora' });
+      }
+    },
+    onSuccess: async () => {
+      const updatedUser = await base44.entities.User.get(user.id);
+      setUser(updatedUser);
+      queryClient.invalidateQueries({ queryKey: ['representatives'] });
+      queryClient.invalidateQueries({ queryKey: ['managedArtists'] });
+      setSearchRepresentative('');
+      setShowAddRep(false);
+      toast.success('Representante adicionado como gravadora');
+    }
+  });
+
+  const removeRepresentativeMutation = useMutation({
+    mutationFn: async (repId) => {
+      const reps = (user.representatives || []).filter(id => id !== repId);
+      await base44.entities.User.update(user.id, { representatives: reps });
+      
+      const otherLabels = await base44.entities.User.filter({}, 100);
+      const isRepForOthers = otherLabels.some(label => 
+        label.id !== user.id && label.representatives?.includes(repId)
+      );
+      
+      if (!isRepForOthers) {
+        await base44.entities.User.update(repId, { user_type: 'user' });
+      }
+    },
+    onSuccess: async () => {
+      const updatedUser = await base44.entities.User.get(user.id);
+      setUser(updatedUser);
+      queryClient.invalidateQueries({ queryKey: ['representatives'] });
+      queryClient.invalidateQueries({ queryKey: ['managedArtists'] });
+      toast.success('Representante removido');
+    }
+  });
+
+  const removeArtistMutation = useMutation({
+    mutationFn: async (artistId) => {
+      const artists = (user.managed_artists || []).filter(id => id !== artistId);
+      await base44.entities.User.update(user.id, { managed_artists: artists });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['managedArtists'] });
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      base44.auth.me().then(setUser);
+      toast.success('Artista desvinculado');
+    }
+  });
+
+  const selectedArtistObject = managedArtists.find(a => a.id === selectedArtistId);
+
+  const totalPlays = labelPosts.reduce((acc, post) => acc + (post.plays || 0), 0);
+  const totalLikes = labelPosts.reduce((acc, post) => acc + (post.likes || 0), 0);
+
+  const stats = [
+    { icon: Music, value: managedArtists.length, label: 'Artistas', color: 'from-cyan-500 to-blue-500', bg: 'bg-cyan-500/10', text: 'text-cyan-400' },
+    { icon: Eye, value: totalPlays, label: 'Reproduções', color: 'from-violet-500 to-purple-500', bg: 'bg-violet-500/10', text: 'text-violet-400' },
+    { icon: Heart, value: totalLikes, label: 'Curtidas', color: 'from-pink-500 to-rose-500', bg: 'bg-pink-500/10', text: 'text-pink-400' },
+    { icon: Disc, value: labelPosts.length, label: 'Lançamentos', color: 'from-amber-500 to-orange-500', bg: 'bg-amber-500/10', text: 'text-amber-400' },
+  ];
+
+  const availableReps = allUsers.filter(u => !representatives.find(r => r.id === u.id) && u.id !== user?.id);
+  const filteredReps = availableReps.filter(u => u.display_name?.toLowerCase().includes(searchRepresentative.toLowerCase()) || u.email?.toLowerCase().includes(searchRepresentative.toLowerCase()));
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#8B5CF6] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (user.user_type !== 'gravadora' && user.user_type !== 'staff' && user.role !== 'admin') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <AlertCircle className="w-8 h-8 text-red-500" />
+          <p className="text-[#B3B3B3]">Acesso restrito a gravadoras</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen pb-32">
+      {/* Hero Header */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#8B5CF6]/20 via-[#121212] to-[#A78BFA]/10" />
+        <div className="relative px-6 lg:px-8 pt-8 pb-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            {/* Avatar & Logo */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="relative flex-shrink-0 group cursor-pointer"
+              onClick={() => {
+                const reader = new FileReader();
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = (e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    reader.onload = (ev) => setCropperImage(ev.target.result);
+                    reader.readAsDataURL(file);
+                  }
+                };
+                input.click();
+              }}
+            >
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden ring-2 ring-[#8B5CF6]/30 shadow-2xl shadow-[#8B5CF6]/20 bg-gradient-to-br from-[#8B5CF6] to-[#A78BFA] flex items-center justify-center">
+                {user.profile_picture ? (
+                  <img src={user.profile_picture} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <Music className="w-12 h-12 text-white/60" />
+                )}
+              </div>
+              <div className="absolute inset-0 rounded-2xl bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                <span className="text-white text-xs font-medium opacity-0 group-hover:opacity-100">Trocar logo</span>
+              </div>
+            </motion.div>
+
+            {/* Info */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15 }}
+              className="flex-1"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#8B5CF6] bg-[#8B5CF6]/10 px-3 py-1 rounded-full">Gravadora</span>
+              </div>
+              <h1 className="text-3xl md:text-5xl font-black text-white mb-1">
+                {user.gravadora_name || user.display_name || user.full_name}
+              </h1>
+              <p className="text-zinc-400 text-sm md:text-base">Dashboard da Gravadora — Gerencie seus artistas e publicações</p>
+            </motion.div>
+
+            {/* Quick Action */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Button 
+                onClick={() => {
+                  if (selectedArtistId) setShowReleaseCreator(true);
+                  else toast.error('Selecione um artista primeiro');
+                }}
+                className="bg-[#8B5CF6] hover:bg-[#A78BFA] text-white rounded-full px-6 py-6 h-auto text-base font-bold shadow-lg shadow-[#8B5CF6]/30"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Novo Lançamento
+              </Button>
+            </motion.div>
+          </div>
+
+          {/* Artist Selector */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-6 max-w-md"
+          >
+            <label className="text-sm font-medium text-[#B3B3B3] mb-2 block">Selecione o artista para publicar</label>
+            <Select value={selectedArtistId} onValueChange={setSelectedArtistId}>
+              <SelectTrigger className="bg-[#181818] border-[#383838] text-white">
+                <SelectValue placeholder="Escolha um artista" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#282828] border-[#383838]">
+                {managedArtists.map((artist) => (
+                  <SelectItem key={artist.id} value={artist.id} className="text-white">
+                    {artist.display_name || artist.full_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </motion.div>
+
+          {/* Stats Row */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8"
+          >
+            {stats.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 + i * 0.05 }}
+                className={`${stat.bg} rounded-xl border border-white/5 p-4 flex items-center gap-3 hover:border-white/10 transition-colors`}
+              >
+                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center flex-shrink-0`}>
+                  <stat.icon className="w-5 h-5 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <motion.p
+                    key={stat.value}
+                    initial={{ scale: 1.1 }}
+                    animate={{ scale: 1 }}
+                    className="text-xl font-bold text-white"
+                  >
+                    {stat.value.toLocaleString()}
+                  </motion.p>
+                  <p className={`text-xs ${stat.text}`}>{stat.label}</p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Content Tabs */}
+      <div className="px-6 lg:px-8 pt-6">
+        <Tabs defaultValue="releases" className="w-full">
+          <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl grid w-full grid-cols-4">
+            <TabsTrigger value="releases" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white text-xs">
+              <Disc className="w-4 h-4 mr-1" />
+              Lançamentos
+            </TabsTrigger>
+            <TabsTrigger value="artists" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white text-xs">
+              <Users className="w-4 h-4 mr-1" />
+              Artistas
+            </TabsTrigger>
+            <TabsTrigger value="representatives" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white text-xs">
+              <Users className="w-4 h-4 mr-1" />
+              Representantes
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-[#8B5CF6] data-[state=active]:text-white text-xs">
+              ⚙️ Dados
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Releases Tab */}
+          <TabsContent value="releases" className="mt-6">
+            <AnimatePresence mode="wait">
+              {labelPosts.length > 0 ? (
+                <motion.div
+                  key="releases"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+                >
+                  {labelPosts.map((post, index) => (
+                    <motion.div
+                      key={post.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.04 }}
+                      className="group bg-[#181818] rounded-xl overflow-hidden hover:bg-[#282828] transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl"
+                    >
+                      <div className="aspect-square relative overflow-hidden">
+                        {post.cover_url ? (
+                          <img src={post.cover_url} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/40 to-[#A78BFA]/40 flex items-center justify-center">
+                            <Disc className="w-16 h-16 text-white/20" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            whileHover={{ opacity: 1, scale: 1 }}
+                            className="w-12 h-12 rounded-full bg-[#8B5CF6] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-2xl"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.location.href = `/Release?id=${post.id}`;
+                            }}
+                          >
+                            <Play className="w-5 h-5 text-white fill-current ml-0.5" />
+                          </motion.div>
+                        </div>
+                        <span className="absolute top-2 left-2 text-[10px] font-bold uppercase bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded-md">
+                          {post.type}
+                        </span>
+                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (confirm('Excluir este lançamento?')) deletePostMutation.mutate(post.id);
+                            }}
+                            className="p-1.5 bg-black/60 backdrop-blur-sm hover:bg-red-500 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-white" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="p-3">
+                        <h3 className="font-semibold text-white text-sm truncate">{post.title}</h3>
+                        <p className="text-xs text-zinc-400 truncate mt-0.5">{post.artist}</p>
+                        <div className="flex items-center gap-3 mt-2 text-xs text-zinc-500">
+                          {post.release_date && (
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(post.release_date).getFullYear()}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1"><Heart className="w-3 h-3" />{post.likes || 0}</span>
+                          <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{post.plays || 0}</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-20 bg-[#181818] rounded-2xl border border-white/5"
+                >
+                  <div className="w-20 h-20 rounded-full bg-[#8B5CF6]/10 flex items-center justify-center mx-auto mb-4">
+                    <Disc className="w-10 h-10 text-[#8B5CF6]" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">Nenhum lançamento ainda</h3>
+                  <p className="text-zinc-400">Selecione um artista e comece a publicar.</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </TabsContent>
+
+          {/* Artists Tab */}
+          <TabsContent value="artists" className="mt-6">
+            <AnimatePresence mode="wait">
+              {managedArtists.length > 0 ? (
+                <motion.div
+                  key="artists"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                >
+                  {managedArtists.map((artist, index) => (
+                    <motion.div
+                      key={artist.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.04 }}
+                      className="group bg-[#181818] rounded-xl overflow-hidden hover:bg-[#282828] transition-all duration-300 shadow-lg hover:shadow-xl"
+                    >
+                      <div className="relative aspect-square overflow-hidden">
+                        {artist.profile_picture ? (
+                          <img src={artist.profile_picture} alt={artist.display_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-[#8B5CF6]/40 to-[#A78BFA]/40 flex items-center justify-center">
+                            <Music className="w-16 h-16 text-white/20" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors" />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-white truncate">{artist.display_name || artist.full_name}</h3>
+                        <p className="text-xs text-zinc-400 mt-1 truncate">{artist.bio || 'Artista'}</p>
+                        <div className="mt-3 flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setSelectedArtistId(artist.id);
+                              setShowReleaseCreator(true);
+                            }}
+                            className="flex-1 h-8 bg-[#8B5CF6]/20 hover:bg-[#8B5CF6]/30 text-[#A78BFA] text-xs"
+                          >
+                            Publicar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              if (confirm('Desassociar este artista da gravadora? Os lançamentos não serão deletados.')) {
+                                removeArtistMutation.mutate(artist.id);
+                              }
+                            }}
+                            className="flex-1 h-8 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs"
+                          >
+                            Desassociar
+                          </Button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="empty-artists"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-20 bg-[#181818] rounded-2xl border border-white/5"
+                >
+                  <div className="w-20 h-20 rounded-full bg-[#8B5CF6]/10 flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-10 h-10 text-[#8B5CF6]" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">Nenhum artista gerenciado</h3>
+                  <p className="text-zinc-400">Solicite a um admin para vincular artistas à sua gravadora.</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </TabsContent>
+
+          {/* Representatives Tab */}
+          <TabsContent value="representatives" className="mt-6">
+            <AnimatePresence mode="wait">
+              {representatives.length > 0 ? (
+                <motion.div
+                  key="reps"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="space-y-3"
+                >
+                  {representatives.map((rep, index) => (
+                    <motion.div
+                      key={rep.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="flex items-center gap-4 bg-[#181818] rounded-xl p-4 border border-white/5 hover:border-white/10 transition-colors"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#8B5CF6] to-[#A78BFA] flex items-center justify-center flex-shrink-0">
+                        {rep.profile_picture ? (
+                          <img src={rep.profile_picture} alt="" className="w-full h-full rounded-full object-cover" />
+                        ) : (
+                          <Users className="w-6 h-6 text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-white truncate">{rep.display_name || rep.full_name}</h3>
+                        <p className="text-xs text-zinc-500">{rep.email}</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          if (confirm('Remover este representante?')) {
+                            removeRepresentativeMutation.mutate(rep.id);
+                          }
+                        }}
+                        disabled={removeRepresentativeMutation.isPending}
+                        className="h-8 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs"
+                      >
+                        <Trash className="w-3.5 h-3.5" />
+                      </Button>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="empty-reps"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-12 bg-[#181818] rounded-2xl border border-white/5"
+                >
+                  <Users className="w-10 h-10 text-[#8B5CF6] mx-auto mb-3" />
+                  <h3 className="text-lg font-bold text-white mb-1">Nenhum representante</h3>
+                  <p className="text-sm text-zinc-400 mb-4">Adicione um representante para ajudar a gerenciar a gravadora</p>
+                </motion.div>
+              )}
+
+              {/* Add Rep Button */}
+              <Dialog open={showAddRep} onOpenChange={setShowAddRep}>
+                <DialogTrigger asChild>
+                  <Button className="mt-4 w-full bg-[#8B5CF6] hover:bg-[#A78BFA] text-white">
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Adicionar Representante
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-[#282828] border-[#383838]">
+                  <DialogHeader>
+                    <DialogTitle className="text-white">Adicionar Representante</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Input
+                        placeholder="Pesquisar por nome ou email"
+                        value={searchRepresentative}
+                        onChange={(e) => setSearchRepresentative(e.target.value)}
+                        className="bg-[#181818] border-[#383838] text-white placeholder-[#535353]"
+                      />
+                    </div>
+                    <div className="max-h-64 overflow-y-auto space-y-2">
+                      {filteredReps.length > 0 ? (
+                        filteredReps.map((u) => (
+                          <motion.div
+                            key={u.id}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex items-center justify-between bg-[#181818] rounded-lg p-3 border border-white/5"
+                          >
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className="w-10 h-10 rounded-full bg-[#8B5CF6]/20 flex items-center justify-center flex-shrink-0">
+                                {u.profile_picture ? (
+                                  <img src={u.profile_picture} alt="" className="w-full h-full rounded-full object-cover" />
+                                ) : (
+                                  <Users className="w-5 h-5 text-[#8B5CF6]" />
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-white truncate">{u.display_name || u.full_name}</p>
+                                <p className="text-xs text-zinc-500 truncate">{u.email}</p>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => addRepresentativeMutation.mutate(u.id)}
+                              disabled={addRepresentativeMutation.isPending}
+                              className="h-8 bg-[#8B5CF6] hover:bg-[#A78BFA] text-white text-xs ml-2"
+                            >
+                              {addRepresentativeMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Adicionar'}
+                            </Button>
+                          </motion.div>
+                        ))
+                      ) : (
+                        <p className="text-center text-zinc-500 text-sm py-4">Nenhum usuário disponível</p>
+                      )}
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </AnimatePresence>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-4 bg-[#181818] rounded-2xl p-6 border border-white/5"
+            >
+              <div>
+                <label className="text-sm font-medium text-[#B3B3B3] mb-2 block">Nome da Gravadora</label>
+                <Input
+                  defaultValue={user.gravadora_name || user.display_name || ''}
+                  onBlur={(e) => {
+                    if (e.target.value !== (user.gravadora_name || user.display_name)) {
+                      updateLabelMutation.mutate({ gravadora_name: e.target.value, display_name: e.target.value });
+                    }
+                  }}
+                  className="bg-[#282828] border-[#383838] text-white placeholder-[#535353]"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[#B3B3B3] mb-2 block">Email</label>
+                <p className="text-sm text-zinc-400 bg-[#282828] rounded-lg p-3">{user.email}</p>
+              </div>
+            </motion.div>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Cropper Modal */}
+      <AnimatePresence>
+        {cropperImage && (
+          <ImageCropper
+            imageUrl={cropperImage}
+            title="Recortar Logo"
+            aspectRatio={1}
+            onSave={async ({ imageUrl }) => {
+              try {
+                updateLabelMutation.mutate({ profile_picture: imageUrl });
+              } catch (err) {
+                toast.error('Erro ao salvar logo');
+              }
+              setCropperImage(null);
+            }}
+            onCancel={() => setCropperImage(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Release Creator Panel */}
+      <ReleaseCreatorPanel
+        isOpen={showReleaseCreator}
+        onClose={() => setShowReleaseCreator(false)}
+        managedArtist={selectedArtistObject}
+        labelContext={{
+          label_id: user?.id,
+          label_name: user?.gravadora_name || user?.display_name || user?.full_name,
+          label_logo: user?.profile_picture || '',
+        }}
+        onSuccess={() => {
+          setShowReleaseCreator(false);
+          queryClient.invalidateQueries({ queryKey: ['labelPosts'] });
+          queryClient.invalidateQueries({ queryKey: ['labelSongs'] });
+          queryClient.invalidateQueries({ queryKey: ['posts'] });
+          queryClient.invalidateQueries({ queryKey: ['songs'] });
+        }}
+      />
+    </div>
+  );
+}

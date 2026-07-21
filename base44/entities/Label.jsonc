@@ -1,0 +1,31 @@
+{
+  "name": "Label",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da gravadora"
+    },
+    "profile_picture": {
+      "type": "string",
+      "description": "Logo da gravadora"
+    },
+    "representatives": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos representantes (usu\u00e1rios)"
+    },
+    "managed_artists": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos artistas gerenciados"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

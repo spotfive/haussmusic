@@ -1,0 +1,534 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
+import Sidebar from '@/components/layout/Sidebar';
+import MiniPlayer from '@/components/layout/MiniPlayer';
+import RightSidebar from '@/components/player/RightSidebar';
+import ExpandedMobilePlayer from '@/components/layout/ExpandedMobilePlayer';
+import ProfileSetup from '@/components/profile/ProfileSetup';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Home, Search, Library, Music2, Trophy, Award } from 'lucide-react';
+
+export default function Layout({ children, currentPageName }) {
+  const queryClient = useQueryClient();
+  
+  // ===== PLAYER STATE =====
+  const audioA = useRef(null);
+  const audioB = useRef(null);
+  const currentAudioRef = useRef(null);
+  const nextAudioRef = useRef(null);
+  
+  const [currentSong, setCurrentSong] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const [repeatMode, setRepeatMode] = useState(false);
+  const [shuffleEnabled, setShuffleEnabled] = useState(false);
+  const [shuffledSongs, setShuffledSongs] = useState([]);
+  const [showRightSidebar, setShowRightSidebar] = useState(false);
+  const [showMobilePlayer, setShowMobilePlayer] = useState(false);
+  const [user, setUser] = useState(null);
+  const [needsProfile, setNeedsProfile] = useState(false);
+  const [crossfadeEnabled, setCrossfadeEnabled] = useState(false);
+  
+  // ===== CROSSFADE CONFIG =====
+  const CROSSFADE_DURATION = 5; // 5 seconds
+  const isCrossfadingRef = useRef(false);
+  const animationFrameRef = useRef(null);
+  const skipDuringFadeRef = useRef(false);
+
+  const { data: songs = [] } = useQuery({
+    queryKey: ['songs'],
+    queryFn: () => base44.entities.Song.list('-plays', 50),
+  });
+
+  // ===== Initialize audio refs =====
+  useEffect(() => {
+    if (audioA.current && audioB.current) {
+      currentAudioRef.current = audioA.current;
+      nextAudioRef.current = audioB.current;
+    }
+  }, []);
+
+  // ===== Check user profile =====
+  useEffect(() => {
+    const checkProfile = async () => {
+      try {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
+        setNeedsProfile(!currentUser.profile_completed && !currentUser.display_name && !currentUser.full_name);
+      } catch (error) {
+        setNeedsProfile(false);
+      }
+    };
+    checkProfile();
+    const handleProfileUpdate = () => checkProfile();
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
+  }, []);
+
+  // ===== Listen for song play events =====
+  useEffect(() => {
+    const handlePlaySong = (e) => {
+      playTrack(e.detail);
+    };
+    const handleTogglePlayPause = () => setIsPlaying(prev => !prev);
+
+    window.addEventListener('playSong', handlePlaySong);
+    window.addEventListener('togglePlayPause', handleTogglePlayPause);
+
+    return () => {
+      window.removeEventListener('playSong', handlePlaySong);
+      window.removeEventListener('togglePlayPause', handleTogglePlayPause);
+    };
+  }, []);
+
+  // ===== NOTIFY ACTIVE SONG =====
+  const notifyActiveSong = (song) => {
+    window.dispatchEvent(new CustomEvent('activeSongChanged', { detail: song }));
+  };
+
+  // ===== TIME UPDATE HANDLER =====
+  const handleTimeUpdate = () => {
+    const audio = isCrossfadingRef.current
+      ? nextAudioRef.current
+      : currentAudioRef.current;
+
+    if (!audio || !Number.isFinite(audio.duration)) return;
+
+    setCurrentTime(audio.currentTime);
+    setDuration(audio.duration);
+    setProgress((audio.currentTime / audio.duration) * 100);
+
+    if (!isCrossfadingRef.current && crossfadeEnabled && isPlaying && songs.length > 1) {
+      const timeRemaining = audio.duration - audio.currentTime;
+
+      if (
+        Number.isFinite(timeRemaining) &&
+        timeRemaining <= CROSSFADE_DURATION &&
+        timeRemaining > 0 &&
+        audio.duration > CROSSFADE_DURATION + 1
+      ) {
+        startCrossfade();
+      }
+    }
+  };
+
+  // ===== PLAYLIST HELPERS =====
+  const getPlaylist = () => {
+    return shuffleEnabled && shuffledSongs.length > 0 ? shuffledSongs : songs;
+  };
+
+  const getNextSong = () => {
+    const playList = getPlaylist();
+    if (!playList.length || !currentSong) return null;
+
+    const currentIndex = playList.findIndex(s => s.id === currentSong.id);
+    const safeIndex = currentIndex >= 0 ? currentIndex : 0;
+    const nextIndex = (safeIndex + 1) % playList.length;
+
+    return playList[nextIndex];
+  };
+
+  const prepareSpecificTrack = (song) => {
+    const next = nextAudioRef.current;
+    if (!next || !song?.audio_url) return false;
+
+    next.pause();
+    next.src = song.audio_url;
+    next.currentTime = 0;
+    next.volume = 0;
+    next.load();
+
+    return true;
+  };
+
+  // ===== CORE PLAYER FUNCTIONS =====
+  const playTrack = (song) => {
+    const current = currentAudioRef.current;
+    if (!current) return;
+
+    // If crossfade is enabled and a song is already playing, use crossfade instead
+    if (crossfadeEnabled && currentSong && currentAudioRef.current?.src) {
+      startCrossfade(song);
+      return;
+    }
+
+    current.src = song.audio_url;
+    current.currentTime = 0;
+    current.volume = isMuted ? 0 : volume;
+
+    setCurrentSong(song);
+    notifyActiveSong(song);
+    setCurrentTime(0);
+    setDuration(0);
+    setProgress(0);
+
+    current.play().catch(() => {});
+    setIsPlaying(true);
+    setShowRightSidebar(true);
+  };
+
+  const prepareNextTrack = () => {
+    const nextSong = getNextSong();
+    if (!nextSong) return null;
+
+    prepareSpecificTrack(nextSong);
+    return nextSong;
+  };
+
+  const startCrossfade = async (forcedSong = null) => {
+    if (isCrossfadingRef.current) return;
+
+    const fromAudio = currentAudioRef.current;
+    const toAudio = nextAudioRef.current;
+    const nextSong = forcedSong || getNextSong();
+
+    if (!fromAudio || !toAudio || !nextSong?.audio_url) return;
+
+    isCrossfadingRef.current = true;
+
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+
+    toAudio.pause();
+    toAudio.src = nextSong.audio_url;
+    toAudio.currentTime = 0;
+    toAudio.volume = 0;
+    toAudio.load();
+
+    try {
+      await toAudio.play();
+    } catch (error) {
+      isCrossfadingRef.current = false;
+      return;
+    }
+
+    setCurrentSong(nextSong);
+    notifyActiveSong(nextSong);
+    setCurrentTime(0);
+    setDuration(0);
+    setProgress(0);
+
+    const masterVolume = isMuted ? 0 : volume;
+    const stepCount = 50; // 50 steps for smooth fade
+    const stepDuration = (CROSSFADE_DURATION * 1000) / stepCount;
+    let step = 0;
+
+    const fadeStep = () => {
+      step++;
+      const fadeProgress = Math.min(step / stepCount, 1);
+
+      fromAudio.volume = Math.max(0, Math.min(1, masterVolume * (1 - fadeProgress)));
+      toAudio.volume = Math.max(0, Math.min(1, masterVolume * fadeProgress));
+
+      if (fadeProgress < 1) {
+        animationFrameRef.current = setTimeout(fadeStep, stepDuration);
+        return;
+      }
+
+      fromAudio.pause();
+      fromAudio.currentTime = 0;
+      fromAudio.removeAttribute('src');
+      fromAudio.load();
+      fromAudio.volume = 0;
+
+      currentAudioRef.current = toAudio;
+      nextAudioRef.current = fromAudio;
+
+      const nextAfterThis = getNextSong();
+      if (nextAfterThis) {
+        prepareSpecificTrack(nextAfterThis);
+      }
+
+      isCrossfadingRef.current = false;
+      animationFrameRef.current = null;
+    };
+
+    animationFrameRef.current = setTimeout(fadeStep, stepDuration);
+  };
+
+  const skipTrack = () => {
+    const nextSong = getNextSong();
+    if (!nextSong) return;
+
+    if (crossfadeEnabled) {
+      startCrossfade(nextSong);
+    } else {
+      playTrack(nextSong);
+    }
+  };
+
+  // ===== VOLUME & PLAYBACK CONTROLS =====
+  const handleSeek = (time) => {
+    const current = currentAudioRef.current;
+    if (current) {
+      current.currentTime = Math.max(0, Math.min(time, current.duration));
+      setCurrentTime(current.currentTime);
+    }
+  };
+
+  const handleVolumeChange = (e) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
+    setIsMuted(newVolume === 0);
+    
+    const current = currentAudioRef.current;
+    const next = nextAudioRef.current;
+    if (current) current.volume = newVolume === 0 ? 0 : newVolume;
+    if (next) next.volume = newVolume === 0 ? 0 : next.volume;
+  };
+
+  const handleToggleMute = () => {
+    const newMuted = !isMuted;
+    setIsMuted(newMuted);
+    
+    const current = currentAudioRef.current;
+    if (current) current.volume = newMuted ? 0 : volume;
+  };
+
+  const handleToggleRepeat = () => {
+    const newRepeatMode = !repeatMode;
+    setRepeatMode(newRepeatMode);
+  };
+
+  const handleToggleShuffle = () => {
+    const newShuffleState = !shuffleEnabled;
+    setShuffleEnabled(newShuffleState);
+
+    if (newShuffleState) {
+      const shuffled = [...songs].sort(() => Math.random() - 0.5);
+      setShuffledSongs(shuffled);
+    } else {
+      setShuffledSongs([]);
+    }
+  };
+
+  const handleNext = () => {
+    skipTrack();
+  };
+
+  const handlePrevious = () => {
+    const playList = shuffleEnabled && shuffledSongs.length > 0 ? shuffledSongs : songs;
+    if (playList.length === 0) return;
+
+    const current = currentAudioRef.current;
+    if (current && current.currentTime > 3) {
+      // Se passou de 3s, volta pro início da música atual
+      current.currentTime = 0;
+      setCurrentTime(0);
+    } else {
+      // Caso contrário, vai pra música anterior
+      const currentIndex = playList.findIndex(s => s.id === currentSong?.id);
+      const prevIndex = currentIndex > 0 ? currentIndex - 1 : playList.length - 1;
+      const prevSong = playList[prevIndex];
+      playTrack(prevSong);
+    }
+  };
+
+  const handleFavoriteToggle = async () => {
+    if (currentSong) {
+      const newFavoriteState = !currentSong.is_favorite;
+      setCurrentSong(prev => ({ ...prev, is_favorite: newFavoriteState }));
+      queryClient.setQueryData(['songs'], (oldSongs) => 
+        oldSongs?.map(s => s.id === currentSong.id ? { ...s, is_favorite: newFavoriteState } : s)
+      );
+      base44.entities.Song.update(currentSong.id, { is_favorite: newFavoriteState }).catch(() => {});
+    }
+  };
+
+  // ===== HANDLE PLAY/PAUSE =====
+  useEffect(() => {
+    const current = currentAudioRef.current;
+    if (!current) return;
+
+    if (isPlaying) {
+      current.play().catch(() => {});
+    } else {
+      current.pause();
+    }
+  }, [isPlaying]);
+
+  // ===== HANDLE SONG END =====
+  useEffect(() => {
+    const a = audioA.current;
+    const b = audioB.current;
+
+    if (!a || !b) return;
+
+    const handleEnded = () => {
+      if (!crossfadeEnabled && repeatMode) {
+        a.currentTime = 0;
+        a.play().catch(() => {});
+      } else if (!crossfadeEnabled) {
+        handleNext();
+      }
+    };
+
+    a.addEventListener('timeupdate', handleTimeUpdate);
+    b.addEventListener('timeupdate', handleTimeUpdate);
+    a.addEventListener('ended', handleEnded);
+
+    return () => {
+      a.removeEventListener('timeupdate', handleTimeUpdate);
+      b.removeEventListener('timeupdate', handleTimeUpdate);
+      a.removeEventListener('ended', handleEnded);
+    };
+  }, [isPlaying, crossfadeEnabled, repeatMode, currentSong, songs, shuffleEnabled, shuffledSongs]);
+
+  const navItems = [
+    { icon: Home, label: 'Início', page: 'Home' },
+    { icon: Search, label: 'Buscar', page: 'Search' },
+    { icon: Library, label: 'Biblioteca', page: 'Library' },
+    ...(user?.user_type === 'artista' || user?.user_type === 'staff'
+      ? [{ icon: Award, label: 'Artista', page: 'ArtistDashboard' }]
+      : [{ icon: Music2, label: 'Artistas', page: 'Artists' }]
+    ),
+    { icon: Trophy, label: 'Rankings', page: 'Rankings' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#121212] text-white">
+      <Toaster position="top-center" theme="dark" />
+      
+      {/* Profile Setup Modal */}
+      {needsProfile && user && (
+        <ProfileSetup 
+          user={user} 
+          onComplete={() => {
+            setNeedsProfile(false);
+            base44.auth.me().then(setUser);
+          }} 
+        />
+      )}
+
+      {/* Dual audio elements for crossfade */}
+      <audio ref={audioA} crossOrigin="anonymous" />
+      <audio ref={audioB} crossOrigin="anonymous" />
+
+
+
+      <div className="flex h-screen relative z-10">
+        {/* Sidebar */}
+        <Sidebar currentPage={currentPageName} />
+
+        {/* Main content */}
+        <main className="flex-1 overflow-y-auto pb-32 lg:pb-24 bg-[#121212]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentPageName}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </div>
+
+      {/* Right Sidebar - Now Playing (Desktop) */}
+      {showRightSidebar && currentSong && (
+        <RightSidebar
+          song={currentSong}
+          isPlaying={isPlaying}
+          onClose={() => setShowRightSidebar(false)}
+          isFavorite={currentSong?.is_favorite}
+          onFavoriteToggle={handleFavoriteToggle}
+          onPlayPause={() => setIsPlaying(!isPlaying)}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          repeatMode={repeatMode}
+          onToggleRepeat={handleToggleRepeat}
+        />
+      )}
+
+      {/* Expanded Mobile Player */}
+      {currentSong && (
+        <ExpandedMobilePlayer
+          isOpen={showMobilePlayer}
+          onClose={() => setShowMobilePlayer(false)}
+          currentSong={currentSong}
+          isPlaying={isPlaying}
+          onPlayPause={() => setIsPlaying(!isPlaying)}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          currentTime={currentTime}
+          duration={duration}
+          onSeek={handleSeek}
+          isFavorite={currentSong?.is_favorite}
+          onFavoriteToggle={handleFavoriteToggle}
+          repeatMode={repeatMode}
+          onToggleRepeat={handleToggleRepeat}
+          shuffleEnabled={shuffleEnabled}
+          onToggleShuffle={handleToggleShuffle}
+          volume={volume}
+          onVolumeChange={handleVolumeChange}
+        />
+      )}
+
+      {/* Mini player */}
+      {currentPageName !== 'ArtistDashboard' && (
+        <MiniPlayer
+          currentSong={currentSong}
+          isPlaying={isPlaying}
+          onPlayPause={() => setIsPlaying(!isPlaying)}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          progress={progress}
+          currentTime={currentTime}
+          duration={duration}
+          onSeek={handleSeek}
+          onExpand={() => setShowRightSidebar(true)}
+          onExpandMobile={() => setShowMobilePlayer(true)}
+          isFavorite={currentSong?.is_favorite}
+          onFavoriteToggle={handleFavoriteToggle}
+          volume={volume}
+          isMuted={isMuted}
+          onVolumeChange={handleVolumeChange}
+          onToggleMute={handleToggleMute}
+          repeatMode={repeatMode}
+          onToggleRepeat={handleToggleRepeat}
+          crossfadeEnabled={crossfadeEnabled}
+          onToggleCrossfade={() => setCrossfadeEnabled(!crossfadeEnabled)}
+          shuffleEnabled={shuffleEnabled}
+          onToggleShuffle={handleToggleShuffle}
+          crossfadeDuration={CROSSFADE_DURATION}
+        />
+      )}
+
+      {/* Mobile navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 lg:hidden z-50 bg-[#181818]/95 backdrop-blur-md border-t border-[#282828]">
+        {currentSong && currentPageName !== 'ArtistDashboard' && <div className="h-[88px]" />}
+        <div className="flex items-center justify-around py-2 px-1 pb-[env(safe-area-inset-bottom,8px)]">
+          {navItems.map((item) => {
+            const isActive = currentPageName === item.page;
+            return (
+              <Link key={item.page} to={createPageUrl(item.page)} className="flex-1">
+                <motion.div
+                  whileTap={{ scale: 0.9 }}
+                  className={`flex flex-col items-center gap-1 py-2 rounded-xl transition-colors ${
+                    isActive ? 'text-[#8B5CF6]' : 'text-[#B3B3B3]'
+                  }`}
+                >
+                  <item.icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.5]'}`} />
+                  <span className={`text-[10px] font-medium ${isActive ? 'text-[#8B5CF6]' : 'text-[#B3B3B3]'}`}>{item.label}</span>
+                  {isActive && <div className="w-1 h-1 rounded-full bg-[#8B5CF6]" />}
+                </motion.div>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </div>
+  );
+}
