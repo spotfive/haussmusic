@@ -43,8 +43,16 @@ export default function Layout({ children, currentPageName }) {
   // ===== CROSSFADE CONFIG =====
   const CROSSFADE_DURATION = 5; // 5 seconds
   const isCrossfadingRef = useRef(false);
-  const animationFrameRef = useRef(null);
-  const skipDuringFadeRef = useRef(false);
+  const fadeTimerRef = useRef(null);
+  // Tracks which song a fade was already attempted for, so a broken/slow
+  // next track doesn't retry the crossfade on every single timeupdate tick.
+  const autoFadeAttemptedForRef = useRef(null);
+  // Live refs so an in-progress fade always reads the current volume/mute
+  // state instead of the value that was in scope when the fade started.
+  const volumeRef = useRef(volume);
+  const isMutedRef = useRef(isMuted);
+  useEffect(() => { volumeRef.current = volume; }, [volume]);
+  useEffect(() => { isMutedRef.current = isMuted; }, [isMuted]);
 
   const { data: songs = [] } = useQuery({
     queryKey: ['songs'],
@@ -57,6 +65,13 @@ export default function Layout({ children, currentPageName }) {
       currentAudioRef.current = audioA.current;
       nextAudioRef.current = audioB.current;
     }
+
+    return () => {
+      if (fadeTimerRef.current) {
+        clearTimeout(fadeTimerRef.current);
+        fadeTimerRef.current = null;
+      }
+    };
   }, []);
 
   // ===== Listen for song play events =====
@@ -92,7 +107,13 @@ export default function Layout({ children, currentPageName }) {
     setDuration(audio.duration);
     setProgress((audio.currentTime / audio.duration) * 100);
 
-    if (!isCrossfadingRef.current && crossfadeEnabled && isPlaying && songs.length > 1) {
+    if (
+      !isCrossfadingRef.current &&
+      crossfadeEnabled &&
+      isPlaying &&
+      (songs.length > 1 || repeatMode) &&
+      autoFadeAttemptedForRef.current !== currentSong?.id
+    ) {
       const timeRemaining = audio.duration - audio.currentTime;
 
       if (
@@ -101,7 +122,10 @@ export default function Layout({ children, currentPageName }) {
         timeRemaining > 0 &&
         audio.duration > CROSSFADE_DURATION + 1
       ) {
-        startCrossfade();
+        // Mark it attempted up front — startCrossfade takes over from here,
+        // succeed or fail, so this tick doesn't retry every ~250ms.
+        autoFadeAttemptedForRef.current = currentSong?.id;
+        startCrossfade(repeatMode ? currentSong : null);
       }
     }
   };
@@ -111,16 +135,21 @@ export default function Layout({ children, currentPageName }) {
     return shuffleEnabled && shuffledSongs.length > 0 ? shuffledSongs : songs;
   };
 
-  const getNextSong = () => {
+  // Takes an explicit song instead of reading `currentSong` from state, so
+  // callers inside a crossfade-in-progress (where the state update for the
+  // new song hasn't been committed yet) always get the right answer.
+  const getSongAfter = (song) => {
     const playList = getPlaylist();
-    if (!playList.length || !currentSong) return null;
+    if (!playList.length || !song) return null;
 
-    const currentIndex = playList.findIndex(s => s.id === currentSong.id);
-    const safeIndex = currentIndex >= 0 ? currentIndex : 0;
+    const index = playList.findIndex(s => s.id === song.id);
+    const safeIndex = index >= 0 ? index : 0;
     const nextIndex = (safeIndex + 1) % playList.length;
 
     return playList[nextIndex];
   };
+
+  const getNextSong = () => getSongAfter(currentSong);
 
   const prepareSpecificTrack = (song) => {
     const next = nextAudioRef.current;
@@ -136,14 +165,26 @@ export default function Layout({ children, currentPageName }) {
   };
 
   // ===== CORE PLAYER FUNCTIONS =====
-  const playTrack = (song) => {
+  // `skipCrossfade` is used by the crossfade's own error fallback (broken
+  // next track) — without it, that fallback would call back into
+  // startCrossfade and could loop forever on a track that never plays.
+  const playTrack = (song, { skipCrossfade = false } = {}) => {
     const current = currentAudioRef.current;
     if (!current) return;
 
     // If crossfade is enabled and a song is already playing, use crossfade instead
-    if (crossfadeEnabled && currentSong && currentAudioRef.current?.src) {
+    if (!skipCrossfade && crossfadeEnabled && currentSong && currentAudioRef.current?.src) {
       startCrossfade(song);
       return;
+    }
+
+    if (isCrossfadingRef.current) {
+      if (fadeTimerRef.current) {
+        clearTimeout(fadeTimerRef.current);
+        fadeTimerRef.current = null;
+      }
+      isCrossfadingRef.current = false;
+      nextAudioRef.current?.pause();
     }
 
     current.src = song.audio_url;
@@ -151,6 +192,7 @@ export default function Layout({ children, currentPageName }) {
     current.volume = isMuted ? 0 : volume;
 
     setCurrentSong(song);
+    autoFadeAttemptedForRef.current = null;
     notifyActiveSong(song);
     setCurrentTime(0);
     setDuration(0);
@@ -170,7 +212,27 @@ export default function Layout({ children, currentPageName }) {
   };
 
   const startCrossfade = async (forcedSong = null) => {
-    if (isCrossfadingRef.current) return;
+    // A fade is already running (e.g. the user hit skip again mid-fade).
+    // Don't just bail out and leave the click feeling dead — snap the
+    // in-flight transition to "done" and immediately start a new one from
+    // whatever is audible right now, so every request always does something.
+    if (isCrossfadingRef.current) {
+      if (fadeTimerRef.current) {
+        clearTimeout(fadeTimerRef.current);
+        fadeTimerRef.current = null;
+      }
+      const interruptedFrom = currentAudioRef.current;
+      const interruptedTo = nextAudioRef.current;
+      interruptedFrom.pause();
+      interruptedFrom.currentTime = 0;
+      interruptedFrom.removeAttribute('src');
+      interruptedFrom.load();
+      interruptedFrom.volume = 0;
+
+      currentAudioRef.current = interruptedTo;
+      nextAudioRef.current = interruptedFrom;
+      isCrossfadingRef.current = false;
+    }
 
     const fromAudio = currentAudioRef.current;
     const toAudio = nextAudioRef.current;
@@ -179,11 +241,6 @@ export default function Layout({ children, currentPageName }) {
     if (!fromAudio || !toAudio || !nextSong?.audio_url) return;
 
     isCrossfadingRef.current = true;
-
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
 
     toAudio.pause();
     toAudio.src = nextSong.audio_url;
@@ -195,6 +252,9 @@ export default function Layout({ children, currentPageName }) {
       await toAudio.play();
     } catch (error) {
       isCrossfadingRef.current = false;
+      // Broken/unavailable next track — fall back to a hard cut instead of
+      // silently doing nothing (and getting retried every tick).
+      playTrack(nextSong, { skipCrossfade: true });
       return;
     }
 
@@ -203,21 +263,24 @@ export default function Layout({ children, currentPageName }) {
     setCurrentTime(0);
     setDuration(0);
     setProgress(0);
+    autoFadeAttemptedForRef.current = null;
 
-    const masterVolume = isMuted ? 0 : volume;
-    const stepCount = 50; // 50 steps for smooth fade
-    const stepDuration = (CROSSFADE_DURATION * 1000) / stepCount;
-    let step = 0;
+    const durationMs = CROSSFADE_DURATION * 1000;
+    const startedAt = performance.now();
 
+    // Elapsed-time based rather than a fixed step counter, so a throttled
+    // background tab (where timers can slow to ~1/sec) still finishes the
+    // fade in the right total time instead of taking minutes to complete.
     const fadeStep = () => {
-      step++;
-      const fadeProgress = Math.min(step / stepCount, 1);
+      const elapsed = performance.now() - startedAt;
+      const fadeProgress = Math.min(elapsed / durationMs, 1);
+      const masterVolume = isMutedRef.current ? 0 : volumeRef.current;
 
       fromAudio.volume = Math.max(0, Math.min(1, masterVolume * (1 - fadeProgress)));
       toAudio.volume = Math.max(0, Math.min(1, masterVolume * fadeProgress));
 
       if (fadeProgress < 1) {
-        animationFrameRef.current = setTimeout(fadeStep, stepDuration);
+        fadeTimerRef.current = setTimeout(fadeStep, 50);
         return;
       }
 
@@ -230,16 +293,16 @@ export default function Layout({ children, currentPageName }) {
       currentAudioRef.current = toAudio;
       nextAudioRef.current = fromAudio;
 
-      const nextAfterThis = getNextSong();
+      const nextAfterThis = repeatMode ? nextSong : getSongAfter(nextSong);
       if (nextAfterThis) {
         prepareSpecificTrack(nextAfterThis);
       }
 
       isCrossfadingRef.current = false;
-      animationFrameRef.current = null;
+      fadeTimerRef.current = null;
     };
 
-    animationFrameRef.current = setTimeout(fadeStep, stepDuration);
+    fadeTimerRef.current = setTimeout(fadeStep, 50);
   };
 
   const skipTrack = () => {
@@ -255,10 +318,12 @@ export default function Layout({ children, currentPageName }) {
 
   // ===== VOLUME & PLAYBACK CONTROLS =====
   const handleSeek = (time) => {
-    const current = currentAudioRef.current;
-    if (current) {
-      current.currentTime = Math.max(0, Math.min(time, current.duration));
-      setCurrentTime(current.currentTime);
+    // Seek whichever track the UI is actually showing progress for — during
+    // a crossfade that's the incoming track, not the outgoing one.
+    const audio = isCrossfadingRef.current ? nextAudioRef.current : currentAudioRef.current;
+    if (audio) {
+      audio.currentTime = Math.max(0, Math.min(time, audio.duration));
+      setCurrentTime(audio.currentTime);
     }
   };
 
@@ -266,17 +331,22 @@ export default function Layout({ children, currentPageName }) {
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
     setIsMuted(newVolume === 0);
-    
+
+    // Mid-fade, fadeStep owns both channels' volume every 50ms and reads
+    // volumeRef/isMutedRef live — touching the elements here would just get
+    // overwritten (or fight it) on the next tick.
+    if (isCrossfadingRef.current) return;
+
     const current = currentAudioRef.current;
-    const next = nextAudioRef.current;
-    if (current) current.volume = newVolume === 0 ? 0 : newVolume;
-    if (next) next.volume = newVolume === 0 ? 0 : next.volume;
+    if (current) current.volume = newVolume;
   };
 
   const handleToggleMute = () => {
     const newMuted = !isMuted;
     setIsMuted(newMuted);
-    
+
+    if (isCrossfadingRef.current) return;
+
     const current = currentAudioRef.current;
     if (current) current.volume = newMuted ? 0 : volume;
   };
@@ -333,13 +403,16 @@ export default function Layout({ children, currentPageName }) {
 
   // ===== HANDLE PLAY/PAUSE =====
   useEffect(() => {
-    const current = currentAudioRef.current;
-    if (!current) return;
-
     if (isPlaying) {
-      current.play().catch(() => {});
+      currentAudioRef.current?.play().catch(() => {});
+      // Mid-crossfade both channels are audibly playing — pausing only the
+      // "current" one used to leave the incoming track playing on its own.
+      if (isCrossfadingRef.current) {
+        nextAudioRef.current?.play().catch(() => {});
+      }
     } else {
-      current.pause();
+      audioA.current?.pause();
+      audioB.current?.pause();
     }
   }, [isPlaying]);
 
@@ -350,10 +423,15 @@ export default function Layout({ children, currentPageName }) {
 
     if (!a || !b) return;
 
-    const handleEnded = () => {
+    // currentAudioRef swaps between `a` and `b` after every crossfade, so
+    // this has to work for whichever one is active — not just `a` — or
+    // repeat/auto-advance silently stop working after the first crossfade.
+    const handleEnded = (e) => {
+      if (e.target !== currentAudioRef.current || isCrossfadingRef.current) return;
+
       if (!crossfadeEnabled && repeatMode) {
-        a.currentTime = 0;
-        a.play().catch(() => {});
+        e.target.currentTime = 0;
+        e.target.play().catch(() => {});
       } else if (!crossfadeEnabled) {
         handleNext();
       }
@@ -362,11 +440,13 @@ export default function Layout({ children, currentPageName }) {
     a.addEventListener('timeupdate', handleTimeUpdate);
     b.addEventListener('timeupdate', handleTimeUpdate);
     a.addEventListener('ended', handleEnded);
+    b.addEventListener('ended', handleEnded);
 
     return () => {
       a.removeEventListener('timeupdate', handleTimeUpdate);
       b.removeEventListener('timeupdate', handleTimeUpdate);
       a.removeEventListener('ended', handleEnded);
+      b.removeEventListener('ended', handleEnded);
     };
   }, [isPlaying, crossfadeEnabled, repeatMode, currentSong, songs, shuffleEnabled, shuffledSongs]);
 
