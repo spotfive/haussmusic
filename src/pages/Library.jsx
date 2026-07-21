@@ -187,7 +187,7 @@ export default function Library() {
                           {r.cover_url ? (
                             <img src={r.cover_url} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400" />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 to-[#1a1030] flex items-center justify-center">
+                            <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 to-[#18181b] flex items-center justify-center">
                               <Disc3 className="w-10 h-10 text-[#535353]" />
                             </div>
                           )}
@@ -287,7 +287,7 @@ export default function Library() {
 
                           if (covers.length === 0) {
                             return (
-                              <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 via-zinc-800/50 to-[#1a1030] flex items-center justify-center">
+                              <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 via-zinc-800/50 to-[#18181b] flex items-center justify-center">
                                 <ListMusic className="w-12 h-12 text-[#535353] group-hover:text-[#c0c0c8]/40 transition-colors" />
                               </div>
                             );

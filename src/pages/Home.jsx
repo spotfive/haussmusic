@@ -6,6 +6,7 @@ import { Play, Pause, Heart, Music2, TrendingUp, Star, Calendar, User, Timer } f
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import ArtistNameBanner from '@/components/home/ArtistNameBanner';
 
 const pills = [
   { label: 'Tudo', key: 'all' },
@@ -134,7 +135,7 @@ export default function Home() {
     enabled: !!featuredSong?.artist,
   });
 
-  const featuredBackdrop = featuredArtist?.profile_banner || featuredSong?.cover_url;
+  const featuredBackdrop = featuredArtist?.profile_banner;
 
   const playMutation = useMutation({
     mutationFn: (songId) => {
@@ -251,7 +252,7 @@ export default function Home() {
               style={{ height: '280px' }}
               onClick={() => dispatchPlaySong(featuredSong)}
             >
-              {/* Background — banner do artista (ou capa da música como fallback) */}
+              {/* Background — banner do artista (ou banner com o nome do artista como fallback) */}
               <div className="absolute inset-0">
                 {featuredBackdrop ? (
                   <>
@@ -265,7 +266,7 @@ export default function Home() {
                     <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 60% 40%, rgba(200,200,210,0.18) 0%, transparent 70%)' }} />
                   </>
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-[#1a1030] via-[#0d0a20] to-[#1a1a2e]" />
+                  <ArtistNameBanner name={featuredSong.artist} />
                 )}
                 {/* gradient overlay bottom */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
@@ -350,7 +351,7 @@ export default function Home() {
                               {song.cover_url ? (
                                 <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover" />
                               ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/20 to-[#1a1030] flex items-center justify-center">
+                                <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/20 to-[#18181b] flex items-center justify-center">
                                   <Music2 className="w-8 h-8 text-[#535353]" />
                                 </div>
                               )}
@@ -406,7 +407,7 @@ export default function Home() {
                               {song.cover_url ? (
                                 <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover" />
                               ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 to-[#1a1030]" />
+                                <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 to-[#18181b]" />
                               )}
                             </div>
 
@@ -581,7 +582,7 @@ export default function Home() {
                             {song.cover_url ? (
                               <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover" />
                             ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/20 to-[#1a1030] flex items-center justify-center">
+                              <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/20 to-[#18181b] flex items-center justify-center">
                                 <Music2 className="w-8 h-8 text-[#535353]" />
                               </div>
                             )}

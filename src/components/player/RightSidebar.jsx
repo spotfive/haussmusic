@@ -83,7 +83,7 @@ export default function RightSidebar({ song, isPlaying, onClose, isFavorite, onF
           ) : song.cover_url ? (
             <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#c0c0c8]/20 to-[#1a1030]">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#c0c0c8]/20 to-[#18181b]">
               <Music2 className="w-20 h-20 text-[#535353]" />
             </div>
           )}

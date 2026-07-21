@@ -345,13 +345,13 @@ export default function AdminDashboard() {
     <div className="min-h-screen pb-32">
       {/* Header */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/15 via-[#121212] to-blue-500/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-400/15 via-[#121212] to-slate-600/10" />
         <div className="relative px-6 lg:px-8 pt-8 pb-6">
           <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan-500/30"
+              className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-slate-400/30"
             >
               <Shield className="w-8 h-8 text-white" />
             </motion.div>
@@ -505,8 +505,8 @@ export default function AdminDashboard() {
                     {song.cover_url ? (
                       <img src={song.cover_url} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0" />
                     ) : (
-                      <div className="w-10 h-10 rounded bg-gradient-to-br from-cyan-500/30 to-blue-500/30 flex items-center justify-center flex-shrink-0">
-                        <Music className="w-4 h-4 text-cyan-400" />
+                      <div className="w-10 h-10 rounded bg-gradient-to-br from-slate-400/30 to-slate-600/30 flex items-center justify-center flex-shrink-0">
+                        <Music className="w-4 h-4 text-slate-300" />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
@@ -559,7 +559,7 @@ export default function AdminDashboard() {
                         }`}>{u.role === 'admin' ? 'Admin' : 'Usuário'}</span>
                         <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
                           u.user_type === 'artista' ? 'bg-[#c0c0c8]/15 text-[#e5e5ea]' :
-                          u.user_type === 'gravadora' ? 'bg-cyan-500/15 text-cyan-400' :
+                          u.user_type === 'gravadora' ? 'bg-slate-400/15 text-slate-300' :
                           u.user_type === 'staff' ? 'bg-amber-500/15 text-amber-400' :
                           'bg-zinc-800 text-zinc-500'
                         }`}>{u.user_type || 'ouvinte'}</span>
@@ -582,7 +582,7 @@ export default function AdminDashboard() {
                       <Button variant="ghost" size="sm"
                         onClick={() => toggleVerifiedMutation.mutate({ userId: u.id, verified: !u.verified })}
                         className={`h-8 px-2.5 text-xs rounded-lg transition-all ${
-                          u.verified ? 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30' : 'bg-white/5 text-zinc-500 hover:bg-white/10'
+                          u.verified ? 'bg-slate-600/20 text-blue-400 hover:bg-slate-600/30' : 'bg-white/5 text-zinc-500 hover:bg-white/10'
                         }`}>
                         {u.verified ? '✓ Verificado' : 'Verificar'}
                       </Button>
@@ -696,7 +696,7 @@ export default function AdminDashboard() {
               <div className="lg:col-span-3 bg-[#181818] rounded-2xl border border-white/5 overflow-hidden">
                 <div className="px-4 py-3 border-b border-white/5"><h2 className="text-lg font-bold text-white flex items-center gap-2"><Music2 className="w-5 h-5 text-[#c0c0c8]" /> Gerenciar Gravadoras</h2></div>
                 <div className="divide-y divide-white/5">
-                  {labels.map((label) => (<div key={label.id} className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">{label.profile_picture ? (<img src={label.profile_picture} alt="" className="w-11 h-11 rounded-xl object-cover flex-shrink-0 ring-1 ring-white/10" />) : (<div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500/40 to-blue-500/40 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{label.name?.[0]?.toUpperCase() || 'G'}</div>)}<div className="flex-1 min-w-0"><p className="text-sm font-semibold text-white truncate">{label.name}</p>{label.managed_artists && label.managed_artists.length > 0 && (<p className="text-xs text-[#c0c0c8] mt-1">{label.managed_artists.length} artista(s)</p>)}</div><div className="flex gap-2"><Button variant="ghost" size="sm" onClick={() => setEditingUser({ ...label, isLabel: true })} className="h-8 px-2.5 text-xs rounded-lg bg-white/5 hover:bg-white/10"><Edit2 className="w-3.5 h-3.5 mr-1" /> Gerenciar</Button><Button variant="ghost" size="sm" onClick={() => { if (confirm('Excluir esta gravadora?')) deleteLabelMutation.mutate(label.id); }} className="h-8 px-2.5 text-xs rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300"><Trash2 className="w-3.5 h-3.5" /></Button></div></div>))}{labels.length === 0 && (<div className="text-center py-16"><Music2 className="w-12 h-12 text-zinc-700 mx-auto mb-3" /><p className="text-zinc-500">Nenhuma gravadora criada</p></div>)}
+                  {labels.map((label) => (<div key={label.id} className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">{label.profile_picture ? (<img src={label.profile_picture} alt="" className="w-11 h-11 rounded-xl object-cover flex-shrink-0 ring-1 ring-white/10" />) : (<div className="w-11 h-11 rounded-xl bg-gradient-to-br from-slate-400/40 to-slate-600/40 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{label.name?.[0]?.toUpperCase() || 'G'}</div>)}<div className="flex-1 min-w-0"><p className="text-sm font-semibold text-white truncate">{label.name}</p>{label.managed_artists && label.managed_artists.length > 0 && (<p className="text-xs text-[#c0c0c8] mt-1">{label.managed_artists.length} artista(s)</p>)}</div><div className="flex gap-2"><Button variant="ghost" size="sm" onClick={() => setEditingUser({ ...label, isLabel: true })} className="h-8 px-2.5 text-xs rounded-lg bg-white/5 hover:bg-white/10"><Edit2 className="w-3.5 h-3.5 mr-1" /> Gerenciar</Button><Button variant="ghost" size="sm" onClick={() => { if (confirm('Excluir esta gravadora?')) deleteLabelMutation.mutate(label.id); }} className="h-8 px-2.5 text-xs rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300"><Trash2 className="w-3.5 h-3.5" /></Button></div></div>))}{labels.length === 0 && (<div className="text-center py-16"><Music2 className="w-12 h-12 text-zinc-700 mx-auto mb-3" /><p className="text-zinc-500">Nenhuma gravadora criada</p></div>)}
                 </div>
               </div>
             </div>
@@ -788,6 +788,38 @@ export default function AdminDashboard() {
                   Sincronizar Agora
                 </Button>
               </div>
+              <div className="bg-[#181818] rounded-2xl border border-white/5 p-6 hover:border-emerald-500/20 transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+                  <Music className="w-5 h-5 text-emerald-400" />
+                </div>
+                <h3 className="font-bold text-white mb-2">Adicionar Música Teste</h3>
+                <p className="text-sm text-zinc-400 mb-4">Cria uma música de exemplo com áudio real pra você testar o player, playlists e avaliações.</p>
+                <Button
+                  onClick={async () => {
+                    try {
+                      const n = songs.filter(s => s.title?.startsWith('Faixa de Teste')).length + 1;
+                      await base44.entities.Song.create({
+                        title: n === 1 ? 'Faixa de Teste' : `Faixa de Teste ${n}`,
+                        artist: 'Artista Teste',
+                        album: '',
+                        type: 'single',
+                        genre: 'electronic',
+                        cover_url: '',
+                        audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+                        duration: 319,
+                        plays: 0,
+                        rating: 0,
+                        rating_count: 0,
+                        is_favorite: false,
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['songs'] });
+                      toast.success('Música de teste adicionada!');
+                    } catch { toast.error('Erro ao criar música de teste'); }
+                  }}
+                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-xl">
+                  Adicionar Música Teste
+                </Button>
+              </div>
               <div className="bg-[#181818] rounded-2xl border border-white/5 p-6 hover:border-[#c0c0c8]/20 transition-colors">
                 <div className="w-10 h-10 rounded-xl bg-[#c0c0c8]/10 flex items-center justify-center mb-4">
                   <BarChart3 className="w-5 h-5 text-[#c0c0c8]" />
@@ -837,7 +869,7 @@ export default function AdminDashboard() {
               <TabsContent value="dados" className="space-y-4 p-6">
                 <div className="flex flex-col items-center gap-3">
                   <div className="relative group">
-                    <div className="w-24 h-24 rounded-2xl overflow-hidden ring-2 ring-white/10 bg-gradient-to-br from-cyan-500/40 to-blue-500/40">
+                    <div className="w-24 h-24 rounded-2xl overflow-hidden ring-2 ring-white/10 bg-gradient-to-br from-slate-400/40 to-slate-600/40">
                       {editingUser.profile_picture ? (
                         <img src={editingUser.profile_picture} alt="" className="w-full h-full object-cover" />
                       ) : (
