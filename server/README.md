@@ -31,10 +31,13 @@ This is a normal Node process + a `Dockerfile`, so it runs on anything that
 runs Docker. A few options, roughly easiest first:
 
 - **Railway / Render / Fly.io** — connect this `server/` folder (or the
-  Dockerfile), add a persistent volume mounted at `/app/data` and
-  `/app/uploads` (this is the part that matters — without it your data
-  resets on every redeploy), set the environment variables from
-  `.env.example`, deploy. All three have a free/trial tier.
+  Dockerfile), add a persistent volume (this is the part that matters —
+  without it your data resets on every redeploy), set the environment
+  variables from `.env.example`, deploy. All three have a free/trial tier.
+  **Railway only allows one volume per service** — if that's where you're
+  deploying, mount that single volume at `/app/uploads` and set
+  `DATA_DIR=/app/uploads/data` (instead of the default `/app/data`) so the
+  SQLite file lives inside the same persisted volume as the uploads.
 - **Any VPS you already have** (or a cheap one — Hetzner, DigitalOcean,
   Oracle Cloud's free tier):
   ```bash
