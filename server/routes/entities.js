@@ -2,6 +2,7 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const { db, getEntityConfig, serializeRow, deserializeRow } = require('../db');
 const { requireAuth } = require('../auth');
+const { extractUploadUrls, cleanupOrphanedFiles } = require('../fileCleanup');
 
 const router = express.Router({ mergeParams: true });
 
@@ -122,6 +123,10 @@ router.put('/:entity/:id', requireAuth, (req, res, next) => {
       db.prepare(`update ${config.table} set ${setClause} where id = ?`).run(...columns.map((c) => row[c]), row.updated_date, req.params.id);
     }
     const updated = db.prepare(`select * from ${config.table} where id = ?`).get(req.params.id);
+    // Runs after the update is committed, so e.g. a replaced cover_url is
+    // only deleted from uploads/ once nothing (including this row's new
+    // value) references the old file anymore.
+    cleanupOrphanedFiles(extractUploadUrls(existing, config.table));
     res.json(stripSecrets(entityName, deserializeRow(config, updated)));
   } catch (err) { next(err); }
 });
@@ -135,6 +140,7 @@ router.delete('/:entity/:id', requireAuth, (req, res, next) => {
     if (!canWrite(entityName, req, existing)) return res.status(403).json({ error: 'Forbidden' });
 
     db.prepare(`delete from ${config.table} where id = ?`).run(req.params.id);
+    cleanupOrphanedFiles(extractUploadUrls(existing, config.table));
     res.json({ success: true });
   } catch (err) { next(err); }
 });

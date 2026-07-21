@@ -4,6 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const { OAuth2Client } = require('google-auth-library');
 const { db, getEntityConfig, serializeRow, deserializeRow } = require('../db');
 const { signToken, requireAuth } = require('../auth');
+const { extractUploadUrls, cleanupOrphanedFiles } = require('../fileCleanup');
 
 const router = express.Router();
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'steffanbaum123@gmail.com')
@@ -134,6 +135,7 @@ router.get('/me', requireAuth, (req, res) => {
 
 router.put('/me', requireAuth, (req, res) => {
   const config = userConfig();
+  const existing = db.prepare('select * from users where id = ?').get(req.userId);
   const patch = serializeRow(config, req.body || {});
   delete patch.id;
   delete patch.password_hash;
@@ -145,6 +147,7 @@ router.put('/me', requireAuth, (req, res) => {
     db.prepare(`update users set ${setClause} where id = ?`).run(...columns.map((c) => patch[c]), patch.updated_date, req.userId);
   }
   const user = db.prepare('select * from users where id = ?').get(req.userId);
+  cleanupOrphanedFiles(extractUploadUrls(existing, 'users'));
   const { password_hash, ...safeUser } = deserializeRow(config, user);
   res.json(safeUser);
 });
