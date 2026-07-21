@@ -38,6 +38,7 @@ export default function GoogleSignInButton({ onSuccess, onError }) {
             try {
               const profile = decodeJwtPayload(response.credential);
               onSuccess({
+                idToken: response.credential,
                 sub: profile.sub,
                 email: profile.email,
                 name: profile.name,

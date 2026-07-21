@@ -51,26 +51,41 @@ async function sha256Hex(text) {
   return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+function sortRows(rows, sort) {
+  if (!sort) return rows;
+  const desc = sort.startsWith('-');
+  const key = desc ? sort.slice(1) : sort;
+  return [...rows].sort((a, b) => {
+    const av = a[key];
+    const bv = b[key];
+    if (av === bv) return 0;
+    return (av > bv ? 1 : -1) * (desc ? -1 : 1);
+  });
+}
+
+// The current session's email, auto-stamped onto created_by like base44 used
+// to do server-side — without this, "my releases/songs" queries (which
+// filter by created_by === user.email) silently come back empty.
+function currentUserEmail() {
+  const uid = storage?.getItem(SESSION_KEY);
+  if (!uid) return undefined;
+  return readTable('User').find(u => u.id === uid)?.email;
+}
+
 function makeEntity(name) {
   return {
     async list(sort, limit) {
-      let rows = readTable(name);
-      if (sort) {
-        const desc = sort.startsWith('-');
-        const key = desc ? sort.slice(1) : sort;
-        rows = [...rows].sort((a, b) => {
-          const av = a[key];
-          const bv = b[key];
-          if (av === bv) return 0;
-          return (av > bv ? 1 : -1) * (desc ? -1 : 1);
-        });
-      }
+      const rows = sortRows(readTable(name), sort);
       return typeof limit === 'number' ? rows.slice(0, limit) : rows;
     },
-    async filter(query = {}, limit) {
-      const rows = readTable(name).filter(row =>
+    // filter(query, limit) or filter(query, sort, limit)
+    async filter(query = {}, sortOrLimit, maybeLimit) {
+      const sort = typeof sortOrLimit === 'string' ? sortOrLimit : undefined;
+      const limit = typeof sortOrLimit === 'number' ? sortOrLimit : maybeLimit;
+      let rows = readTable(name).filter(row =>
         Object.entries(query).every(([key, value]) => row[key] === value)
       );
+      rows = sortRows(rows, sort);
       return typeof limit === 'number' ? rows.slice(0, limit) : rows;
     },
     async get(id) {
@@ -84,14 +99,15 @@ function makeEntity(name) {
     },
     async create(data) {
       const rows = readTable(name);
-      const row = { id: genId(), created_date: nowIso(), updated_date: nowIso(), ...data };
+      const row = { id: genId(), created_date: nowIso(), updated_date: nowIso(), created_by: currentUserEmail(), ...data };
       rows.push(row);
       writeTable(name, rows);
       return row;
     },
     async bulkCreate(items) {
       const rows = readTable(name);
-      const created = items.map(data => ({ id: genId(), created_date: nowIso(), updated_date: nowIso(), ...data }));
+      const createdBy = currentUserEmail();
+      const created = items.map(data => ({ id: genId(), created_date: nowIso(), updated_date: nowIso(), created_by: createdBy, ...data }));
       writeTable(name, [...rows, ...created]);
       return created;
     },
