@@ -14,6 +14,7 @@ import ImageCropper from '@/components/profile/ImageCropper';
 
 export default function LabelDashboard() {
   const [user, setUser] = useState(null);
+  const [selectedLabelId, setSelectedLabelId] = useState(null);
   const [selectedArtistId, setSelectedArtistId] = useState('');
   const [showReleaseCreator, setShowReleaseCreator] = useState(false);
   const [cropperImage, setCropperImage] = useState(null);
@@ -30,46 +31,64 @@ export default function LabelDashboard() {
     }).catch(() => window.location.href = '/');
   }, []);
 
-  const { data: managedArtists = [] } = useQuery({
-    queryKey: ['managedArtists', user?.id],
-    queryFn: async () => {
-      if (!user?.managed_artists || user.managed_artists.length === 0) return [];
-      const artists = await Promise.all(
-        user.managed_artists.map(id => base44.entities.User.get(id).catch(() => null))
-      );
-      return artists.filter(Boolean);
-    },
+  const isStaffOrAdmin = user?.user_type === 'staff' || user?.role === 'admin';
+
+  // A "gravadora" is its own Label record (created by an admin), not the
+  // logged-in user — the user is just listed in that Label's representatives.
+  const { data: labels = [] } = useQuery({
+    queryKey: ['labels'],
+    queryFn: () => base44.entities.Label.list('-created_date', 100),
     enabled: !!user,
   });
 
+  const myLabels = labels.filter(l => l.representatives?.includes(user?.id));
+  const label = labels.find(l => l.id === selectedLabelId) || myLabels[0] || null;
+
+  useEffect(() => {
+    if (!selectedLabelId && myLabels.length > 0) setSelectedLabelId(myLabels[0].id);
+  }, [myLabels.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const { data: managedArtists = [] } = useQuery({
+    queryKey: ['managedArtists', label?.id],
+    queryFn: async () => {
+      if (!label?.managed_artists || label.managed_artists.length === 0) return [];
+      const artists = await Promise.all(
+        label.managed_artists.map(id => base44.entities.User.get(id).catch(() => null))
+      );
+      return artists.filter(Boolean);
+    },
+    enabled: !!label,
+  });
+
   const { data: labelPosts = [] } = useQuery({
-    queryKey: ['labelPosts', user?.id],
-    queryFn: () => base44.entities.Post.filter({ label_id: user?.id }, '-release_date', 50),
-    enabled: !!user,
+    queryKey: ['labelPosts', label?.id],
+    queryFn: () => base44.entities.Post.filter({ label_id: label?.id }, '-release_date', 50),
+    enabled: !!label,
     refetchInterval: 5000,
   });
 
   const { data: labelSongs = [] } = useQuery({
-    queryKey: ['labelSongs', user?.id],
-    queryFn: () => base44.entities.Song.filter({ label_id: user?.id }, '-created_date', 100),
-    enabled: !!user,
+    queryKey: ['labelSongs', label?.id],
+    queryFn: () => base44.entities.Song.filter({ label_id: label?.id }, '-created_date', 100),
+    enabled: !!label,
   });
 
   const { data: allUsers = [] } = useQuery({
     queryKey: ['allUsers'],
     queryFn: () => base44.entities.User.list('-created_date', 100),
+    enabled: !!label,
   });
 
   const { data: representatives = [] } = useQuery({
-    queryKey: ['representatives', user?.id],
+    queryKey: ['representatives', label?.id],
     queryFn: async () => {
-      if (!user?.representatives || user.representatives.length === 0) return [];
+      if (!label?.representatives || label.representatives.length === 0) return [];
       const reps = await Promise.all(
-        user.representatives.map(id => base44.entities.User.get(id).catch(() => null))
+        label.representatives.map(id => base44.entities.User.get(id).catch(() => null))
       );
       return reps.filter(Boolean);
     },
-    enabled: !!user,
+    enabled: !!label,
   });
 
   const deletePostMutation = useMutation({
@@ -78,7 +97,7 @@ export default function LabelDashboard() {
       const posts = await base44.entities.Post.list();
       const post = posts.find(p => p.id === postId);
       if (post) {
-        const songsToDelete = allSongs.filter(s => s.label_id === user.id && s.album === post.title);
+        const songsToDelete = allSongs.filter(s => s.label_id === label.id && s.album === post.title);
         await Promise.all(songsToDelete.map(song => base44.entities.Song.delete(song.id)));
       }
       await base44.entities.Post.delete(postId);
@@ -91,68 +110,55 @@ export default function LabelDashboard() {
   });
 
   const updateLabelMutation = useMutation({
-    mutationFn: async (data) => {
-      await base44.entities.User.update(user.id, data);
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['auth'] });
-      const updatedUser = await base44.auth.me();
-      setUser(updatedUser);
+    mutationFn: async (data) => base44.entities.Label.update(label.id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['labels'] });
       toast.success('Gravadora atualizada');
     }
   });
 
   const addRepresentativeMutation = useMutation({
     mutationFn: async (repId) => {
-      const reps = user.representatives || [];
+      const reps = label.representatives || [];
       if (!reps.includes(repId)) {
-        await base44.entities.User.update(user.id, { representatives: [...reps, repId] });
+        await base44.entities.Label.update(label.id, { representatives: [...reps, repId] });
         await base44.entities.User.update(repId, { user_type: 'gravadora' });
       }
     },
-    onSuccess: async () => {
-      const updatedUser = await base44.entities.User.get(user.id);
-      setUser(updatedUser);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['labels'] });
       queryClient.invalidateQueries({ queryKey: ['representatives'] });
-      queryClient.invalidateQueries({ queryKey: ['managedArtists'] });
       setSearchRepresentative('');
       setShowAddRep(false);
-      toast.success('Representante adicionado como gravadora');
+      toast.success('Representante adicionado');
     }
   });
 
   const removeRepresentativeMutation = useMutation({
     mutationFn: async (repId) => {
-      const reps = (user.representatives || []).filter(id => id !== repId);
-      await base44.entities.User.update(user.id, { representatives: reps });
-      
-      const otherLabels = await base44.entities.User.filter({}, 100);
-      const isRepForOthers = otherLabels.some(label => 
-        label.id !== user.id && label.representatives?.includes(repId)
-      );
-      
+      const reps = (label.representatives || []).filter(id => id !== repId);
+      await base44.entities.Label.update(label.id, { representatives: reps });
+
+      const isRepForOthers = labels.some(l => l.id !== label.id && l.representatives?.includes(repId));
       if (!isRepForOthers) {
         await base44.entities.User.update(repId, { user_type: 'user' });
       }
     },
-    onSuccess: async () => {
-      const updatedUser = await base44.entities.User.get(user.id);
-      setUser(updatedUser);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['labels'] });
       queryClient.invalidateQueries({ queryKey: ['representatives'] });
-      queryClient.invalidateQueries({ queryKey: ['managedArtists'] });
       toast.success('Representante removido');
     }
   });
 
   const removeArtistMutation = useMutation({
     mutationFn: async (artistId) => {
-      const artists = (user.managed_artists || []).filter(id => id !== artistId);
-      await base44.entities.User.update(user.id, { managed_artists: artists });
+      const artists = (label.managed_artists || []).filter(id => id !== artistId);
+      await base44.entities.Label.update(label.id, { managed_artists: artists });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['managedArtists'] });
-      queryClient.invalidateQueries({ queryKey: ['auth'] });
-      base44.auth.me().then(setUser);
+      queryClient.invalidateQueries({ queryKey: ['labels'] });
       toast.success('Artista desvinculado');
     }
   });
@@ -191,6 +197,35 @@ export default function LabelDashboard() {
     );
   }
 
+  if (!label) {
+    return (
+      <div className="flex items-center justify-center min-h-screen px-6">
+        <div className="flex flex-col items-center gap-4 text-center max-w-md">
+          <AlertCircle className="w-8 h-8 text-[#c0c0c8]" />
+          {isStaffOrAdmin && labels.length > 0 ? (
+            <>
+              <p className="text-white font-semibold">Escolha uma gravadora para gerenciar</p>
+              <Select value={selectedLabelId || ''} onValueChange={setSelectedLabelId}>
+                <SelectTrigger className="bg-[#181818] border-[#383838] text-white w-64">
+                  <SelectValue placeholder="Selecione uma gravadora" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#282828] border-[#383838]">
+                  {labels.map((l) => (
+                    <SelectItem key={l.id} value={l.id} className="text-white">{l.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          ) : (
+            <p className="text-[#B3B3B3]">
+              Sua conta ainda não está associada a nenhuma gravadora. Peça a um admin para te adicionar como representante em Admin → Gravadoras.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pb-32">
       {/* Hero Header */}
@@ -198,7 +233,7 @@ export default function LabelDashboard() {
         <div className="absolute inset-0 bg-gradient-to-br from-[#c0c0c8]/20 via-[#121212] to-[#e5e5ea]/10" />
         <div className="relative px-6 lg:px-8 pt-8 pb-8">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            {/* Avatar & Logo */}
+            {/* Label logo */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -219,8 +254,8 @@ export default function LabelDashboard() {
               }}
             >
               <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden ring-2 ring-[#c0c0c8]/30 shadow-2xl shadow-[#c0c0c8]/20 bg-gradient-to-br from-[#c0c0c8] to-[#e5e5ea] flex items-center justify-center">
-                {user.profile_picture ? (
-                  <img src={user.profile_picture} alt="" className="w-full h-full object-cover" />
+                {label.profile_picture ? (
+                  <img src={label.profile_picture} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <Music className="w-12 h-12 text-white/60" />
                 )}
@@ -240,9 +275,7 @@ export default function LabelDashboard() {
               <div className="flex items-center gap-3 mb-2">
                 <span className="text-xs font-semibold uppercase tracking-wider text-[#c0c0c8] bg-[#c0c0c8]/10 px-3 py-1 rounded-full">Gravadora</span>
               </div>
-              <h1 className="text-3xl md:text-5xl font-black text-white mb-1">
-                {user.gravadora_name || user.display_name || user.full_name}
-              </h1>
+              <h1 className="text-3xl md:text-5xl font-black text-white mb-1">{label.name}</h1>
               <p className="text-zinc-400 text-sm md:text-base">Dashboard da Gravadora — Gerencie seus artistas e publicações</p>
             </motion.div>
 
@@ -252,7 +285,7 @@ export default function LabelDashboard() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <Button 
+              <Button
                 onClick={() => {
                   if (selectedArtistId) setShowReleaseCreator(true);
                   else toast.error('Selecione um artista primeiro');
@@ -641,18 +674,14 @@ export default function LabelDashboard() {
               <div>
                 <label className="text-sm font-medium text-[#B3B3B3] mb-2 block">Nome da Gravadora</label>
                 <Input
-                  defaultValue={user.gravadora_name || user.display_name || ''}
+                  defaultValue={label.name || ''}
                   onBlur={(e) => {
-                    if (e.target.value !== (user.gravadora_name || user.display_name)) {
-                      updateLabelMutation.mutate({ gravadora_name: e.target.value, display_name: e.target.value });
+                    if (e.target.value && e.target.value !== label.name) {
+                      updateLabelMutation.mutate({ name: e.target.value });
                     }
                   }}
                   className="bg-[#282828] border-[#383838] text-white placeholder-[#535353]"
                 />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#B3B3B3] mb-2 block">Email</label>
-                <p className="text-sm text-zinc-400 bg-[#282828] rounded-lg p-3">{user.email}</p>
               </div>
             </motion.div>
           </TabsContent>
@@ -685,9 +714,9 @@ export default function LabelDashboard() {
         onClose={() => setShowReleaseCreator(false)}
         managedArtist={selectedArtistObject}
         labelContext={{
-          label_id: user?.id,
-          label_name: user?.gravadora_name || user?.display_name || user?.full_name,
-          label_logo: user?.profile_picture || '',
+          label_id: label?.id,
+          label_name: label?.name,
+          label_logo: label?.profile_picture || '',
         }}
         onSuccess={() => {
           setShowReleaseCreator(false);
