@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ArtistNameBanner from '@/components/home/ArtistNameBanner';
+import { hasUserType } from '@/lib/utils';
 
 const pills = [
   { label: 'Tudo', key: 'all' },
@@ -124,7 +125,7 @@ export default function Home() {
   const featuredSong = topPlayed[0];
   const featuredSongScheduled = featuredSong ? isSongScheduled(featuredSong) : false;
   const recentAlbums = posts.filter(p => p.type === 'album' || p.type === 'ep').slice(0, 8);
-  const songArtists = artists.filter(a => a.user_type === 'artista').slice(0, 5);
+  const songArtists = artists.filter(a => hasUserType(a, 'artista')).slice(0, 5);
 
   const { data: featuredArtist } = useQuery({
     queryKey: ['featured-artist', featuredSong?.artist],

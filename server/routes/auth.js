@@ -32,7 +32,7 @@ function insertUser(fields) {
     profile_picture: '',
     profile_banner: '',
     bio: '',
-    user_type: 'ouvinte',
+    user_type: ['ouvinte'],
     role: 'user',
     verified: false,
     profile_completed: false,

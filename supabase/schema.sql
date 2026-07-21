@@ -17,7 +17,7 @@ create table if not exists public.profiles (
   profile_picture text,
   profile_banner text,
   bio text,
-  user_type text not null default 'ouvinte', -- ouvinte | artista | gravadora | staff
+  user_type text[] not null default '{ouvinte}', -- any of: ouvinte, artista, gravadora, staff (a user can hold more than one)
   role text not null default 'user',          -- user | admin
   verified boolean not null default false,
   profile_completed boolean not null default false,
@@ -196,7 +196,7 @@ begin
     chosen_name,
     new.raw_user_meta_data->>'avatar_url',
     case when is_first or new.email = any(admin_emails) then 'admin' else 'user' end,
-    'ouvinte',
+    array['ouvinte'],
     coalesce(new.raw_user_meta_data->>'avatar_url' is not null, false)
   )
   on conflict (id) do nothing;

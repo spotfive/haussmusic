@@ -38,7 +38,7 @@ db.exec(`
     profile_picture text,
     profile_banner text,
     bio text,
-    user_type text not null default 'ouvinte',
+    user_type text not null default '["ouvinte"]',
     role text not null default 'user',
     verified integer not null default 0,
     profile_completed integer not null default 0,
@@ -153,6 +153,7 @@ db.exec(`
     profile_picture text,
     verified integer not null default 0,
     user_type text not null default 'artista',
+    created_by text,
     created_date text not null,
     updated_date text not null
   );
@@ -188,14 +189,39 @@ db.exec(`
     id text primary key,
     key text not null unique,
     value text,
+    created_by text,
     created_date text not null,
     updated_date text not null
   );
 `);
 
+// Lightweight migration: add columns that got introduced after a table
+// already existed on disk. "create table if not exists" above only
+// applies to brand-new databases, so older ones need this too.
+for (const [table, column, definition] of [
+  ['artists', 'created_by', 'text'],
+  ['app_settings', 'created_by', 'text'],
+]) {
+  const cols = db.prepare(`pragma table_info(${table})`).all();
+  if (!cols.some((c) => c.name === column)) {
+    db.exec(`alter table ${table} add column ${column} ${definition}`);
+  }
+}
+
+// Migration: user_type used to be a single string column (e.g. "gravadora").
+// It's now a JSON array (people can hold more than one cargo at once) —
+// wrap any leftover plain-string values so existing accounts keep their
+// cargo instead of losing it. Safe to run on every startup: once a value
+// starts with "[" this no longer matches it.
+db.exec(`
+  update users
+  set user_type = '["' || replace(user_type, '"', '') || '"]'
+  where user_type is not null and user_type != '' and substr(user_type, 1, 1) != '[';
+`);
+
 // entity name (as used by the frontend) -> { table, json: [...], bool: [...] }
 const ENTITIES = {
-  User: { table: 'users', json: ['managed_artists', 'representatives', 'social_links'], bool: ['verified', 'profile_completed'] },
+  User: { table: 'users', json: ['managed_artists', 'representatives', 'social_links', 'user_type'], bool: ['verified', 'profile_completed'] },
   Song: { table: 'songs', json: ['lyrics'], bool: ['is_favorite', 'published_by_label'] },
   Post: { table: 'posts', json: ['tracks'], bool: ['is_featured', 'is_scheduled', 'published_by_label'] },
   Playlist: { table: 'playlists', json: ['song_ids'], bool: ['is_public'] },

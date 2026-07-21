@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { TikTokIcon, SpotifyIcon } from '@/components/social/SocialBrandIcons';
+import { hasUserType } from '@/lib/utils';
 
 function VerifiedBadge() {
   return (
@@ -166,7 +167,7 @@ export default function ArtistProfile() {
 
             <div className="flex-1 pb-2">
               <div className="text-sm text-zinc-200 mb-1">
-                {artist.user_type === 'artista' ? '🎤 Artista' : artist.user_type === 'staff' ? '⭐ Staff' : '🎧 Usuário'}
+                {hasUserType(artist, 'artista') ? '🎤 Artista' : hasUserType(artist, 'staff') ? '⭐ Staff' : '🎧 Usuário'}
               </div>
               <h1 className="text-4xl lg:text-5xl font-black text-white mb-2">{artist.display_name || artist.full_name}</h1>
               <div className="flex items-center gap-6 text-sm text-zinc-300 flex-wrap">

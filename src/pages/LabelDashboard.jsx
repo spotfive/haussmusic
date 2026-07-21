@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from 'sonner';
 import ReleaseCreatorPanel from '@/components/releases/ReleaseCreatorPanel';
 import ImageCropper from '@/components/profile/ImageCropper';
+import { hasUserType, withUserType, withoutUserType } from '@/lib/utils';
 
 export default function LabelDashboard() {
   const [user, setUser] = useState(null);
@@ -24,14 +25,14 @@ export default function LabelDashboard() {
 
   useEffect(() => {
     base44.auth.me().then(u => {
-      if (u.user_type !== 'gravadora' && u.user_type !== 'staff' && u.role !== 'admin') {
+      if (!hasUserType(u, 'gravadora') && !hasUserType(u, 'staff') && u.role !== 'admin') {
         window.location.href = '/';
       }
       setUser(u);
     }).catch(() => window.location.href = '/');
   }, []);
 
-  const isStaffOrAdmin = user?.user_type === 'staff' || user?.role === 'admin';
+  const isStaffOrAdmin = hasUserType(user, 'staff') || user?.role === 'admin';
 
   // A "gravadora" is its own Label record (created by an admin), not the
   // logged-in user — the user is just listed in that Label's representatives.
@@ -122,7 +123,8 @@ export default function LabelDashboard() {
       const reps = label.representatives || [];
       if (!reps.includes(repId)) {
         await base44.entities.Label.update(label.id, { representatives: [...reps, repId] });
-        await base44.entities.User.update(repId, { user_type: 'gravadora' });
+        const repUser = allUsers.find(u => u.id === repId);
+        await base44.entities.User.update(repId, { user_type: withUserType(repUser, 'gravadora') });
       }
     },
     onSuccess: () => {
@@ -141,7 +143,8 @@ export default function LabelDashboard() {
 
       const isRepForOthers = labels.some(l => l.id !== label.id && l.representatives?.includes(repId));
       if (!isRepForOthers) {
-        await base44.entities.User.update(repId, { user_type: 'user' });
+        const repUser = representatives.find(u => u.id === repId);
+        await base44.entities.User.update(repId, { user_type: withoutUserType(repUser, 'gravadora') });
       }
     },
     onSuccess: () => {
@@ -186,7 +189,7 @@ export default function LabelDashboard() {
     );
   }
 
-  if (user.user_type !== 'gravadora' && user.user_type !== 'staff' && user.role !== 'admin') {
+  if (!hasUserType(user, 'gravadora') && !hasUserType(user, 'staff') && user.role !== 'admin') {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-3 text-center">

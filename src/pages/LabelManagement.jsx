@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from 'sonner';
+import { hasUserType } from '@/lib/utils';
 
 export default function LabelManagement() {
   const queryClient = useQueryClient();
@@ -16,7 +17,7 @@ export default function LabelManagement() {
 
   useEffect(() => {
     base44.auth.me().then(u => {
-      if (u.user_type !== 'staff' && u.role !== 'admin') {
+      if (!hasUserType(u, 'staff') && u.role !== 'admin') {
         toast.error('Acesso negado. Apenas staffs e admins.');
         setTimeout(() => window.location.href = '/', 1500);
       }
@@ -90,7 +91,7 @@ export default function LabelManagement() {
     );
   }
 
-  if (user.user_type !== 'staff' && user.role !== 'admin') {
+  if (!hasUserType(user, 'staff') && user.role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -300,10 +301,10 @@ export default function LabelManagement() {
                        <SelectValue placeholder="Selecione um representante" />
                      </SelectTrigger>
                      <SelectContent className="bg-[#1a1a1a] border-white/10">
-                       {users.filter(u => u.user_type === 'artista' && !editingLabel.managed_artists?.includes(u.id)).length === 0 ? (
+                       {users.filter(u => hasUserType(u, 'artista') && !editingLabel.managed_artists?.includes(u.id)).length === 0 ? (
                          <div className="text-xs text-zinc-500 p-2">Nenhum artista disponível</div>
                        ) : (
-                         users.filter(u => u.user_type === 'artista' && !editingLabel.managed_artists?.includes(u.id)).map(u => (
+                         users.filter(u => hasUserType(u, 'artista') && !editingLabel.managed_artists?.includes(u.id)).map(u => (
                            <SelectItem key={u.id} value={u.id} className="text-white text-xs">
                              {u.display_name || u.full_name || 'Sem nome'}
                            </SelectItem>
@@ -318,7 +319,7 @@ export default function LabelManagement() {
                      <p className="text-xs text-[#B3B3B3]">Artistas associados:</p>
                      {editingLabel.managed_artists.map(artistId => {
                        const artist = users.find(u => u.id === artistId);
-                       if (!artist || artist.user_type !== 'artista') return null;
+                       if (!artist || !hasUserType(artist, 'artista')) return null;
                        return (
                          <div key={artistId} className="flex items-center justify-between bg-white/5 rounded-lg p-3">
                            <span className="text-sm text-white">{artist.display_name || artist.full_name || 'Sem nome'}</span>

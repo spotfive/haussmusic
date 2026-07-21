@@ -10,7 +10,16 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from 'sonner';
+import { hasUserType, userTypeList, withUserType, withoutUserType } from '@/lib/utils';
+
+const CARGO_OPTIONS = [
+  { value: 'ouvinte', label: '🎧 Ouvinte' },
+  { value: 'artista', label: '🎤 Artista' },
+  { value: 'gravadora', label: '🏷️ Gravadora' },
+  { value: 'staff', label: '⭐ Staff' },
+];
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -100,19 +109,27 @@ export default function AdminDashboard() {
     onError: () => toast.error('Erro ao remover banner'),
   });
 
-  // Unified "cargo" selector: ouvinte/artista/gravadora/staff live on user_type,
-  // admin lives on the separate `role` field — this mutation sets whichever
-  // combination matches the picked cargo and keeps the Artist mirror row in sync.
-  const updateUserRoleMutation = useMutation({
+  // Cargos are now multi-select: ouvinte/artista/gravadora/staff live together
+  // in the user_type array, admin lives on the separate `role` field. Each
+  // call toggles exactly one cargo on/off, keeping the Artist mirror row
+  // (used for the public artist listing) in sync with the artista cargo.
+  const toggleUserCargoMutation = useMutation({
     mutationFn: async ({ userId, cargo }) => {
-      const isAdmin = cargo === 'admin';
-      await base44.entities.User.update(userId, isAdmin ? { role: 'admin' } : { role: 'user', user_type: cargo });
+      const u = users.find(u => u.id === userId);
+      if (!u) return;
 
-      if (!isAdmin) {
-        const u = users.find(u => u.id === userId);
+      if (cargo === 'admin') {
+        await base44.entities.User.update(userId, { role: u.role === 'admin' ? 'user' : 'admin' });
+        return;
+      }
+
+      const hadCargo = hasUserType(u, cargo);
+      await base44.entities.User.update(userId, { user_type: hadCargo ? withoutUserType(u, cargo) : withUserType(u, cargo) });
+
+      if (cargo === 'artista') {
         const existingArtists = await base44.entities.Artist.list();
         const existingArtist = existingArtists.find(a => a.user_id === userId);
-        if (cargo === 'artista') {
+        if (!hadCargo) {
           const artistData = { user_id: userId, display_name: u?.display_name || u?.full_name, email: u?.email, profile_picture: u?.profile_picture, verified: u?.verified || false, user_type: 'artista' };
           if (existingArtist) await base44.entities.Artist.update(existingArtist.id, artistData);
           else await base44.entities.Artist.create(artistData);
@@ -124,10 +141,11 @@ export default function AdminDashboard() {
     onMutate: async ({ userId, cargo }) => {
       await queryClient.cancelQueries({ queryKey: ['users'] });
       const prev = queryClient.getQueryData(['users']);
-      queryClient.setQueryData(['users'], (old) => old?.map(u => u.id === userId
-        ? (cargo === 'admin' ? { ...u, role: 'admin' } : { ...u, role: 'user', user_type: cargo })
-        : u
-      ));
+      queryClient.setQueryData(['users'], (old) => old?.map(u => {
+        if (u.id !== userId) return u;
+        if (cargo === 'admin') return { ...u, role: u.role === 'admin' ? 'user' : 'admin' };
+        return { ...u, user_type: hasUserType(u, cargo) ? withoutUserType(u, cargo) : withUserType(u, cargo) };
+      }));
       return { prev };
     },
     onError: (err, vars, ctx) => { queryClient.setQueryData(['users'], ctx.prev); toast.error('Erro ao atualizar cargo'); },
@@ -208,9 +226,10 @@ export default function AdminDashboard() {
 
       if (data.representatives && data.representatives.length > 0) {
         await Promise.all(
-          data.representatives.map(repId =>
-            base44.entities.User.update(repId, { user_type: 'gravadora' })
-          )
+          data.representatives.map(repId => {
+            const rep = users.find(u => u.id === repId);
+            return base44.entities.User.update(repId, { user_type: withUserType(rep, 'gravadora') });
+          })
         );
       }
       return newLabel;
@@ -561,39 +580,61 @@ export default function AdminDashboard() {
                         )}
                       </div>
                       <p className="text-xs text-zinc-500 truncate">{u.email}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                          u.role === 'admin' ? 'bg-red-500/15 text-red-400' : 'bg-zinc-800 text-zinc-400'
-                        }`}>{u.role === 'admin' ? 'Admin' : 'Usuário'}</span>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                          u.user_type === 'artista' ? 'bg-[#c0c0c8]/15 text-[#e5e5ea]' :
-                          u.user_type === 'gravadora' ? 'bg-slate-400/15 text-slate-300' :
-                          u.user_type === 'staff' ? 'bg-amber-500/15 text-amber-400' :
-                          'bg-zinc-800 text-zinc-500'
-                        }`}>{u.user_type || 'ouvinte'}</span>
+                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                        {u.role === 'admin' && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded font-medium bg-red-500/15 text-red-400">Admin</span>
+                        )}
+                        {userTypeList(u).length > 0 ? (
+                          userTypeList(u).map((t) => (
+                            <span key={t} className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                              t === 'artista' ? 'bg-[#c0c0c8]/15 text-[#e5e5ea]' :
+                              t === 'gravadora' ? 'bg-slate-400/15 text-slate-300' :
+                              t === 'staff' ? 'bg-amber-500/15 text-amber-400' :
+                              'bg-zinc-800 text-zinc-500'
+                            }`}>{t}</span>
+                          ))
+                        ) : (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded font-medium bg-zinc-800 text-zinc-500">ouvinte</span>
+                        )}
                       </div>
                     </div>
                     {/* Actions */}
                     <div className="flex items-center gap-1.5 flex-shrink-0">
-                      <Select value={u.role === 'admin' ? 'admin' : (u.user_type || 'ouvinte')}
-                        onValueChange={(v) => {
-                          if (v !== 'admin' && u.role === 'admin' && u.id === user?.id) {
-                            toast.error('Você não pode remover seu próprio acesso de admin');
-                            return;
-                          }
-                          updateUserRoleMutation.mutate({ userId: u.id, cargo: v });
-                        }}>
-                        <SelectTrigger className="h-8 w-[120px] bg-white/5 border-white/10 text-white text-xs rounded-lg">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#1a1a1a] border-white/10">
-                          <SelectItem value="ouvinte" className="text-white text-xs">🎧 Ouvinte</SelectItem>
-                          <SelectItem value="artista" className="text-white text-xs">🎤 Artista</SelectItem>
-                          <SelectItem value="gravadora" className="text-white text-xs">🏷️ Gravadora</SelectItem>
-                          <SelectItem value="staff" className="text-white text-xs">⭐ Staff</SelectItem>
-                          <SelectItem value="admin" className="text-white text-xs">🛡️ Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-[120px] justify-between bg-white/5 border border-white/10 text-white text-xs rounded-lg hover:bg-white/10">
+                            Cargos
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="bg-[#1a1a1a] border-white/10">
+                          <DropdownMenuLabel className="text-zinc-400 text-xs">Cargos (pode marcar mais de um)</DropdownMenuLabel>
+                          <DropdownMenuSeparator className="bg-white/10" />
+                          {CARGO_OPTIONS.map((opt) => (
+                            <DropdownMenuCheckboxItem
+                              key={opt.value}
+                              checked={hasUserType(u, opt.value)}
+                              onCheckedChange={() => toggleUserCargoMutation.mutate({ userId: u.id, cargo: opt.value })}
+                              className="text-white text-xs"
+                            >
+                              {opt.label}
+                            </DropdownMenuCheckboxItem>
+                          ))}
+                          <DropdownMenuSeparator className="bg-white/10" />
+                          <DropdownMenuCheckboxItem
+                            checked={u.role === 'admin'}
+                            onCheckedChange={() => {
+                              if (u.role === 'admin' && u.id === user?.id) {
+                                toast.error('Você não pode remover seu próprio acesso de admin');
+                                return;
+                              }
+                              toggleUserCargoMutation.mutate({ userId: u.id, cargo: 'admin' });
+                            }}
+                            className="text-white text-xs"
+                          >
+                            🛡️ Admin
+                          </DropdownMenuCheckboxItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       <Button variant="ghost" size="sm"
                         onClick={() => toggleVerifiedMutation.mutate({ userId: u.id, verified: !u.verified })}
                         className={`h-8 px-2.5 text-xs rounded-lg transition-all ${
@@ -681,7 +722,8 @@ export default function AdminDashboard() {
                       if (!newLabelForm.representatives.includes(userId)) {
                         setNewLabelForm(prev => ({ ...prev, representatives: [...prev.representatives, userId] }));
                         try {
-                          await base44.entities.User.update(userId, { user_type: 'gravadora' });
+                          const rep = users.find(u => u.id === userId);
+                          await base44.entities.User.update(userId, { user_type: withUserType(rep, 'gravadora') });
                           await new Promise(r => setTimeout(r, 500));
                           await queryClient.invalidateQueries({ queryKey: ['users'] });
                           await queryClient.refetchQueries({ queryKey: ['users'] });
@@ -693,7 +735,7 @@ export default function AdminDashboard() {
                     }}>
                       <SelectTrigger className="h-8 bg-white/5 border-white/10 text-white text-xs"><SelectValue placeholder="Adicionar representante" /></SelectTrigger>
                       <SelectContent className="bg-[#1a1a1a] border-white/10">
-                        {users.filter(u => u.user_type !== 'gravadora' && !newLabelForm.representatives.includes(u.id)).map(u => (<SelectItem key={u.id} value={u.id} className="text-white text-xs">{u.display_name || u.full_name || 'Sem nome'}</SelectItem>))}
+                        {users.filter(u => !hasUserType(u, 'gravadora') && !newLabelForm.representatives.includes(u.id)).map(u => (<SelectItem key={u.id} value={u.id} className="text-white text-xs">{u.display_name || u.full_name || 'Sem nome'}</SelectItem>))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -987,7 +1029,7 @@ export default function AdminDashboard() {
                             }));
                             setRepSearchTerm('');
                             try {
-                              await base44.entities.User.update(u.id, { user_type: 'gravadora' });
+                              await base44.entities.User.update(u.id, { user_type: withUserType(u, 'gravadora') });
                               await queryClient.invalidateQueries({ queryKey: ['users'] });
                             } catch (err) {
                               toast.error('Erro ao atualizar representante');
@@ -1042,10 +1084,10 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div className="mt-2 max-h-48 overflow-y-auto bg-[#1a1a1a] border border-white/10 rounded-lg">
-                    {users.filter(u => u.user_type === 'artista' && !editingUser.managed_artists?.includes(u.id) && (u.display_name?.toLowerCase().includes(artistSearchTerm.toLowerCase()) || u.full_name?.toLowerCase().includes(artistSearchTerm.toLowerCase()))).length === 0 ? (
+                    {users.filter(u => hasUserType(u, 'artista') && !editingUser.managed_artists?.includes(u.id) && (u.display_name?.toLowerCase().includes(artistSearchTerm.toLowerCase()) || u.full_name?.toLowerCase().includes(artistSearchTerm.toLowerCase()))).length === 0 ? (
                       <div className="text-xs text-zinc-500 p-3">Nenhum artista encontrado</div>
                     ) : (
-                      users.filter(u => u.user_type === 'artista' && !editingUser.managed_artists?.includes(u.id) && (u.display_name?.toLowerCase().includes(artistSearchTerm.toLowerCase()) || u.full_name?.toLowerCase().includes(artistSearchTerm.toLowerCase()))).map(u => (
+                      users.filter(u => hasUserType(u, 'artista') && !editingUser.managed_artists?.includes(u.id) && (u.display_name?.toLowerCase().includes(artistSearchTerm.toLowerCase()) || u.full_name?.toLowerCase().includes(artistSearchTerm.toLowerCase()))).map(u => (
                         <button
                           key={u.id}
                           onClick={() => {
@@ -1069,7 +1111,7 @@ export default function AdminDashboard() {
                     <p className="text-xs text-[#B3B3B3]">Artistas associados:</p>
                     {editingUser.managed_artists.map(artistId => {
                       const artist = users.find(u => u.id === artistId);
-                      if (!artist || artist.user_type !== 'artista') return null;
+                      if (!artist || !hasUserType(artist, 'artista')) return null;
                       return (
                         <div key={artistId} className="flex items-center justify-between bg-white/5 rounded-lg p-3">
                           <span className="text-sm text-white">{artist.display_name || artist.full_name || 'Sem nome'}</span>

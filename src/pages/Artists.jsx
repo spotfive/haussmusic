@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { hasUserType } from '@/lib/utils';
 
 
 export default function Artists() {
@@ -173,7 +174,7 @@ export default function Artists() {
     setTracks(tracks.filter((_, i) => i !== index));
   };
 
-  const canCreatePosts = user?.role === 'admin' || user?.user_type === 'artista' || user?.user_type === 'staff';
+  const canCreatePosts = user?.role === 'admin' || hasUserType(user, 'artista') || hasUserType(user, 'staff');
   const featuredPosts = posts.filter(p => p.is_featured);
   const recentPosts = posts.filter(p => !p.is_featured);
 

@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import ReleaseCreatorPanel from '@/components/releases/ReleaseCreatorPanel';
 import { TikTokIcon, SpotifyIcon } from '@/components/social/SocialBrandIcons';
+import { hasUserType } from '@/lib/utils';
 import { toast } from 'sonner';
 
 export default function ArtistDashboard() {
@@ -21,7 +22,7 @@ export default function ArtistDashboard() {
 
   useEffect(() => {
     base44.auth.me().then(u => {
-      if (u.role !== 'admin' && u.user_type !== 'artista' && u.user_type !== 'staff') {
+      if (u.role !== 'admin' && !hasUserType(u, 'artista') && !hasUserType(u, 'staff')) {
         window.location.href = '/';
       }
       setUser(u);
@@ -166,7 +167,7 @@ export default function ArtistDashboard() {
             >
               <div className="flex items-center gap-3 mb-2">
                 <span className="text-xs font-semibold uppercase tracking-wider text-[#c0c0c8] bg-[#c0c0c8]/10 px-3 py-1 rounded-full">
-                  {user.user_type === 'staff' ? 'Staff' : 'Artista'}
+                  {hasUserType(user, 'staff') ? 'Staff' : 'Artista'}
                 </span>
                 {user.verified && (
                   <span className="text-xs font-semibold text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full flex items-center gap-1">

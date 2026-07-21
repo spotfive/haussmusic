@@ -6,6 +6,7 @@ import { Home, Search, Library, Music2, Trophy, Shield, Award } from 'lucide-rea
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useAuth } from '@/lib/AuthContext';
+import { hasUserType } from '@/lib/utils';
 
 const navItems = [
   { icon: Home, label: 'Início', page: 'Home' },
@@ -86,7 +87,7 @@ export default function Sidebar({ currentPage }) {
         ))}
 
         {/* Artist Dashboard link */}
-        {(user?.user_type === 'artista' || user?.user_type === 'staff' || user?.role === 'admin') && (
+        {(hasUserType(user, 'artista') || hasUserType(user, 'staff') || user?.role === 'admin') && (
           <Link to={createPageUrl('ArtistDashboard')} className="w-full">
             <motion.div
               whileHover={{ scale: 1.05 }}
@@ -104,7 +105,7 @@ export default function Sidebar({ currentPage }) {
         )}
 
         {/* Label Dashboard link */}
-        {(user?.user_type === 'gravadora' || user?.role === 'admin') && (
+        {(hasUserType(user, 'gravadora') || user?.role === 'admin') && (
           <Link to={createPageUrl('LabelDashboard')} className="w-full">
             <motion.div
               whileHover={{ scale: 1.05 }}

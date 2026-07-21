@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Home, Search, Library, Music2, Trophy, Award } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { hasUserType } from '@/lib/utils';
 
 export default function Layout({ children, currentPageName }) {
   const queryClient = useQueryClient();
@@ -373,7 +374,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: Home, label: 'Início', page: 'Home' },
     { icon: Search, label: 'Buscar', page: 'Search' },
     { icon: Library, label: 'Biblioteca', page: 'Library' },
-    ...(user?.user_type === 'artista' || user?.user_type === 'staff'
+    ...(hasUserType(user, 'artista') || hasUserType(user, 'staff')
       ? [{ icon: Award, label: 'Artista', page: 'ArtistDashboard' }]
       : [{ icon: Music2, label: 'Artistas', page: 'Artists' }]
     ),

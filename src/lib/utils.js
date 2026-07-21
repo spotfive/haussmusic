@@ -21,6 +21,32 @@ export function isImageBackground(url) {
   return /\.(gif|png|jpe?g|webp)(\?|#|$)/i.test(url);
 }
 
+// user_type now holds an array of cargos (a person can be e.g. both
+// "artista" and "gravadora"), but stays backward-compatible with older
+// records that still have a single string value.
+export function hasUserType(user, type) {
+  const value = user?.user_type;
+  if (Array.isArray(value)) return value.includes(type);
+  return value === type;
+}
+
+export function userTypeList(user) {
+  const value = user?.user_type;
+  if (Array.isArray(value)) return value;
+  return value ? [value] : [];
+}
+
+export function withUserType(user, type) {
+  const current = userTypeList(user);
+  return current.includes(type) ? current : [...current, type];
+}
+
+export function withoutUserType(user, type) {
+  const current = userTypeList(user);
+  const next = current.filter((t) => t !== type);
+  return next.length > 0 ? next : ['ouvinte'];
+}
+
 export function decodeJwtPayload(token) {
   const base64Url = token.split('.')[1];
   const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
