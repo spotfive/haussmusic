@@ -200,10 +200,10 @@ export default function ImageCropper({ imageUrl, onSave, onCancel, aspectRatio =
           <button
             onClick={handleSave}
             disabled={saving || !imageLoaded}
-            className="flex-[2] py-3 rounded-2xl bg-[#c0c0c8] hover:bg-[#9B6CF7] text-white text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#c0c0c8]/25"
+            className="flex-[2] py-3 rounded-2xl btn-metal text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#c0c0c8]/25"
           >
             {saving ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" />
             ) : (
               <Check className="w-4 h-4" />
             )}

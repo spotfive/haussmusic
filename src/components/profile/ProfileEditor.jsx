@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { Camera, Save, Loader2, User } from 'lucide-react';
+import { Camera, Save, Loader2, User, Image as ImageIcon } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from 'sonner';
@@ -11,31 +11,37 @@ export default function ProfileEditor({ user, onUpdate }) {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showCropper, setShowCropper] = useState(false);
+  const [cropperTarget, setCropperTarget] = useState('photo'); // 'photo' | 'banner'
   const [tempImage, setTempImage] = useState('');
   const [profileData, setProfileData] = useState({
     display_name: user?.display_name || user?.full_name || '',
-    profile_picture: user?.profile_picture || ''
+    profile_picture: user?.profile_picture || '',
+    profile_banner: user?.profile_banner || ''
   });
 
   useEffect(() => {
     if (user) {
       setProfileData({
         display_name: user.display_name || user.full_name || '',
-        profile_picture: user.profile_picture || ''
+        profile_picture: user.profile_picture || '',
+        profile_banner: user.profile_banner || ''
       });
     }
-  }, [user?.display_name, user?.full_name, user?.profile_picture]);
+  }, [user?.display_name, user?.full_name, user?.profile_picture, user?.profile_banner]);
 
-  const handleUploadPhoto = async (e) => {
+  const handleUploadPhoto = async (e, target) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => { setTempImage(ev.target.result); setShowCropper(true); };
+    reader.onload = (ev) => { setTempImage(ev.target.result); setCropperTarget(target); setShowCropper(true); };
     reader.readAsDataURL(file);
   };
 
   const handleSaveCrop = ({ imageUrl }) => {
-    setProfileData(prev => ({ ...prev, profile_picture: imageUrl }));
+    setProfileData(prev => ({
+      ...prev,
+      [cropperTarget === 'banner' ? 'profile_banner' : 'profile_picture']: imageUrl
+    }));
     setShowCropper(false);
   };
 
@@ -50,6 +56,7 @@ export default function ProfileEditor({ user, onUpdate }) {
       await base44.auth.updateMe({
         display_name: profileData.display_name,
         profile_picture: profileData.profile_picture,
+        profile_banner: profileData.profile_banner,
         profile_completed: true
       });
 
@@ -71,6 +78,8 @@ export default function ProfileEditor({ user, onUpdate }) {
         {showCropper && (
           <ImageCropper
             imageUrl={tempImage}
+            aspectRatio={cropperTarget === 'banner' ? 16 / 6 : 1}
+            title={cropperTarget === 'banner' ? 'Recortar Banner' : 'Recortar Foto'}
             onSave={handleSaveCrop}
             onCancel={() => setShowCropper(false)}
           />
@@ -78,6 +87,27 @@ export default function ProfileEditor({ user, onUpdate }) {
       </AnimatePresence>
 
       <div className="space-y-6">
+      {/* Profile Banner */}
+      <div className="relative group">
+        <div className="w-full h-32 sm:h-40 rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-zinc-800 to-zinc-900">
+          {profileData.profile_banner ? (
+            <img src={profileData.profile_banner} alt="Banner" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageIcon className="w-8 h-8 text-white/30" />
+            </div>
+          )}
+        </div>
+        <label className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+          <Camera className="w-6 h-6 text-white" />
+          <span className="text-xs text-white font-medium">Alterar banner</span>
+          <input type="file" accept="image/*" className="hidden" onChange={(e) => handleUploadPhoto(e, 'banner')} />
+        </label>
+      </div>
+      <p className="text-xs text-zinc-500 -mt-4 text-center">
+        Esse banner aparece no seu perfil e no destaque de "Mais Ouvidas" quando sua música estiver em alta.
+      </p>
+
       {/* Profile Picture */}
       <div className="flex flex-col items-center gap-4">
         <div className="relative group">
@@ -90,14 +120,14 @@ export default function ProfileEditor({ user, onUpdate }) {
               </div>
             )}
           </div>
-          
+
           <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
             {uploading ? (
               <Loader2 className="w-8 h-8 text-white animate-spin" />
             ) : (
               <Camera className="w-8 h-8 text-white" />
             )}
-            <input type="file" accept="image/*" className="hidden" onChange={handleUploadPhoto} disabled={uploading} />
+            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleUploadPhoto(e, 'photo')} disabled={uploading} />
           </label>
         </div>
         <p className="text-sm text-zinc-500">Clique para alterar foto</p>

@@ -125,6 +125,17 @@ export default function Home() {
   const recentAlbums = posts.filter(p => p.type === 'album' || p.type === 'ep').slice(0, 8);
   const songArtists = artists.filter(a => a.user_type === 'artista').slice(0, 5);
 
+  const { data: featuredArtist } = useQuery({
+    queryKey: ['featured-artist', featuredSong?.artist],
+    queryFn: async () => {
+      const users = await base44.entities.User.list();
+      return users.find(u => u.display_name === featuredSong.artist || u.full_name === featuredSong.artist) || null;
+    },
+    enabled: !!featuredSong?.artist,
+  });
+
+  const featuredBackdrop = featuredArtist?.profile_banner || featuredSong?.cover_url;
+
   const playMutation = useMutation({
     mutationFn: (songId) => {
       const song = allSongs.find(s => s.id === songId);
@@ -240,12 +251,12 @@ export default function Home() {
               style={{ height: '280px' }}
               onClick={() => dispatchPlaySong(featuredSong)}
             >
-              {/* Background — capa da música como wallpaper */}
+              {/* Background — banner do artista (ou capa da música como fallback) */}
               <div className="absolute inset-0">
-                {featuredSong.cover_url ? (
+                {featuredBackdrop ? (
                   <>
                     <img
-                      src={featuredSong.cover_url}
+                      src={featuredBackdrop}
                       alt=""
                       className="w-full h-full object-cover"
                       style={{ filter: 'saturate(1.3) brightness(0.55)' }}
