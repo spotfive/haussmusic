@@ -25,8 +25,8 @@ function canWrite(entityName, req, existingRow) {
   if (!me) return false;
   if (me.role === 'admin') return true;
   if (ADMIN_ONLY_ENTITIES.has(entityName)) return false;
-  if (entityName === 'User') return true; // matches the app's existing "any signed-in user" trust model
   if (!existingRow) return true; // create: any authenticated user
+  if (entityName === 'User') return existingRow.id === me.id; // only your own account, never someone else's
   return existingRow.created_by === me.email;
 }
 
