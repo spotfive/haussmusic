@@ -1,35 +1,12 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, TrendingUp, Heart, Play, ListPlus } from 'lucide-react';
-import RatingStars from './RatingStars';
-import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Trophy, TrendingUp, Heart, Play } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import AddToPlaylistMenu from '@/components/playlist/AddToPlaylistMenu';
 
-export default function RankingCard({ item, rank, type, onRate, userRating }) {
-  const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
-  const [user, setUser] = useState(null);
-  const queryClient = useQueryClient();
-
-  React.useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-  }, []);
-
-  const { data: playlists = [] } = useQuery({
-    queryKey: ['playlists'],
-    queryFn: async () => {
-      const all = await base44.entities.Playlist.list('-created_date');
-      return all.filter(p => p.created_by === user?.email);
-    },
-    enabled: !!user && showPlaylistMenu,
-  });
-
-  const addToPlaylistMutation = useMutation({
-    mutationFn: ({ playlistId, songIds }) => base44.entities.Playlist.update(playlistId, { song_ids: songIds }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['playlists'] });
-      setShowPlaylistMenu(false);
-    },
-  });
+export default function RankingCard({ item, rank, type }) {
+  const isSong = !!item.audio_url;
 
   const getTrophyColor = (rank) => {
     if (rank === 1) return 'text-yellow-400';
@@ -45,16 +22,18 @@ export default function RankingCard({ item, rank, type, onRate, userRating }) {
     return 'from-zinc-700 to-zinc-800';
   };
 
-  // Only show playlist button for songs
-  const isSong = !!item.audio_url || type === 'plays';
+  const handlePlay = () => {
+    if (isSong) window.dispatchEvent(new CustomEvent('playSong', { detail: item }));
+  };
 
-  return (
+  const content = (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: rank * 0.05 }}
+      transition={{ delay: rank * 0.02 }}
       whileHover={{ x: 5, scale: 1.01 }}
-      className="group relative bg-white/5 rounded-2xl p-4 border border-white/10 hover:border-zinc-400/30 transition-all"
+      onClick={isSong ? handlePlay : undefined}
+      className={`group relative bg-white/5 rounded-2xl p-4 border border-white/10 hover:border-zinc-400/30 transition-all ${isSong ? 'cursor-pointer' : ''}`}
     >
       {/* Rank badge */}
       <div className="absolute -left-3 top-1/2 -translate-y-1/2">
@@ -69,8 +48,8 @@ export default function RankingCard({ item, rank, type, onRate, userRating }) {
 
       <div className="flex items-center gap-4 ml-6">
         {/* Cover */}
-        <div className="relative group/img">
-          <div className="w-20 h-20 rounded-xl overflow-hidden">
+        <div className="relative group/img flex-shrink-0">
+          <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-xl overflow-hidden">
             {item.cover_url ? (
               <img src={item.cover_url} alt={item.title} className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-300" />
             ) : (
@@ -84,6 +63,11 @@ export default function RankingCard({ item, rank, type, onRate, userRating }) {
               className="absolute inset-0 rounded-xl bg-yellow-400/20"
             />
           )}
+          {isSong && (
+            <div className="absolute inset-0 rounded-xl bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+              <Play className="w-6 h-6 text-white fill-current opacity-0 group-hover:opacity-100 transition-opacity ml-0.5" />
+            </div>
+          )}
         </div>
 
         {/* Info */}
@@ -95,97 +79,34 @@ export default function RankingCard({ item, rank, type, onRate, userRating }) {
             {item.artist}
             {item.featuring && <span className="text-zinc-600"> feat. {item.featuring}</span>}
           </p>
-          
-          <div className="flex items-center gap-4 mt-2 flex-wrap">
-            <RatingStars rating={item.rating || 0} size="sm" />
-            <span className="text-xs text-zinc-600">
-              {item.rating?.toFixed(1) || 0} ({item.rating_count || 0})
-            </span>
-            
-            {type === 'likes' && (
-              <div className="flex items-center gap-1 text-pink-400">
-                <Heart className="w-4 h-4 fill-current" />
-                <span className="text-sm font-semibold">{item.likes || 0}</span>
-              </div>
-            )}
-            
-            {type === 'plays' && (
-              <div className="flex items-center gap-1 text-cyan-400">
-                <Play className="w-4 h-4 fill-current" />
-                <span className="text-sm font-semibold">{item.plays || 0}</span>
-              </div>
+
+          <div className="flex items-center gap-1.5 mt-2">
+            {type === 'likes' ? (
+              <>
+                <Heart className="w-4 h-4 text-pink-400 fill-current" />
+                <span className="text-sm font-semibold text-pink-400">{(item.likes || 0).toLocaleString()}</span>
+                <span className="text-xs text-zinc-600">curtidas</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4 text-cyan-400 fill-current" />
+                <span className="text-sm font-semibold text-cyan-400">{(item.plays || 0).toLocaleString()}</span>
+                <span className="text-xs text-zinc-600">plays</span>
+              </>
             )}
           </div>
         </div>
 
-        {/* Rate & Actions */}
-        <div className="flex items-center gap-3">
-          {isSong && (
-            <div className="relative">
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                whileHover={{ scale: 1.1 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowPlaylistMenu(!showPlaylistMenu);
-                }}
-                className="p-2 rounded-full text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all"
-              >
-                <ListPlus className="w-5 h-5" />
-              </motion.button>
-              <AnimatePresence>
-                {showPlaylistMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9, y: -10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                    className="absolute right-0 top-full mt-2 w-48 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl z-50 overflow-hidden"
-                  >
-                    <div className="p-2 border-b border-zinc-800">
-                      <div className="text-xs text-zinc-500 px-2 py-1">Adicionar à playlist</div>
-                    </div>
-                    <div className="max-h-48 overflow-y-auto">
-                      {playlists.length > 0 ? (
-                        playlists.map((playlist) => (
-                          <button
-                            key={playlist.id}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const currentSongs = playlist.song_ids || [];
-                              if (!currentSongs.includes(item.id)) {
-                                addToPlaylistMutation.mutate({
-                                  playlistId: playlist.id,
-                                  songIds: [...currentSongs, item.id]
-                                });
-                              }
-                            }}
-                            className="w-full px-3 py-2 text-left text-sm text-white hover:bg-zinc-800 transition-colors flex items-center gap-2"
-                          >
-                            <ListPlus className="w-3 h-3" />
-                            {playlist.name}
-                          </button>
-                        ))
-                      ) : (
-                        <div className="px-3 py-4 text-xs text-zinc-600 text-center">
-                          Nenhuma playlist ainda
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-          <div className="flex flex-col items-end gap-2">
-            <RatingStars 
-              rating={userRating || 0}
-              onRate={onRate}
-              size="md"
-              interactive={true}
+        {/* Actions */}
+        {isSong && (
+          <div onClick={(e) => e.stopPropagation()} className="flex-shrink-0">
+            <AddToPlaylistMenu
+              songId={item.id}
+              buttonClassName="p-2.5 rounded-full text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all"
+              iconClassName="w-5 h-5"
             />
-            <span className="text-xs text-zinc-600">Sua nota</span>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Trending indicator for top 3 */}
@@ -200,4 +121,7 @@ export default function RankingCard({ item, rank, type, onRate, userRating }) {
       )}
     </motion.div>
   );
+
+  if (isSong) return content;
+  return <Link to={createPageUrl('Release') + '?id=' + item.id}>{content}</Link>;
 }

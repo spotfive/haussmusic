@@ -15,7 +15,7 @@ const navItems = [
 ];
 
 const libraryItems = [
-  { icon: Trophy, label: 'Rankings', page: 'Rankings' },
+  { icon: Trophy, label: 'HAUSS HITS', page: 'Rankings' },
 ];
 
 export default function Sidebar({ currentPage }) {
