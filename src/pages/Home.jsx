@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ArtistNameBanner from '@/components/home/ArtistNameBanner';
 import HomeHeroCarousel from '@/components/home/HomeHeroCarousel';
+import MoodPlaylists from '@/components/home/MoodPlaylists';
 import BackgroundMedia from '@/components/media/BackgroundMedia';
 import { DiscordIcon } from '@/components/social/SocialBrandIcons';
 import { hasUserType } from '@/lib/utils';
@@ -520,6 +521,9 @@ export default function Home() {
                       </div>
                     </section>
                   )}
+
+                  {/* Auto-curated mood collections built from the catalogue */}
+                  <MoodPlaylists songs={allSongs} onPlaySong={dispatchPlaySong} userEmail={user?.email} />
 
                   {/* Recent Releases */}
                   {recentSongs.length > 0 && (

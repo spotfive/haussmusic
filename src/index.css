@@ -161,6 +161,10 @@
 ::-webkit-scrollbar-thumb { background: #535353; border-radius: 100px; }
 ::-webkit-scrollbar-thumb:hover { background: #6a6a6a; }
 
+/* Hide the scrollbar on horizontal carousels (mood playlists row, etc.) */
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
 /* ===== Range Input ===== */
 input[type="range"] {
   -webkit-appearance: none; appearance: none;
