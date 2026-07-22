@@ -59,6 +59,7 @@ export default function ArtistProfile() {
       return allPosts.filter(p => (p.artist_id === artistId || p.created_by === artist?.email) && p.status === 'published');
     },
     enabled: !!artist,
+    refetchInterval: 3000,
   });
 
   const { data: songs = [] } = useQuery({
@@ -68,6 +69,7 @@ export default function ArtistProfile() {
       return allSongs.filter(s => s.artist_id === artistId || s.artist === artist?.display_name || s.artist === artist?.full_name);
     },
     enabled: !!artist,
+    refetchInterval: 3000,
   });
 
   const { data: labels = [] } = useQuery({

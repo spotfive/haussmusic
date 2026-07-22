@@ -89,6 +89,7 @@ export default function Home() {
   const { data: allSongs = [], isLoading: songsLoading } = useQuery({
     queryKey: ['songs'],
     queryFn: () => base44.entities.Song.list('-plays', 50),
+    refetchInterval: 3000,
   });
 
   const { data: posts = [] } = useQuery({
@@ -97,6 +98,7 @@ export default function Home() {
       const all = await base44.entities.Post.list('-created_date', 20);
       return all;
     },
+    refetchInterval: 3000,
   });
 
   const { data: artists = [] } = useQuery({

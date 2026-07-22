@@ -80,6 +80,7 @@ export default function LabelDashboard() {
     queryKey: ['labelAllSongs'],
     queryFn: () => base44.entities.Song.list('-created_date', 300),
     enabled: !!label,
+    refetchInterval: 5000,
   });
 
   const managedArtistIds = new Set(label?.managed_artists || []);

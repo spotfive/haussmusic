@@ -43,6 +43,7 @@ export default function Library() {
   const { data: songs = [] } = useQuery({
     queryKey: ['songs'],
     queryFn: () => base44.entities.Song.list('-created_date'),
+    refetchInterval: 3000,
   });
 
   const { data: playlists = [] } = useQuery({

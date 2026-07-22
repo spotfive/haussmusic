@@ -42,6 +42,7 @@ export default function Playlist() {
   const { data: allSongs = [] } = useQuery({
     queryKey: ['songs'],
     queryFn: () => base44.entities.Song.list('-created_date'),
+    refetchInterval: 3000,
   });
 
   const deletePlaylistMutation = useMutation({
