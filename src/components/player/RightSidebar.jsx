@@ -1,14 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronRight, Heart, Music2 } from 'lucide-react';
+import { ChevronRight, Music2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import BackgroundMedia from '@/components/media/BackgroundMedia';
-import AddToPlaylistMenu from '@/components/playlist/AddToPlaylistMenu';
-import ActiveGlow from '@/components/player/ActiveGlow';
 
-export default function RightSidebar({ song, isPlaying, onClose, isFavorite, onFavoriteToggle }) {
+export default function RightSidebar({ song, onClose }) {
   const videoRef = useRef(null);
   const [artist, setArtist] = useState(null);
 
@@ -35,11 +33,11 @@ export default function RightSidebar({ song, isPlaying, onClose, isFavorite, onF
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: '100%', opacity: 0 }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-[#121212] border-l border-[#282828] z-40 flex flex-col shadow-2xl"
+      className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-black border-l border-white/[0.06] z-40 flex flex-col shadow-2xl"
     >
       {/* Media + title hero — the video/cover fades to black at the bottom
           so the title/artist read clearly instead of fighting the footage */}
-      <div className="relative w-full aspect-square bg-black flex-shrink-0 overflow-hidden">
+      <div className="relative w-full aspect-[3/4] bg-black flex-shrink-0 overflow-hidden">
         {song.background_video_url ? (
           <BackgroundMedia
             src={song.background_video_url}
@@ -93,59 +91,31 @@ export default function RightSidebar({ song, isPlaying, onClose, isFavorite, onF
         </div>
       </div>
 
-      {/* Data — plays, rating, duration, genre, actions */}
+      {/* Data — plays, rating, duration, genre */}
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="space-y-5">
-            {song.album && (
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#181818]">
-                <Music2 className="w-4 h-4 text-[#B3B3B3]" />
-                <div>
-                  <p className="text-sm text-white">{song.album}</p>
-                  {song.type && <p className="text-xs text-[#696969] uppercase">{song.type}</p>}
-                </div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-3 gap-2">
-              <div className="text-center p-3 rounded-xl bg-[#181818]">
-                <p className="text-lg font-bold text-white">{(song.plays || 0).toLocaleString()}</p>
-                <p className="text-[10px] text-[#B3B3B3] uppercase tracking-wider">Plays</p>
-              </div>
-              <div className="text-center p-3 rounded-xl bg-[#181818]">
-                <p className="text-lg font-bold text-white">{song.rating > 0 ? song.rating.toFixed(1) : '—'}</p>
-                <p className="text-[10px] text-[#B3B3B3] uppercase tracking-wider">Rating</p>
-              </div>
-              <div className="text-center p-3 rounded-xl bg-[#181818]">
-                <p className="text-lg font-bold text-white">{song.duration ? `${Math.floor(song.duration / 60)}:${String(Math.floor(song.duration % 60)).padStart(2, '0')}` : '—'}</p>
-                <p className="text-[10px] text-[#B3B3B3] uppercase tracking-wider">Duração</p>
-              </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="text-center p-3 rounded-xl bg-black border border-white/[0.06]">
+              <p className="text-lg font-bold text-white">{(song.plays || 0).toLocaleString()}</p>
+              <p className="text-[10px] text-[#B3B3B3] uppercase tracking-wider">Plays</p>
             </div>
-
-            {song.genre && (
-              <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-[#c0c0c8]/10 text-[#c0c0c8] border border-[#c0c0c8]/20">
-                {song.genre}
-              </span>
-            )}
-
-            <div className="flex items-center gap-3 pt-2">
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={onFavoriteToggle}
-                className={`relative flex-1 py-2 rounded-lg transition-colors ${isFavorite ? 'bg-[#c0c0c8]/20 text-[#c0c0c8]' : 'bg-[#181818] text-[#B3B3B3] hover:text-white'}`}
-              >
-                {isFavorite && <ActiveGlow rounded="rounded-lg" />}
-                <Heart className={`relative z-10 w-4 h-4 mx-auto ${isFavorite ? 'fill-current' : ''}`} />
-              </motion.button>
-              <div className="flex-1">
-                <AddToPlaylistMenu
-                  songId={song.id}
-                  buttonClassName="w-full py-2 rounded-lg bg-[#181818] text-[#B3B3B3] hover:text-white transition-colors flex items-center justify-center"
-                  iconClassName="w-4 h-4"
-                />
-              </div>
+            <div className="text-center p-3 rounded-xl bg-black border border-white/[0.06]">
+              <p className="text-lg font-bold text-white">{song.rating > 0 ? song.rating.toFixed(1) : '—'}</p>
+              <p className="text-[10px] text-[#B3B3B3] uppercase tracking-wider">Rating</p>
+            </div>
+            <div className="text-center p-3 rounded-xl bg-black border border-white/[0.06]">
+              <p className="text-lg font-bold text-white">{song.duration ? `${Math.floor(song.duration / 60)}:${String(Math.floor(song.duration % 60)).padStart(2, '0')}` : '—'}</p>
+              <p className="text-[10px] text-[#B3B3B3] uppercase tracking-wider">Duração</p>
             </div>
           </div>
+
+          {song.genre && (
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-[#c0c0c8]/10 text-[#c0c0c8] border border-[#c0c0c8]/20">
+              {song.genre}
+            </span>
+          )}
         </div>
+      </div>
     </motion.div>
   );
 }
