@@ -6,6 +6,7 @@ const { attachUser } = require('./auth');
 const authRoutes = require('./routes/auth');
 const entityRoutes = require('./routes/entities');
 const { router: uploadRoutes, UPLOADS_DIR } = require('./routes/upload');
+const lyricsSyncRoutes = require('./routes/lyricsSync');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -29,6 +30,11 @@ app.get('/health', (_req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/entities', entityRoutes);
 app.use('/api/upload', uploadRoutes);
+// Transcribing + aligning a full track can take well over a minute,
+// especially the first call after a deploy (downloading the Whisper
+// model). Node's default socket timeout would otherwise cut the response
+// off mid-request.
+app.use('/api/lyrics-sync', (req, res, next) => { req.setTimeout(5 * 60 * 1000); next(); }, lyricsSyncRoutes);
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {

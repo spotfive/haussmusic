@@ -127,6 +127,12 @@ const integrations = {
       form.append('file', file);
       return request('/api/upload', { method: 'POST', body: form, isForm: true });
     },
+    // Transcribes the track and aligns each given lyric line to it —
+    // can take a minute or more, there's nothing to poll, the caller just
+    // awaits it.
+    async SyncLyrics({ audio_url, lines }) {
+      return request('/api/lyrics-sync', { method: 'POST', body: { audio_url, lines } });
+    },
   },
 };
 

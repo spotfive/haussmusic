@@ -1,9 +1,22 @@
-FROM node:24-alpine
+FROM node:24-bookworm-slim
+
+# Switched off node:24-alpine: the lyric auto-sync feature (server/lib/lyricsSync.js)
+# needs onnxruntime-node's native binary to run the Whisper model, and that
+# binary is built against glibc — it can't load on Alpine's musl libc at
+# all. This is the standard fix for that class of native-addon
+# incompatibility, not a workaround specific to this one dependency.
+# libgomp1 is onnxruntime's OpenMP runtime, not present in the slim base
+# by default.
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY package.json ./
-RUN npm install --omit=dev
+COPY package.json package-lock.json ./
+# npm ci (not install) so the native onnxruntime-node binary Railway builds
+# with is exactly what was tested locally, not whatever a fresh semver
+# resolve happens to pick.
+RUN npm ci --omit=dev
 
 COPY . .
 

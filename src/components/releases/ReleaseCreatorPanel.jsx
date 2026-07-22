@@ -62,6 +62,7 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
   const [uploadingWhat, setUploadingWhat] = useState('');
   const [cropperImage, setCropperImage] = useState(null);
   const [expandedTrack, setExpandedTrack] = useState(null);
+  const [syncingTrackIndex, setSyncingTrackIndex] = useState(null);
 
   const updateTrack = (index, patch) => {
     setFormData((p) => {
@@ -69,6 +70,31 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
       t[index] = { ...t[index], ...patch };
       return { ...p, tracks: t };
     });
+  };
+
+  // Sends the plain (untimed) lines to the server, which transcribes the
+  // track and matches each line to where it's actually sung — same [mm:ss]
+  // format as typing the times by hand, so the result drops straight back
+  // into the textarea for the artist to review/tweak.
+  const handleSyncLyrics = async (index) => {
+    const track = formData.tracks[index];
+    if (!track.audio_url) { toast.error('Envie o áudio da faixa antes de sincronizar'); return; }
+    const rawLines = (track.lyrics_raw ?? formatLyrics(track.lyrics || []))
+      .split('\n')
+      .map((l) => l.replace(/^\s*\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]\s?/, '').trim());
+    if (!rawLines.some((l) => l.length)) { toast.error('Escreva a letra antes de sincronizar'); return; }
+
+    setSyncingTrackIndex(index);
+    try {
+      const { lines: synced } = await base44.integrations.Core.SyncLyrics({ audio_url: track.audio_url, lines: rawLines });
+      updateTrack(index, { lyrics_raw: formatLyrics(synced) });
+      const matched = synced.filter((l) => l.time != null).length;
+      toast.success(`${matched} de ${synced.length} versos sincronizados — confira e ajuste se precisar`);
+    } catch (err) {
+      toast.error(err.message || 'Não foi possível sincronizar a letra');
+    } finally {
+      setSyncingTrackIndex(null);
+    }
   };
 
   // Credits/lyrics live per-track and get copied onto each Song row so the
@@ -681,15 +707,29 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
                                                   placeholder={'Uma linha por verso.\nOpcional: [00:12] no início da linha para sincronizar com a voz.'}
                                                   className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm leading-relaxed placeholder:text-zinc-600 focus:outline-none focus:border-[#c0c0c8]/40 resize-y font-mono"
                                                 />
-                                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                  <button
+                                                    onClick={() => handleSyncLyrics(index)}
+                                                    disabled={syncingTrackIndex === index}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c0c0c8]/15 hover:bg-[#c0c0c8]/25 disabled:opacity-60 text-[#e5e5ea] text-xs font-medium transition-colors"
+                                                  >
+                                                    {syncingTrackIndex === index ? (
+                                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                    ) : (
+                                                      <Sparkles className="w-3.5 h-3.5" />
+                                                    )}
+                                                    {syncingTrackIndex === index ? 'Ouvindo a faixa...' : 'Sincronizar com IA'}
+                                                  </button>
                                                   <button
                                                     onClick={() => updateTrack(index, { lyrics_raw: autoDistributeLyrics(track.lyrics_raw ?? formatLyrics(track.lyrics || []), track.duration) })}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c0c0c8]/15 hover:bg-[#c0c0c8]/25 text-[#e5e5ea] text-xs font-medium transition-colors"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 text-xs font-medium transition-colors"
                                                   >
-                                                    <Wand2 className="w-3.5 h-3.5" /> Distribuir tempos automaticamente
+                                                    <Wand2 className="w-3.5 h-3.5" /> Distribuir tempos
                                                   </button>
-                                                  <span className="text-[10px] text-zinc-600">espalha os versos pela duração da faixa</span>
                                                 </div>
+                                                <p className="text-[10px] text-zinc-600">
+                                                  "Sincronizar com IA" ouve o áudio e encontra quando cada verso é cantado — pode levar um minuto ou mais. "Distribuir tempos" apenas espalha os versos igualmente pela duração da faixa.
+                                                </p>
                                               </div>
                                             )}
                                           </div>
