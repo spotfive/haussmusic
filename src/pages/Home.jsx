@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ArtistNameBanner from '@/components/home/ArtistNameBanner';
+import HomeHeroCarousel from '@/components/home/HomeHeroCarousel';
 import { hasUserType } from '@/lib/utils';
 
 const pills = [
@@ -108,6 +109,12 @@ export default function Home() {
 
   const logoUrl = appSettings.find(s => s.key === 'logo_url')?.value || '/logo.png';
 
+  const { data: banners = [] } = useQuery({
+    queryKey: ['banners'],
+    queryFn: () => base44.entities.Banner.list('-priority', 10),
+  });
+  const activeBanners = banners.filter(b => b.is_active !== false);
+
   const scheduledAlbums = new Set(posts.filter(p => p.is_scheduled && p.scheduled_datetime && new Date(p.scheduled_datetime) > new Date()).map(p => p.title));
   const isSongScheduled = (song) => song.album && scheduledAlbums.has(song.album);
   const topPlayed = [...allSongs].sort((a, b) => (b.plays || 0) - (a.plays || 0)).slice(0, 8);
@@ -187,6 +194,116 @@ export default function Home() {
     activePill === 'albums' ? recentAlbums :
     activePill === 'artists' ? songArtists : allSongs;
 
+  // Hero rotates between the "Mais Ouvidas" song card and every active
+  // admin banner, one slide at a time — same spot, same size, so an admin
+  // adding a banner just means the rotation gets one slide longer.
+  const heroSlides = [
+    ...(featuredSong ? [{
+      key: `song-${featuredSong.id}`,
+      render: () => (
+        <div
+          className={`relative w-full h-full ${featuredSongScheduled ? 'cursor-default' : 'cursor-pointer'}`}
+          onClick={() => dispatchPlaySong(featuredSong)}
+        >
+          <div className="absolute inset-0">
+            {featuredBackdrop ? (
+              <>
+                <img
+                  src={featuredBackdrop}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  style={{ filter: 'saturate(1.3) brightness(0.55)' }}
+                />
+                <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 60% 40%, rgba(200,200,210,0.18) 0%, transparent 70%)' }} />
+              </>
+            ) : (
+              <ArtistNameBanner name={featuredSong.artist} />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
+          </div>
+
+          <div className="relative h-full flex items-end p-5 lg:p-8">
+            <div className="flex items-end gap-5 w-full">
+              {featuredSong.cover_url && (
+                <div className="hidden sm:block w-24 h-24 lg:w-32 lg:h-32 rounded-xl overflow-hidden shadow-2xl flex-shrink-0 ring-2 ring-white/10">
+                  <img src={featuredSong.cover_url} alt={featuredSong.title} className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-[#e5e5ea] text-xs font-bold uppercase tracking-widest mb-1.5">Mais Ouvidas</p>
+                <h1 className="text-2xl lg:text-4xl font-black text-white mb-0.5 truncate">{featuredSong.title}</h1>
+                <p className="text-white/70 text-sm lg:text-base mb-4 truncate">{featuredSong.artist}{featuredSong.featuring ? ` feat. ${featuredSong.featuring}` : ''}</p>
+
+                <div className="flex items-center gap-3">
+                  {featuredSongScheduled ? (
+                    <span className="px-4 py-2 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase">Em Breve</span>
+                  ) : (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={(e) => { e.stopPropagation(); dispatchPlaySong(featuredSong); }}
+                      className="w-12 h-12 rounded-full bg-[#c0c0c8] flex items-center justify-center shadow-lg shadow-[#c0c0c8]/40"
+                    >
+                      {currentPlayingSong?.id === featuredSong.id ? (
+                        <Pause className="w-6 h-6 text-black fill-black" />
+                      ) : (
+                        <Play className="w-6 h-6 text-black fill-black ml-0.5" />
+                      )}
+                    </motion.button>
+                  )}
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={(e) => toggleFavorite(featuredSong, e)}
+                    className={`p-2 rounded-full ${featuredSong.is_favorite ? 'text-[#c0c0c8]' : 'text-white/60 hover:text-white'}`}
+                  >
+                    <Heart className={`w-5 h-5 ${featuredSong.is_favorite ? 'fill-current' : ''}`} />
+                  </motion.button>
+                  <span className="text-white/50 text-sm">{formatPlays(featuredSong.plays)} plays</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ),
+    }] : []),
+    ...activeBanners.map((banner) => ({
+      key: `banner-${banner.id}`,
+      render: () => (
+        <div
+          className={`relative w-full h-full ${banner.link_url ? 'cursor-pointer' : ''}`}
+          onClick={() => { if (banner.link_url) window.open(banner.link_url, '_blank', 'noopener'); }}
+        >
+          <div className="absolute inset-0">
+            {banner.image_url ? (
+              <img
+                src={banner.image_url}
+                alt={banner.title}
+                className="w-full h-full object-cover"
+                style={{ filter: 'saturate(1.3) brightness(0.55)' }}
+              />
+            ) : (
+              <ArtistNameBanner name={banner.title} />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
+          </div>
+
+          <div className="relative h-full flex items-end p-5 lg:p-8">
+            <div className="flex-1 min-w-0">
+              <p className="text-[#e5e5ea] text-xs font-bold uppercase tracking-widest mb-1.5">Destaque</p>
+              <h1 className="text-2xl lg:text-4xl font-black text-white mb-0.5 truncate">{banner.title}</h1>
+              {banner.artist_name && (
+                <p className="text-white/70 text-sm lg:text-base mb-1 truncate">{banner.artist_name}</p>
+              )}
+              {banner.description && (
+                <p className="text-white/60 text-sm max-w-xl line-clamp-2 mt-2">{banner.description}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      ),
+    })),
+  ];
+
   return (
     <>
       {/* Intro Splash */}
@@ -244,79 +361,8 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Hero Card - Mais Ouvidas */}
-          {featuredSong && (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`relative rounded-2xl overflow-hidden mb-6 group ${featuredSongScheduled ? 'cursor-default opacity-70' : 'cursor-pointer'}`}
-              style={{ height: '280px' }}
-              onClick={() => dispatchPlaySong(featuredSong)}
-            >
-              {/* Background — banner do artista (ou banner com o nome do artista como fallback) */}
-              <div className="absolute inset-0">
-                {featuredBackdrop ? (
-                  <>
-                    <img
-                      src={featuredBackdrop}
-                      alt=""
-                      className="w-full h-full object-cover"
-                      style={{ filter: 'saturate(1.3) brightness(0.55)' }}
-                    />
-                    {/* blur edge glow */}
-                    <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 60% 40%, rgba(200,200,210,0.18) 0%, transparent 70%)' }} />
-                  </>
-                ) : (
-                  <ArtistNameBanner name={featuredSong.artist} />
-                )}
-                {/* gradient overlay bottom */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
-              </div>
-
-              <div className="relative h-full flex items-end p-5 lg:p-8">
-                <div className="flex items-end gap-5 w-full">
-                  {/* Capa quadrada */}
-                  {featuredSong.cover_url && (
-                    <div className="hidden sm:block w-24 h-24 lg:w-32 lg:h-32 rounded-xl overflow-hidden shadow-2xl flex-shrink-0 ring-2 ring-white/10">
-                      <img src={featuredSong.cover_url} alt={featuredSong.title} className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[#e5e5ea] text-xs font-bold uppercase tracking-widest mb-1.5">Mais Ouvidas</p>
-                    <h1 className="text-2xl lg:text-4xl font-black text-white mb-0.5 truncate">{featuredSong.title}</h1>
-                    <p className="text-white/70 text-sm lg:text-base mb-4 truncate">{featuredSong.artist}{featuredSong.featuring ? ` feat. ${featuredSong.featuring}` : ''}</p>
-
-                    <div className="flex items-center gap-3">
-                      {featuredSongScheduled ? (
-                        <span className="px-4 py-2 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase">Em Breve</span>
-                      ) : (
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={(e) => { e.stopPropagation(); dispatchPlaySong(featuredSong); }}
-                          className="w-12 h-12 rounded-full bg-[#c0c0c8] flex items-center justify-center shadow-lg shadow-[#c0c0c8]/40"
-                        >
-                          {currentPlayingSong?.id === featuredSong.id ? (
-                            <Pause className="w-6 h-6 text-black fill-black" />
-                          ) : (
-                            <Play className="w-6 h-6 text-black fill-black ml-0.5" />
-                          )}
-                        </motion.button>
-                      )}
-                      <motion.button
-                        whileTap={{ scale: 0.9 }}
-                        onClick={(e) => toggleFavorite(featuredSong, e)}
-                        className={`p-2 rounded-full ${featuredSong.is_favorite ? 'text-[#c0c0c8]' : 'text-white/60 hover:text-white'}`}
-                      >
-                        <Heart className={`w-5 h-5 ${featuredSong.is_favorite ? 'fill-current' : ''}`} />
-                      </motion.button>
-                      <span className="text-white/50 text-sm">{formatPlays(featuredSong.plays)} plays</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
+          {/* Hero Carousel — "Mais Ouvidas" + active admin banners, rotating */}
+          <HomeHeroCarousel slides={heroSlides} />
 
           {/* Two Column Layout */}
           <div className="flex flex-col lg:flex-row gap-6">
