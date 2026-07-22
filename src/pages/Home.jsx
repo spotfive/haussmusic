@@ -466,62 +466,6 @@ export default function Home() {
                     </section>
                   )}
 
-                  {/* Top Played - List format */}
-                  {topPlayed.length > 0 && (
-                    <section className="mb-8">
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl lg:text-2xl font-bold text-white">Mais Tocadas</h2>
-                      </div>
-                      <div className="space-y-1">
-                        {topPlayed.slice(0, 6).map((song, index) => {
-                          const scheduled = isSongScheduled(song);
-                          return (
-                          <motion.div
-                            key={song.id}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: index * 0.03 }}
-                            onClick={() => dispatchPlaySong(song)}
-                            className={`group flex items-center gap-3 p-2.5 rounded-lg transition-all ${scheduled ? 'opacity-60 cursor-default' : 'hover:bg-[#282828] cursor-pointer'} ${activeSongId === song.id ? 'bg-zinc-400/10' : ''}`}
-                          >
-                            <span className="w-6 text-center text-sm text-[#B3B3B3] font-medium">{index + 1}</span>
-
-                            <div className="w-10 h-10 rounded-md overflow-hidden bg-[#282828] shrink-0">
-                              {song.cover_url ? (
-                                <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 to-[#18181b]" />
-                              )}
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <div className={`text-sm font-medium truncate ${activeSongId === song.id ? 'text-zinc-400' : 'text-white'}`}>
-                                  {song.title}
-                                </div>
-                                {scheduled && (
-                                  <span className="text-[10px] font-bold uppercase bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded whitespace-nowrap">Em Breve</span>
-                                )}
-                              </div>
-                              <div className="text-xs text-[#B3B3B3] truncate">{song.artist}</div>
-                            </div>
-
-                            <span className="text-xs text-[#B3B3B3] hidden sm:block">{formatPlays(song.plays)}</span>
-                            <span className="text-xs text-[#535353] w-10 text-right">{formatDuration(song.duration)}</span>
-
-                            <motion.button
-                              whileTap={{ scale: 0.9 }}
-                              onClick={(e) => toggleFavorite(song, e)}
-                              className={`p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${isLiked(song) ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`}
-                            >
-                              <Heart className={`w-4 h-4 ${isLiked(song) ? 'fill-current' : ''}`} />
-                            </motion.button>
-                          </motion.div>
-                        )})}
-                      </div>
-                    </section>
-                  )}
-
                   {/* Auto-curated mood collections built from the catalogue */}
                   <MoodPlaylists songs={allSongs} onPlaySong={dispatchPlaySong} userEmail={user?.email} />
 
