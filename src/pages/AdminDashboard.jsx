@@ -137,6 +137,32 @@ export default function AdminDashboard() {
           await base44.entities.Artist.delete(existingArtist.id);
         }
       }
+
+      // Giving someone the gravadora cargo used to just flip the tag and
+      // nothing else — LabelDashboard checks for a Label whose
+      // representatives include them, so without this they'd have the
+      // badge but still hit "sua conta não está associada a nenhuma
+      // gravadora". Mirror the artista pattern: make sure a Label exists
+      // with them as a representative (create one on first grant), and
+      // drop them from it when the cargo is removed.
+      if (cargo === 'gravadora') {
+        const existingLabels = await base44.entities.Label.list();
+        const myLabel = existingLabels.find(l => (l.representatives || []).includes(userId));
+        if (!hadCargo) {
+          if (!myLabel) {
+            await base44.entities.Label.create({
+              name: u?.display_name || u?.full_name || 'Gravadora',
+              profile_picture: u?.profile_picture || '',
+              representatives: [userId],
+              managed_artists: [],
+            });
+          }
+        } else if (myLabel) {
+          await base44.entities.Label.update(myLabel.id, {
+            representatives: (myLabel.representatives || []).filter(id => id !== userId),
+          });
+        }
+      }
     },
     onMutate: async ({ userId, cargo }) => {
       await queryClient.cancelQueries({ queryKey: ['users'] });
@@ -149,7 +175,11 @@ export default function AdminDashboard() {
       return { prev };
     },
     onError: (err, vars, ctx) => { queryClient.setQueryData(['users'], ctx.prev); toast.error('Erro ao atualizar cargo'); },
-    onSettled: () => { queryClient.invalidateQueries({ queryKey: ['users'] }); queryClient.invalidateQueries({ queryKey: ['artists'] }); },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['artists'] });
+      queryClient.invalidateQueries({ queryKey: ['labels'] });
+    },
   });
 
   const toggleVerifiedMutation = useMutation({
