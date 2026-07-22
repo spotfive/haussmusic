@@ -8,6 +8,7 @@ import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { TikTokIcon, SpotifyIcon } from '@/components/social/SocialBrandIcons';
 import { hasUserType } from '@/lib/utils';
+import ArtistNameBanner from '@/components/home/ArtistNameBanner';
 
 function VerifiedBadge() {
   return (
@@ -134,12 +135,14 @@ export default function ArtistProfile() {
     <div className="min-h-screen pb-32">
       {/* Hero Header */}
       <div className="relative h-72 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-zinc-500/30 to-neutral-500/30" />
-        {artist.profile_picture && (
-          <img src={artist.profile_picture} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20 scale-110 blur-2xl" />
-        )}
-        <div className="absolute inset-0 backdrop-blur-xl" />
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
+        <div className="absolute inset-0">
+          {artist.profile_banner ? (
+            <img src={artist.profile_banner} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <ArtistNameBanner name={artist.display_name || artist.full_name} />
+          )}
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
         
         <div className="relative h-full flex items-end px-6 lg:px-8 pb-6">
           <div className="flex items-end gap-6 w-full">
