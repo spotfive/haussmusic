@@ -501,20 +501,26 @@ export default function Layout({ children, currentPageName }) {
       </div>
 
       {/* Right Sidebar - Now Playing (Desktop) */}
-      {showRightSidebar && currentSong && (
-        <RightSidebar
-          song={currentSong}
-          isPlaying={isPlaying}
-          onClose={() => setShowRightSidebar(false)}
-          isFavorite={currentSong?.is_favorite}
-          onFavoriteToggle={handleFavoriteToggle}
-          onPlayPause={() => setIsPlaying(!isPlaying)}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          repeatMode={repeatMode}
-          onToggleRepeat={handleToggleRepeat}
-        />
-      )}
+      {/* AnimatePresence has to wrap the conditional itself (not live inside
+          RightSidebar) — otherwise it unmounts in the same tick as its
+          child and the exit/slide-out animation never gets to run. */}
+      <AnimatePresence>
+        {showRightSidebar && currentSong && (
+          <RightSidebar
+            key="right-sidebar"
+            song={currentSong}
+            isPlaying={isPlaying}
+            onClose={() => setShowRightSidebar(false)}
+            isFavorite={currentSong?.is_favorite}
+            onFavoriteToggle={handleFavoriteToggle}
+            onPlayPause={() => setIsPlaying(!isPlaying)}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            repeatMode={repeatMode}
+            onToggleRepeat={handleToggleRepeat}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Expanded Mobile Player */}
       {currentSong && (
