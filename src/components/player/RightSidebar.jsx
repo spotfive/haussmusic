@@ -77,30 +77,17 @@ export default function RightSidebar({ song, onClose, currentTime = 0, duration 
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
 
-        {/* Lyrics + close — top-right corner. Lyrics is icon-only here so it
-            doesn't compete with the credits section below for space. */}
-        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.92 }}
-            onClick={() => setShowLyrics(true)}
-            title={hasLyrics ? 'Ver letra' : 'Sem letra disponível'}
-            className={`p-2.5 backdrop-blur-sm rounded-xl transition-colors ${
-              hasLyrics ? 'bg-[#c0c0c8]/20 hover:bg-[#c0c0c8]/30 text-[#e5e5ea]' : 'bg-black/40 hover:bg-black/60 text-white/60'
-            }`}
-          >
-            <Mic className="w-4 h-4" />
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.92 }}
-            onClick={onClose}
-            title="Recolher"
-            className="p-2.5 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-xl transition-colors"
-          >
-            <ChevronRight className="w-4 h-4 text-white" />
-          </motion.button>
-        </div>
+        {/* Close — collapses the panel back off the right edge, matching
+            the direction it slides out */}
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
+          onClick={onClose}
+          title="Recolher"
+          className="absolute top-4 right-4 z-10 p-2.5 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-xl transition-colors"
+        >
+          <ChevronRight className="w-4 h-4 text-white" />
+        </motion.button>
 
         {/* Title/artist/feat sit directly on the faded-out footage */}
         <div className="absolute bottom-0 left-0 right-0 p-5">
@@ -153,11 +140,26 @@ export default function RightSidebar({ song, onClose, currentTime = 0, duration 
             </div>
           </div>
 
-          {song.genre && (
-            <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-[#c0c0c8]/10 text-[#c0c0c8] border border-[#c0c0c8]/20">
-              {song.genre}
-            </span>
-          )}
+          <div className="flex items-center justify-between gap-2">
+            {song.genre ? (
+              <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-[#c0c0c8]/10 text-[#c0c0c8] border border-[#c0c0c8]/20">
+                {song.genre}
+              </span>
+            ) : <span />}
+
+            <button
+              onClick={() => setShowLyrics(true)}
+              title={hasLyrics ? 'Ver letra' : 'Sem letra disponível'}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                hasLyrics
+                  ? 'bg-[#c0c0c8]/10 text-[#c0c0c8] border-[#c0c0c8]/20 hover:bg-[#c0c0c8]/15'
+                  : 'bg-white/[0.02] text-white/40 border-white/[0.06] hover:bg-white/[0.04]'
+              }`}
+            >
+              <Mic className="w-3.5 h-3.5" />
+              Letra
+            </button>
+          </div>
 
           {/* Credits — opens the full list in an overlay instead of an inline
               list, since the persistent mini player at the bottom of the
