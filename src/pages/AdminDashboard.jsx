@@ -38,6 +38,8 @@ export default function AdminDashboard() {
   const [newLabelForm, setNewLabelForm] = useState({ name: '', logo_url: '', representatives: [] });
   const [newLabelRepSearch, setNewLabelRepSearch] = useState('');
   const [uploadingLabelLogo, setUploadingLabelLogo] = useState(false);
+  const [songSearchTerm, setSongSearchTerm] = useState('');
+  const [userSearchTerm, setUserSearchTerm] = useState('');
   
   // Get tab from URL query params
   const urlParams = new URLSearchParams(window.location.search);
@@ -63,8 +65,15 @@ export default function AdminDashboard() {
 
   const { data: songs = [] } = useQuery({
     queryKey: ['songs'],
-    queryFn: () => base44.entities.Song.list('-created_date', 50),
+    queryFn: () => base44.entities.Song.list('-created_date'),
   });
+
+  const filteredSongs = songSearchTerm.trim()
+    ? songs.filter(s =>
+        s.title?.toLowerCase().includes(songSearchTerm.toLowerCase()) ||
+        s.artist?.toLowerCase().includes(songSearchTerm.toLowerCase())
+      )
+    : songs;
 
   const { data: users = [] } = useQuery({
     queryKey: ['users'],
@@ -76,6 +85,14 @@ export default function AdminDashboard() {
       }
     },
   });
+
+  const filteredUsers = userSearchTerm.trim()
+    ? users.filter(u =>
+        u.display_name?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+        u.full_name?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+        u.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
+      )
+    : users;
 
   const { data: labels = [] } = useQuery({
     queryKey: ['labels'],
@@ -548,13 +565,25 @@ export default function AdminDashboard() {
           {/* Songs Tab */}
           <TabsContent value="songs" className="mt-6">
             <div className="bg-[#181818] rounded-2xl border border-white/5 overflow-hidden">
-              <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+              <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between gap-4 flex-wrap">
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Music className="w-5 h-5 text-[#c0c0c8]" /> Músicas Recentes ({songs.length})
+                  <Music className="w-5 h-5 text-[#c0c0c8]" /> Músicas ({filteredSongs.length})
                 </h2>
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                  <Input
+                    placeholder="Buscar por título ou artista..."
+                    value={songSearchTerm}
+                    onChange={(e) => setSongSearchTerm(e.target.value)}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600 pl-9 h-9 text-sm"
+                  />
+                </div>
               </div>
+              {filteredSongs.length === 0 && (
+                <p className="text-center text-zinc-500 text-sm py-10">Nenhuma música encontrada</p>
+              )}
               <div className="divide-y divide-white/5">
-                {songs.map((song, i) => (
+                {filteredSongs.map((song, i) => (
                   <motion.div
                     key={song.id}
                     initial={{ opacity: 0 }}
@@ -586,13 +615,25 @@ export default function AdminDashboard() {
           {/* Users Tab */}
           <TabsContent value="users" className="mt-6">
             <div className="bg-[#181818] rounded-2xl border border-white/5 overflow-hidden">
-              <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+              <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between gap-4 flex-wrap">
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Users className="w-5 h-5 text-[#c0c0c8]" /> Gerenciar Usuários ({users.length})
+                  <Users className="w-5 h-5 text-[#c0c0c8]" /> Gerenciar Usuários ({filteredUsers.length})
                 </h2>
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                  <Input
+                    placeholder="Buscar por nome ou email..."
+                    value={userSearchTerm}
+                    onChange={(e) => setUserSearchTerm(e.target.value)}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600 pl-9 h-9 text-sm"
+                  />
+                </div>
               </div>
+              {filteredUsers.length === 0 && (
+                <p className="text-center text-zinc-500 text-sm py-10">Nenhum usuário encontrado</p>
+              )}
               <div className="divide-y divide-white/5">
-                {users.map((u) => (
+                {filteredUsers.map((u) => (
                   <div key={u.id} className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">
                     {/* Avatar */}
                     {u.profile_picture ? (
