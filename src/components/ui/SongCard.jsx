@@ -5,7 +5,6 @@ import { Play, Pause, Heart, Music2, Timer, Share2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { getItemLabel } from '@/lib/utils';
-import SocialShareButtons from '@/components/songs/SocialShareButtons';
 import AddToPlaylistMenu from '@/components/playlist/AddToPlaylistMenu';
 
 export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFavorite, index, hidePlaylistButton = false, isScheduled = false, scheduledDatetime = null }) {
@@ -140,10 +139,9 @@ export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFav
         </div>
       )}
 
-      {/* Actions - Compartilhar Social, Link e Curtir */}
+      {/* Actions - Link e Curtir */}
       {!isScheduled && (
         <div className="flex items-center gap-1 flex-shrink-0">
-          <SocialShareButtons url={`${window.location.origin}/?song=${song.id}`} title={`🎵 ${song.title} - ${song.artist}`} />
           <button
             onClick={(e) => { e.stopPropagation(); handleShare(); }}
             className="p-1.5 rounded-lg text-[#696969] hover:text-white hover:bg-[#333] transition-colors"
