@@ -365,32 +365,22 @@ export default function Home() {
               ))}
             </div>
 
-            {(discordUrl || revistaUrl) && (
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {discordUrl && (
-                  <a
-                    href={discordUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Discord"
-                    className="w-9 h-9 rounded-full bg-white/5 hover:bg-[#5865F2]/20 border border-white/10 hover:border-[#5865F2]/40 flex items-center justify-center text-[#B3B3B3] hover:text-[#5865F2] transition-colors"
-                  >
-                    <DiscordIcon className="w-4 h-4" />
-                  </a>
-                )}
-                {revistaUrl && (
-                  <a
-                    href={revistaUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Revista"
-                    className="w-9 h-9 rounded-full bg-white/5 hover:bg-[#c0c0c8]/20 border border-white/10 hover:border-[#c0c0c8]/40 flex items-center justify-center text-[#B3B3B3] hover:text-[#c0c0c8] transition-colors"
-                  >
-                    <Newspaper className="w-4 h-4" />
-                  </a>
-                )}
-              </div>
-            )}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={() => discordUrl ? window.open(discordUrl, '_blank', 'noopener') : toast('Em Breve!')}
+                title="Discord"
+                className="w-9 h-9 rounded-full bg-white/5 hover:bg-[#5865F2]/20 border border-white/10 hover:border-[#5865F2]/40 flex items-center justify-center text-[#B3B3B3] hover:text-[#5865F2] transition-colors"
+              >
+                <DiscordIcon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => revistaUrl ? window.open(revistaUrl, '_blank', 'noopener') : toast('Em Breve!')}
+                title="Revista"
+                className="w-9 h-9 rounded-full bg-white/5 hover:bg-[#c0c0c8]/20 border border-white/10 hover:border-[#c0c0c8]/40 flex items-center justify-center text-[#B3B3B3] hover:text-[#c0c0c8] transition-colors"
+              >
+                <Newspaper className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* Hero Carousel — "Mais Ouvidas" + active admin banners, rotating */}
