@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Play, Pause, Heart, Clock, Calendar, Music2, User, ArrowLeft, Timer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import BackgroundMedia from '@/components/media/BackgroundMedia';
 
 export default function Release() {
@@ -104,16 +105,31 @@ export default function Release() {
     },
     onMutate: async () => {
       // Atualização otimista
+      const previousFavoriteState = isFavorite;
+      const previousRelease = queryClient.getQueryData(['release', releaseId]);
       const newFavoriteState = !isFavorite;
       const newLikes = newFavoriteState ? (release?.likes || 0) + 1 : Math.max((release?.likes || 0) - 1, 0);
-      
+
       setIsFavorite(newFavoriteState);
-      queryClient.setQueryData(['release', releaseId], (old) => 
+      queryClient.setQueryData(['release', releaseId], (old) =>
         old ? { ...old, likes: newLikes } : old
       );
       queryClient.setQueryData(['posts'], (oldPosts) =>
         oldPosts?.map(p => p.id === releaseId ? { ...p, likes: newLikes } : p)
       );
+
+      return { previousFavoriteState, previousRelease };
+    },
+    onError: (err, _vars, context) => {
+      // The optimistic update above assumed success — roll it back since
+      // it didn't actually persist, instead of leaving a "liked" state on
+      // screen that reverts on its own next time this data refetches.
+      if (context) {
+        setIsFavorite(context.previousFavoriteState);
+        queryClient.setQueryData(['release', releaseId], context.previousRelease);
+      }
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      toast.error('Não foi possível curtir agora');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['release', releaseId] });

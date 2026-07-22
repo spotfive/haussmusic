@@ -30,6 +30,22 @@ function canWrite(entityName, req, existingRow) {
   return existingRow.created_by === me.email;
 }
 
+// Engagement counters that need to move regardless of who created the row
+// — liking or playing someone else's song/post is the normal case, not
+// the exception, so these specific fields are writable by anyone signed
+// in even when canWrite() says no. Everything else on the row (title,
+// audio_url, cover_url, ...) still requires owning it.
+const PUBLIC_WRITABLE_FIELDS = {
+  songs: ['plays', 'likes', 'is_favorite', 'rating', 'rating_count'],
+  posts: ['plays', 'likes', 'rating', 'rating_count'],
+};
+
+function isPublicEngagementUpdate(table, patchKeys) {
+  const allowed = PUBLIC_WRITABLE_FIELDS[table];
+  if (!allowed || patchKeys.length === 0) return false;
+  return patchKeys.every((key) => allowed.includes(key));
+}
+
 router.get('/:entity', (req, res, next) => {
   try {
     const config = getEntityConfig(req.params.entity);
@@ -105,11 +121,14 @@ router.put('/:entity/:id', requireAuth, (req, res, next) => {
     const config = getEntityConfig(entityName);
     const existing = db.prepare(`select * from ${config.table} where id = ?`).get(req.params.id);
     if (!existing) return res.status(404).json({ error: 'Not found' });
-    if (!canWrite(entityName, req, existing)) return res.status(403).json({ error: 'Forbidden' });
 
     const me = requester(req);
     const patch = { ...req.body };
     delete patch.id;
+
+    const allowed = canWrite(entityName, req, existing) || isPublicEngagementUpdate(config.table, Object.keys(patch));
+    if (!allowed) return res.status(403).json({ error: 'Forbidden' });
+
     if (entityName === 'User' && me.role !== 'admin') {
       delete patch.role;
       delete patch.password_hash;
