@@ -150,14 +150,13 @@ export default function RightSidebar({ song, onClose, currentTime = 0, duration 
             <button
               onClick={() => setShowLyrics(true)}
               title={hasLyrics ? 'Ver letra' : 'Sem letra disponível'}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+              className={`flex items-center justify-center w-9 h-9 rounded-full border transition-colors flex-shrink-0 ${
                 hasLyrics
                   ? 'bg-[#c0c0c8]/10 text-[#c0c0c8] border-[#c0c0c8]/20 hover:bg-[#c0c0c8]/15'
                   : 'bg-white/[0.02] text-white/40 border-white/[0.06] hover:bg-white/[0.04]'
               }`}
             >
-              <Mic className="w-3.5 h-3.5" />
-              Letra
+              <Mic className="w-4 h-4" />
             </button>
           </div>
 
