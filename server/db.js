@@ -220,14 +220,19 @@ for (const [table, column, definition] of [
   }
 }
 
-// Migration: songs.likes was only just introduced — before it existed,
-// "liking" a song just flipped is_favorite with nothing counting it. Give
-// every song that was already favorited a starting count of 1 instead of
-// silently showing 0 (and never appearing in HAUSS HITS' Curtidas chart)
-// until someone happens to unlike/relike it. Naturally a no-op after the
-// first run: going forward is_favorite and likes are always kept in sync,
-// so this combination shouldn't recur.
-db.exec(`update songs set likes = 1 where is_favorite = 1 and likes = 0;`);
+// Migration: resync songs.likes / is_favorite from user_favorites — the
+// real per-user source of truth. An earlier version of this migration set
+// likes=1 for already-favorited songs without creating a matching
+// user_favorites row, leaving those songs with a phantom like nobody
+// could ever unlike (toggling looks for a user_favorites row to decide
+// whether to remove one). Recomputing from user_favorites on every
+// startup is idempotent and self-healing: it undoes that phantom count
+// and keeps likes accurate even if a client update ever drifts.
+db.exec(`
+  update songs
+  set likes = (select count(*) from user_favorites uf where uf.item_id = songs.id and uf.item_type = 'song'),
+      is_favorite = case when (select count(*) from user_favorites uf where uf.item_id = songs.id and uf.item_type = 'song') > 0 then 1 else 0 end;
+`);
 
 // Migration: user_type used to be a single string column (e.g. "gravadora").
 // It's now a JSON array (people can hold more than one cargo at once) —
