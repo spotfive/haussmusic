@@ -169,7 +169,7 @@ async function regenerateAutoPlaylists() {
 
   console.log(
     `Auto playlists regenerated: ${newRows.length} playlist(s) from ${songs.length} song(s). ` +
-    `AI ${aiConfigured ? 'enabled' : 'DISABLED (set OPENAI_API_KEY for real names/covers — using plain genre names, no covers for now)'}.`
+    `AI names ${aiConfigured ? 'enabled' : 'DISABLED (set OPENAI_API_KEY — using plain genre names for now)'}, covers via free pollinations.ai.`
   );
   return newRows.length;
 }

@@ -1,12 +1,12 @@
 // AI-generated creative content for auto-curated playlists: a fitting
-// Portuguese name + subtitle (chat model) and a unique cover image (image
-// model), both via OpenAI. Needs OPENAI_API_KEY set — callers should treat
-// a null return as "skip this playlist's AI polish, not a fatal error",
-// since a missing/expired key shouldn't take the whole weekly curation
-// run down with it.
+// Portuguese name + subtitle (OpenAI chat model — needs OPENAI_API_KEY,
+// costs a fraction of a cent per playlist) and a unique cover image
+// (pollinations.ai — free, keyless, no account needed at all). Callers
+// should treat a null return as "skip this playlist's AI polish, not a
+// fatal error", since a missing/expired key or a flaky free image service
+// shouldn't take the whole weekly curation run down with it.
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const TEXT_MODEL = process.env.OPENAI_TEXT_MODEL || 'gpt-4o-mini';
-const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || 'gpt-image-1';
 
 const isConfigured = !!OPENAI_API_KEY;
 
@@ -34,27 +34,18 @@ async function generatePlaylistName({ genre, sampleSongs }) {
   return { name: parsed.name, subtitle: parsed.subtitle || '' };
 }
 
-// Returns a Buffer of the generated image (caller saves it to uploads/),
-// or null if no key is configured.
+// Returns a Buffer of the generated image (caller saves it to uploads/).
+// pollinations.ai is a free, keyless image-generation service — no
+// account, no billing, nothing to configure. Quality/uptime aren't
+// contractually guaranteed the way a paid API's would be, which is fine
+// here: a failed cover just falls back to the mosaic/gradient cover.
 async function generatePlaylistCover({ name, subtitle, genre }) {
-  if (!OPENAI_API_KEY) return null;
   const prompt = `Abstract album/playlist cover art. Moody, atmospheric, metallic silver and deep black color palette with a subtle colored glow matching the mood of "${genre}" music. Collection named "${name}" (${subtitle}). Modern, elegant, high contrast, dark background. No text, no letters, no words, no logos.`;
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
 
-  const res = await fetch('https://api.openai.com/v1/images/generations', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${OPENAI_API_KEY}` },
-    body: JSON.stringify({ model: IMAGE_MODEL, prompt, size: '1024x1024', quality: 'low', n: 1 }),
-  });
-  if (!res.ok) throw new Error(`OpenAI image failed: ${res.status} ${await res.text()}`);
-  const data = await res.json();
-  const b64 = data.data?.[0]?.b64_json;
-  if (b64) return Buffer.from(b64, 'base64');
-  const url = data.data?.[0]?.url;
-  if (url) {
-    const imgRes = await fetch(url);
-    return Buffer.from(await imgRes.arrayBuffer());
-  }
-  return null;
+  const res = await fetch(url, { signal: AbortSignal.timeout(90000) });
+  if (!res.ok) throw new Error(`Pollinations image failed: ${res.status}`);
+  return Buffer.from(await res.arrayBuffer());
 }
 
 module.exports = { generatePlaylistName, generatePlaylistCover, isConfigured };
