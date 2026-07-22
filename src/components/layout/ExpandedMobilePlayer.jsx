@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Play, Pause, SkipForward, SkipBack, Heart, Repeat, Shuffle, Volume2 } from 'lucide-react';
+import { ChevronDown, Play, Pause, SkipForward, SkipBack, Heart, Repeat, Shuffle, Volume2, GitMerge } from 'lucide-react';
 import AddToPlaylistMenu from '@/components/playlist/AddToPlaylistMenu';
+import ActiveGlow from '@/components/player/ActiveGlow';
 
 export default function ExpandedMobilePlayer({
   isOpen,
@@ -20,6 +21,8 @@ export default function ExpandedMobilePlayer({
   onToggleRepeat,
   shuffleEnabled,
   onToggleShuffle,
+  crossfadeEnabled,
+  onToggleCrossfade,
   volume,
   onVolumeChange,
 }) {
@@ -106,11 +109,12 @@ export default function ExpandedMobilePlayer({
               <motion.button
                 whileTap={{ scale: 0.85 }}
                 onClick={onToggleShuffle}
-                className={`p-3 rounded-full transition-colors ${
+                className={`relative p-3 rounded-full transition-colors ${
                   shuffleEnabled ? 'text-[#c0c0c8] bg-[#c0c0c8]/10' : 'text-[#B3B3B3]'
                 }`}
               >
-                <Shuffle className="w-6 h-6" />
+                {shuffleEnabled && <ActiveGlow />}
+                <Shuffle className="relative z-10 w-6 h-6" />
               </motion.button>
 
               <motion.button
@@ -144,27 +148,52 @@ export default function ExpandedMobilePlayer({
               <motion.button
                 whileTap={{ scale: 0.85 }}
                 onClick={onFavoriteToggle}
-                className={`p-3 rounded-full transition-colors ${
+                className={`relative p-3 rounded-full transition-colors ${
                   isFavorite ? 'text-[#c0c0c8] bg-[#c0c0c8]/10' : 'text-[#B3B3B3]'
                 }`}
               >
-                <Heart className={`w-6 h-6 ${isFavorite ? 'fill-current' : ''}`} />
+                {isFavorite && <ActiveGlow />}
+                <Heart className={`relative z-10 w-6 h-6 ${isFavorite ? 'fill-current' : ''}`} />
               </motion.button>
             </div>
 
             {/* Secondary controls */}
-            <div className="px-6 pb-12 flex items-center justify-between">
-              <motion.button
-                whileTap={{ scale: 0.85 }}
-                onClick={onToggleRepeat}
-                className={`p-2 rounded-full transition-colors ${
-                  repeatMode ? 'text-[#c0c0c8] bg-[#c0c0c8]/10' : 'text-[#B3B3B3]'
-                }`}
-              >
-                <Repeat className="w-5 h-5" />
-              </motion.button>
+            <div className="px-6 pb-12 space-y-4">
+              <div className="flex items-center justify-center gap-6">
+                <motion.button
+                  whileTap={{ scale: 0.85 }}
+                  onClick={onToggleRepeat}
+                  className={`relative p-2 rounded-full transition-colors ${
+                    repeatMode ? 'text-[#c0c0c8] bg-[#c0c0c8]/10' : 'text-[#B3B3B3]'
+                  }`}
+                >
+                  {repeatMode && <ActiveGlow />}
+                  <Repeat className="relative z-10 w-5 h-5" />
+                </motion.button>
 
-              <div className="flex items-center gap-3 flex-1 mx-4">
+                <motion.button
+                  whileTap={{ scale: 0.85 }}
+                  onClick={onToggleCrossfade}
+                  className={`relative p-2 rounded-full transition-colors ${
+                    crossfadeEnabled ? 'text-[#c0c0c8] bg-[#c0c0c8]/10' : 'text-[#B3B3B3]'
+                  }`}
+                  title="Crossfade entre faixas"
+                >
+                  {crossfadeEnabled && <ActiveGlow />}
+                  <GitMerge className="relative z-10 w-5 h-5" />
+                </motion.button>
+
+                {currentSong && (
+                  <AddToPlaylistMenu
+                    songId={currentSong.id}
+                    buttonClassName="p-2 rounded-full text-[#B3B3B3] transition-colors"
+                    iconClassName="w-5 h-5"
+                    align="start"
+                  />
+                )}
+              </div>
+
+              <div className="flex items-center gap-3">
                 <Volume2 className="w-4 h-4 text-[#B3B3B3] flex-shrink-0" />
                 <input
                   type="range"
@@ -181,15 +210,6 @@ export default function ExpandedMobilePlayer({
                   }}
                 />
               </div>
-
-              {currentSong && (
-                <AddToPlaylistMenu
-                  songId={currentSong.id}
-                  buttonClassName="p-2 rounded-full text-[#B3B3B3] transition-colors"
-                  iconClassName="w-5 h-5"
-                  align="start"
-                />
-              )}
             </div>
           </div>
         </motion.div>

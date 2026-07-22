@@ -535,6 +535,8 @@ export default function Layout({ children, currentPageName }) {
           onToggleRepeat={handleToggleRepeat}
           shuffleEnabled={shuffleEnabled}
           onToggleShuffle={handleToggleShuffle}
+          crossfadeEnabled={crossfadeEnabled}
+          onToggleCrossfade={() => setCrossfadeEnabled(!crossfadeEnabled)}
           volume={volume}
           onVolumeChange={handleVolumeChange}
         />

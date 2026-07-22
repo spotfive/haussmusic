@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import BackgroundMedia from '@/components/media/BackgroundMedia';
 import AddToPlaylistMenu from '@/components/playlist/AddToPlaylistMenu';
+import ActiveGlow from '@/components/player/ActiveGlow';
 
 export default function RightSidebar({ song, isPlaying, onClose, isFavorite, onFavoriteToggle }) {
   const videoRef = useRef(null);
@@ -121,9 +122,10 @@ export default function RightSidebar({ song, isPlaying, onClose, isFavorite, onF
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={onFavoriteToggle}
-                className={`flex-1 py-2 rounded-lg transition-colors ${isFavorite ? 'bg-[#c0c0c8]/20 text-[#c0c0c8]' : 'bg-[#181818] text-[#B3B3B3] hover:text-white'}`}
+                className={`relative flex-1 py-2 rounded-lg transition-colors ${isFavorite ? 'bg-[#c0c0c8]/20 text-[#c0c0c8]' : 'bg-[#181818] text-[#B3B3B3] hover:text-white'}`}
               >
-                <Heart className={`w-4 h-4 mx-auto ${isFavorite ? 'fill-current' : ''}`} />
+                {isFavorite && <ActiveGlow rounded="rounded-lg" />}
+                <Heart className={`relative z-10 w-4 h-4 mx-auto ${isFavorite ? 'fill-current' : ''}`} />
               </motion.button>
               <div className="flex-1">
                 <AddToPlaylistMenu

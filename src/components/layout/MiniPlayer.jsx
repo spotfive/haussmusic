@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Play, Pause, SkipForward, SkipBack, Heart, Volume2, VolumeX, Repeat, Maximize2, Music2, GitMerge, Shuffle } from 'lucide-react';
 import AddToPlaylistMenu from '@/components/playlist/AddToPlaylistMenu';
+import ActiveGlow from '@/components/player/ActiveGlow';
 
 export default function MiniPlayer({
   currentSong, isPlaying, onPlayPause, onNext, onPrevious,
@@ -113,9 +114,10 @@ export default function MiniPlayer({
             <motion.button
               whileTap={{ scale: 0.88 }}
               onClick={onFavoriteToggle}
-              className={`p-2 rounded-lg ml-auto transition-colors ${isFavorite ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] active:bg-[#282828]'}`}
+              className={`relative p-2 rounded-lg ml-auto transition-colors ${isFavorite ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] active:bg-[#282828]'}`}
             >
-              <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+              {isFavorite && <ActiveGlow />}
+              <Heart className={`relative z-10 w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
             </motion.button>
           </div>
         </div>
@@ -148,11 +150,13 @@ export default function MiniPlayer({
 
           {/* Controls */}
           <div className="flex-1 flex items-center justify-center gap-1">
-            <button onClick={onToggleShuffle} className={`p-2 rounded-lg transition-colors ${shuffleEnabled ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`} title="Modo aleatório">
-              <Shuffle className="w-4 h-4" />
+            <button onClick={onToggleShuffle} className={`relative p-2 rounded-lg transition-colors ${shuffleEnabled ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`} title="Modo aleatório">
+              {shuffleEnabled && <ActiveGlow />}
+              <Shuffle className="relative z-10 w-4 h-4" />
             </button>
-            <button onClick={onToggleRepeat} className={`p-2 rounded-lg transition-colors ${repeatMode ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`}>
-              <Repeat className="w-4 h-4" />
+            <button onClick={onToggleRepeat} className={`relative p-2 rounded-lg transition-colors ${repeatMode ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`}>
+              {repeatMode && <ActiveGlow />}
+              <Repeat className="relative z-10 w-4 h-4" />
             </button>
             <button onClick={onPrevious} className="p-2 rounded-lg text-[#B3B3B3] hover:text-white transition-colors">
               <SkipBack className="w-4 h-4" />
@@ -163,11 +167,13 @@ export default function MiniPlayer({
             <button onClick={onNext} className="p-2 rounded-lg text-[#B3B3B3] hover:text-white transition-colors">
               <SkipForward className="w-4 h-4" />
             </button>
-            <button onClick={onFavoriteToggle} className={`p-2 rounded-lg transition-colors ${isFavorite ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`}>
-              <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+            <button onClick={onFavoriteToggle} className={`relative p-2 rounded-lg transition-colors ${isFavorite ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`}>
+              {isFavorite && <ActiveGlow />}
+              <Heart className={`relative z-10 w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
             </button>
-            <button onClick={onToggleCrossfade} className={`p-2 rounded-lg transition-colors ${crossfadeEnabled ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`} title="Crossfade entre faixas">
-              <GitMerge className="w-4 h-4" />
+            <button onClick={onToggleCrossfade} className={`relative p-2 rounded-lg transition-colors ${crossfadeEnabled ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`} title="Crossfade entre faixas">
+              {crossfadeEnabled && <ActiveGlow />}
+              <GitMerge className="relative z-10 w-4 h-4" />
             </button>
             <AddToPlaylistMenu
               songId={currentSong.id}
