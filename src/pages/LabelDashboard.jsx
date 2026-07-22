@@ -771,6 +771,34 @@ export default function LabelDashboard() {
               className="space-y-4 bg-[#181818] rounded-2xl p-6 border border-white/5"
             >
               <div>
+                <label className="text-sm font-medium text-[#B3B3B3] mb-2 block">Logo da Gravadora</label>
+                <label className="relative block w-28 h-28 rounded-2xl overflow-hidden border-2 border-dashed border-white/10 hover:border-[#c0c0c8]/50 transition-colors cursor-pointer group">
+                  {label.profile_picture ? (
+                    <img src={label.profile_picture} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-[#282828]">
+                      <Music className="w-8 h-8 text-zinc-600" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+                    <span className="text-white text-xs font-medium opacity-0 group-hover:opacity-100">Trocar logo</span>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = (ev) => setCropperImage(ev.target.result);
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+              </div>
+
+              <div>
                 <label className="text-sm font-medium text-[#B3B3B3] mb-2 block">Nome da Gravadora</label>
                 <Input
                   defaultValue={label.name || ''}

@@ -126,6 +126,12 @@ export default function AdminDashboard() {
     onError: () => toast.error('Erro ao remover banner'),
   });
 
+  const deleteSongMutation = useMutation({
+    mutationFn: (id) => base44.entities.Song.delete(id),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['songs'] }); toast.success('Música removida'); },
+    onError: () => toast.error('Erro ao remover música'),
+  });
+
   // Cargos are now multi-select: ouvinte/artista/gravadora/staff live together
   // in the user_type array, admin lives on the separate `role` field. Each
   // call toggles exactly one cargo on/off, keeping the Artist mirror row
@@ -602,10 +608,15 @@ export default function AdminDashboard() {
                       <p className="text-sm font-medium text-white truncate">{song.title}</p>
                       <p className="text-xs text-zinc-500 truncate">{song.artist}{song.featuring ? ` feat. ${song.featuring}` : ''}</p>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-zinc-500">
+                    <div className="flex items-center gap-4 text-xs text-zinc-500 flex-shrink-0">
                       <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{song.plays || 0}</span>
                       <span className="bg-white/5 px-2 py-0.5 rounded">{song.type || 'single'}</span>
                     </div>
+                    <Button variant="ghost" size="icon"
+                      onClick={() => { if (confirm(`Excluir "${song.title}"?`)) deleteSongMutation.mutate(song.id); }}
+                      className="flex-shrink-0 text-zinc-600 hover:text-red-400 hover:bg-red-500/10">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </motion.div>
                 ))}
               </div>
