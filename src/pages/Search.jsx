@@ -6,6 +6,7 @@ import { Search as SearchIcon, X, Music2, Disc3, User, Users, Play, Pause, Heart
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { hasUserType } from '@/lib/utils';
 
 const categoryCards = [
   { id: 'pop', label: 'Pop', color: 'from-zinc-300 to-zinc-500', icon: Mic2 },
@@ -140,7 +141,10 @@ export default function Search() {
   const filteredArtists = useMemo(() => {
     if (!query.trim()) return [];
     const s = query.toLowerCase();
-    return allUsers.filter(u => (u.display_name || u.full_name || '').toLowerCase().includes(s));
+    return allUsers.filter(u =>
+      (hasUserType(u, 'artista') || hasUserType(u, 'gravadora')) &&
+      (u.display_name || u.full_name || '').toLowerCase().includes(s)
+    );
   }, [allUsers, query]);
 
   const filteredSongs = useMemo(() => {
