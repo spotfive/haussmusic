@@ -128,6 +128,9 @@ db.exec(`
     artist_name text not null,
     release_date text,
     link_url text,
+    button_text text,
+    category text,
+    duration_seconds real not null default 7,
     is_active integer not null default 1,
     priority real not null default 0,
     created_by text,
@@ -207,6 +210,9 @@ for (const [table, column, definition] of [
   ['follows', 'updated_date', 'text'],
   ['user_favorites', 'updated_date', 'text'],
   ['songs', 'likes', 'real not null default 0'],
+  ['banners', 'button_text', 'text'],
+  ['banners', 'category', 'text'],
+  ['banners', 'duration_seconds', 'real not null default 7'],
 ]) {
   const cols = db.prepare(`pragma table_info(${table})`).all();
   if (!cols.some((c) => c.name === column)) {

@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ArtistNameBanner from '@/components/home/ArtistNameBanner';
 import HomeHeroCarousel from '@/components/home/HomeHeroCarousel';
+import BackgroundMedia from '@/components/media/BackgroundMedia';
 import { DiscordIcon } from '@/components/social/SocialBrandIcons';
 import { hasUserType } from '@/lib/utils';
 import { toggleSongLike } from '@/lib/songLikes';
@@ -115,7 +116,7 @@ export default function Home() {
 
   const { data: banners = [] } = useQuery({
     queryKey: ['banners'],
-    queryFn: () => base44.entities.Banner.list('-priority', 10),
+    queryFn: () => base44.entities.Banner.list('-created_date', 10),
   });
   const activeBanners = banners.filter(b => b.is_active !== false);
 
@@ -272,34 +273,43 @@ export default function Home() {
     }] : []),
     ...activeBanners.map((banner) => ({
       key: `banner-${banner.id}`,
+      durationSeconds: banner.duration_seconds || 7,
       render: () => (
-        <div
-          className={`relative w-full h-full ${banner.link_url ? 'cursor-pointer' : ''}`}
-          onClick={() => { if (banner.link_url) window.open(banner.link_url, '_blank', 'noopener'); }}
-        >
-          <div className="absolute inset-0">
+        <div className="relative w-full h-full bg-black">
+          <div className="absolute inset-0 bg-black overflow-hidden">
             {banner.image_url ? (
-              <img
+              <BackgroundMedia
                 src={banner.image_url}
                 alt={banner.title}
-                className="w-full h-full object-cover"
-                style={{ filter: 'saturate(1.3) brightness(0.55)' }}
+                className="w-full h-full object-contain"
+                style={{ filter: 'saturate(1.15) brightness(0.85)' }}
               />
             ) : (
               <ArtistNameBanner name={banner.title} />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/20" />
           </div>
 
           <div className="relative h-full flex items-end p-5 lg:p-8">
             <div className="flex-1 min-w-0">
-              <p className="text-[#e5e5ea] text-xs font-bold uppercase tracking-widest mb-1.5">Destaque</p>
-              <h1 className="text-2xl lg:text-4xl font-black text-white mb-0.5 truncate">{banner.title}</h1>
+              <p className="text-[#e5e5ea] text-xs font-bold uppercase tracking-widest mb-1.5">{banner.category || 'Destaque'}</p>
+              <h1 className="text-2xl lg:text-4xl font-black text-white mb-0.5">{banner.title}</h1>
               {banner.artist_name && (
-                <p className="text-white/70 text-sm lg:text-base mb-1 truncate">{banner.artist_name}</p>
+                <p className="text-white/70 text-sm lg:text-base mb-1">{banner.artist_name}</p>
               )}
               {banner.description && (
-                <p className="text-white/60 text-sm max-w-xl line-clamp-2 mt-2">{banner.description}</p>
+                <p className="text-white/60 text-sm max-w-xl mt-2">{banner.description}</p>
+              )}
+              {banner.link_url && (
+                <a
+                  href={banner.link_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-block mt-4 px-5 py-2.5 rounded-full bg-[#c0c0c8] text-black text-sm font-bold hover:bg-white transition-colors"
+                >
+                  {banner.button_text || 'Saiba Mais'}
+                </a>
               )}
             </div>
           </div>

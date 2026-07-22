@@ -28,7 +28,7 @@ export default function AdminDashboard() {
   const [editingUser, setEditingUser] = useState(null);
   const [uploadingUserPhoto, setUploadingUserPhoto] = useState(false);
   const [newBanner, setNewBanner] = useState({
-    title: '', description: '', artist_name: '', image_url: '', link_url: '', priority: 0
+    title: '', description: '', artist_name: '', image_url: '', link_url: '', button_text: '', category: '', duration_seconds: 7
   });
   const [editingBannerId, setEditingBannerId] = useState(null);
   const [repSearchTerm, setRepSearchTerm] = useState('');
@@ -61,7 +61,7 @@ export default function AdminDashboard() {
 
   const { data: banners = [] } = useQuery({
     queryKey: ['banners'],
-    queryFn: () => base44.entities.Banner.list('-priority'),
+    queryFn: () => base44.entities.Banner.list('-created_date'),
   });
 
   const { data: songs = [] } = useQuery({
@@ -125,7 +125,7 @@ export default function AdminDashboard() {
     mutationFn: (data) => base44.entities.Banner.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banners'] });
-      setNewBanner({ title: '', description: '', artist_name: '', image_url: '', link_url: '', priority: 0 });
+      setNewBanner({ title: '', description: '', artist_name: '', image_url: '', link_url: '', button_text: '', category: '', duration_seconds: 7 });
       toast.success('Banner criado!');
     },
     onError: () => toast.error('Erro ao criar banner'),
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
     mutationFn: ({ id, data }) => base44.entities.Banner.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banners'] });
-      setNewBanner({ title: '', description: '', artist_name: '', image_url: '', link_url: '', priority: 0 });
+      setNewBanner({ title: '', description: '', artist_name: '', image_url: '', link_url: '', button_text: '', category: '', duration_seconds: 7 });
       setEditingBannerId(null);
       toast.success('Banner atualizado!');
     },
@@ -349,9 +349,32 @@ export default function AdminDashboard() {
   const handleUploadImage = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    if (file.type.startsWith('video/')) {
+      const durationOk = await new Promise((resolve) => {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.onloadedmetadata = () => {
+          URL.revokeObjectURL(video.src);
+          resolve(video.duration <= 30);
+        };
+        video.onerror = () => resolve(true); // can't read it — let the server side sort it out
+        video.src = URL.createObjectURL(file);
+      });
+      if (!durationOk) {
+        toast.error('O vídeo precisa ter no máximo 30 segundos');
+        e.target.value = '';
+        return;
+      }
+    }
+
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setNewBanner(prev => ({ ...prev, image_url: file_url }));
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setNewBanner(prev => ({ ...prev, image_url: file_url }));
+    } catch {
+      toast.error('Erro ao enviar arquivo');
+    }
     setUploading(false);
   };
 
@@ -485,6 +508,9 @@ export default function AdminDashboard() {
                   <Input placeholder="Título do banner" value={newBanner.title}
                     onChange={(e) => setNewBanner(prev => ({ ...prev, title: e.target.value }))}
                     className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600" />
+                  <Input placeholder="Categoria (ex: Destaque, Novidade...)" value={newBanner.category}
+                    onChange={(e) => setNewBanner(prev => ({ ...prev, category: e.target.value }))}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600" />
                   <Input placeholder="Nome do Artista" value={newBanner.artist_name}
                     onChange={(e) => setNewBanner(prev => ({ ...prev, artist_name: e.target.value }))}
                     className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600" />
@@ -495,24 +521,38 @@ export default function AdminDashboard() {
                     <Input placeholder="Link (URL)" value={newBanner.link_url}
                       onChange={(e) => setNewBanner(prev => ({ ...prev, link_url: e.target.value }))}
                       className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600" />
-                    <Input type="number" placeholder="Prioridade" value={newBanner.priority}
-                      onChange={(e) => setNewBanner(prev => ({ ...prev, priority: parseInt(e.target.value) || 0 }))}
+                    <Input placeholder="Texto do botão" value={newBanner.button_text}
+                      onChange={(e) => setNewBanner(prev => ({ ...prev, button_text: e.target.value }))}
+                      className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-500 mb-1 block">Duração na rotação (segundos)</label>
+                    <Input type="number" min="3" max="60" placeholder="Segundos" value={newBanner.duration_seconds}
+                      onChange={(e) => setNewBanner(prev => ({ ...prev, duration_seconds: parseInt(e.target.value) || 7 }))}
                       className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600" />
                   </div>
                   <label className="block p-6 border-2 border-dashed border-white/10 rounded-xl hover:border-[#c0c0c8]/50 transition-colors cursor-pointer text-center">
                     {uploading ? (
                       <div className="flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin text-[#c0c0c8]" /><span className="text-zinc-400 text-sm">Enviando...</span></div>
                     ) : newBanner.image_url ? (
-                      <img src={newBanner.image_url} alt="Preview" className="w-full h-28 object-cover rounded-lg" />
+                      /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(newBanner.image_url) ? (
+                        <video src={newBanner.image_url} className="w-full h-28 object-cover rounded-lg" muted loop autoPlay playsInline />
+                      ) : (
+                        <img src={newBanner.image_url} alt="Preview" className="w-full h-28 object-cover rounded-lg" />
+                      )
                     ) : (
-                      <div className="flex flex-col items-center gap-2"><Upload className="w-8 h-8 text-zinc-600" /><span className="text-zinc-500 text-sm">Clique para enviar imagem</span></div>
+                      <div className="flex flex-col items-center gap-2">
+                        <Upload className="w-8 h-8 text-zinc-600" />
+                        <span className="text-zinc-500 text-sm">Clique para enviar imagem, GIF ou vídeo</span>
+                        <span className="text-zinc-600 text-xs">Vídeos: até 30 segundos</span>
+                      </div>
                     )}
-                    <input type="file" accept="image/*" className="hidden" onChange={handleUploadImage} />
+                    <input type="file" accept="image/*,video/*" className="hidden" onChange={handleUploadImage} />
                   </label>
                   <div className="flex gap-2">
                     {editingBannerId && (
                       <Button
-                        onClick={() => { setEditingBannerId(null); setNewBanner({ title: '', description: '', artist_name: '', image_url: '', link_url: '', priority: 0 }); }}
+                        onClick={() => { setEditingBannerId(null); setNewBanner({ title: '', description: '', artist_name: '', image_url: '', link_url: '', button_text: '', category: '', duration_seconds: 7 }); }}
                         variant="ghost"
                         className="rounded-xl h-11 bg-white/5 hover:bg-white/10 text-zinc-300"
                       >
@@ -546,12 +586,17 @@ export default function AdminDashboard() {
                       animate={{ opacity: 1, x: 0 }}
                       className="bg-[#181818] rounded-xl border border-white/5 p-3 flex items-center gap-4 group hover:border-white/10 transition-colors"
                     >
-                      <img src={banner.image_url} alt={banner.title} className="w-20 h-20 rounded-lg object-cover flex-shrink-0" />
+                      {/\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(banner.image_url || '') ? (
+                        <video src={banner.image_url} className="w-20 h-20 rounded-lg object-cover flex-shrink-0" muted loop autoPlay playsInline />
+                      ) : (
+                        <img src={banner.image_url} alt={banner.title} className="w-20 h-20 rounded-lg object-cover flex-shrink-0" />
+                      )}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-white text-sm truncate">{banner.title}</h3>
                         <p className="text-xs text-zinc-400 truncate">{banner.artist_name}</p>
                         <div className="flex items-center gap-3 mt-1">
-                          <span className="text-[10px] text-[#c0c0c8] bg-[#c0c0c8]/10 px-2 py-0.5 rounded-full">Prioridade {banner.priority}</span>
+                          {banner.category && <span className="text-[10px] text-[#c0c0c8] bg-[#c0c0c8]/10 px-2 py-0.5 rounded-full truncate max-w-[100px]">{banner.category}</span>}
+                          <span className="text-[10px] text-zinc-500">{banner.duration_seconds || 7}s</span>
                           {banner.link_url && <span className="text-[10px] text-zinc-500 truncate">{banner.link_url}</span>}
                         </div>
                       </div>
@@ -565,7 +610,9 @@ export default function AdminDashboard() {
                               artist_name: banner.artist_name || '',
                               image_url: banner.image_url || '',
                               link_url: banner.link_url || '',
-                              priority: banner.priority || 0,
+                              button_text: banner.button_text || '',
+                              category: banner.category || '',
+                              duration_seconds: banner.duration_seconds || 7,
                             });
                           }}
                           className="text-zinc-600 hover:text-[#c0c0c8] hover:bg-[#c0c0c8]/10">
@@ -573,7 +620,7 @@ export default function AdminDashboard() {
                         </Button>
                         <Button variant="ghost" size="icon"
                           onClick={() => {
-                            if (editingBannerId === banner.id) { setEditingBannerId(null); setNewBanner({ title: '', description: '', artist_name: '', image_url: '', link_url: '', priority: 0 }); }
+                            if (editingBannerId === banner.id) { setEditingBannerId(null); setNewBanner({ title: '', description: '', artist_name: '', image_url: '', link_url: '', button_text: '', category: '', duration_seconds: 7 }); }
                             deleteBannerMutation.mutate(banner.id);
                           }}
                           className="text-zinc-600 hover:text-red-400 hover:bg-red-500/10">

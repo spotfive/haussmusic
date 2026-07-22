@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const ROTATE_MS = 7000;
+const DEFAULT_ROTATE_MS = 7000;
 
 // Rotates through whatever hero slides are handed to it (the "Mais Ouvidas"
 // song card, plus one per active admin banner) — sliding one out and the
-// next one in, auto-advancing, with dots/arrows for manual control.
+// next one in, auto-advancing, with dots/arrows for manual control. Each
+// slide can set its own durationSeconds (banners do, from the admin form);
+// slides without one — the song card — use the default.
 export default function HomeHeroCarousel({ slides }) {
   const [index, setIndex] = useState(0);
 
@@ -16,15 +18,17 @@ export default function HomeHeroCarousel({ slides }) {
 
   useEffect(() => {
     if (slides.length < 2) return;
-    const timer = setInterval(() => setIndex((i) => (i + 1) % slides.length), ROTATE_MS);
-    return () => clearInterval(timer);
-  }, [slides.length]);
+    const current = slides[index];
+    const ms = current?.durationSeconds ? current.durationSeconds * 1000 : DEFAULT_ROTATE_MS;
+    const timer = setTimeout(() => setIndex((i) => (i + 1) % slides.length), ms);
+    return () => clearTimeout(timer);
+  }, [slides, index]);
 
   if (slides.length === 0) return null;
   const slide = slides[index] || slides[0];
 
   return (
-    <div className="group relative rounded-2xl overflow-hidden mb-6" style={{ height: '280px' }}>
+    <div className="group relative rounded-2xl overflow-hidden mb-6 h-[280px] sm:h-[300px] lg:h-[320px]">
       <AnimatePresence mode="wait">
         <motion.div
           key={slide.key}
