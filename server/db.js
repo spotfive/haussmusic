@@ -223,6 +223,32 @@ db.exec(`
   where user_type is not null and user_type != '' and substr(user_type, 1, 1) != '[';
 `);
 
+// table -> columns that can hold a plain uploads URL (this server's own
+// /uploads/<file>, never a third-party URL). Shared with fileCleanup.js so
+// there's one list of "where uploaded file URLs can live" to keep in sync.
+const FILE_FIELDS_BY_TABLE = {
+  users: ['profile_picture', 'profile_banner'],
+  songs: ['cover_url', 'background_video_url', 'audio_url'],
+  posts: ['cover_url', 'background_video_url'],
+  banners: ['image_url'],
+  labels: ['profile_picture'],
+  artists: ['profile_picture'],
+};
+
+// Migration: PUBLIC_URL was misconfigured as http:// instead of https:// for
+// a while, so uploads made during that window have an insecure URL baked
+// into the database — the browser then flags the (https) site as "not
+// fully secure" because it's loading http:// images/video as mixed
+// content. This server is only ever reachable over https in production
+// (Railway/Vercel both terminate TLS at the edge), so it's always safe to
+// upgrade a stored own-upload URL from http to https.
+for (const [table, columns] of Object.entries(FILE_FIELDS_BY_TABLE)) {
+  for (const column of columns) {
+    db.exec(`update ${table} set ${column} = 'https://' || substr(${column}, 8) where ${column} like 'http://%'`);
+  }
+}
+db.exec(`update posts set tracks = replace(tracks, 'http://', 'https://') where tracks like '%http://%'`);
+
 // entity name (as used by the frontend) -> { table, json: [...], bool: [...] }
 const ENTITIES = {
   User: { table: 'users', json: ['managed_artists', 'representatives', 'social_links', 'user_type'], bool: ['verified', 'profile_completed'] },
@@ -274,4 +300,4 @@ function deserializeRow(config, row) {
   return out;
 }
 
-module.exports = { db, ENTITIES, getEntityConfig, serializeRow, deserializeRow };
+module.exports = { db, ENTITIES, getEntityConfig, serializeRow, deserializeRow, FILE_FIELDS_BY_TABLE };

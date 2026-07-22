@@ -3,18 +3,8 @@
 // doesn't leave the original file sitting on disk forever.
 const path = require('path');
 const fs = require('fs');
-const { db } = require('./db');
+const { db, FILE_FIELDS_BY_TABLE } = require('./db');
 const { UPLOADS_DIR } = require('./routes/upload');
-
-// table -> columns that can hold a plain uploads URL
-const FILE_FIELDS_BY_TABLE = {
-  users: ['profile_picture', 'profile_banner'],
-  songs: ['cover_url', 'background_video_url', 'audio_url'],
-  posts: ['cover_url', 'background_video_url'],
-  banners: ['image_url'],
-  labels: ['profile_picture'],
-  artists: ['profile_picture'],
-};
 
 // posts.tracks is a JSON array of { audio_url, ... } — those files need the
 // same treatment but aren't a plain column.
