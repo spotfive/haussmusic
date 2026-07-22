@@ -63,6 +63,7 @@ db.exec(`
     genre text,
     lyrics text default '[]',
     plays real not null default 0,
+    likes real not null default 0,
     is_favorite integer not null default 0,
     rating real not null default 0,
     rating_count real not null default 0,
@@ -205,6 +206,7 @@ for (const [table, column, definition] of [
   ['app_settings', 'created_by', 'text'],
   ['follows', 'updated_date', 'text'],
   ['user_favorites', 'updated_date', 'text'],
+  ['songs', 'likes', 'real not null default 0'],
 ]) {
   const cols = db.prepare(`pragma table_info(${table})`).all();
   if (!cols.some((c) => c.name === column)) {

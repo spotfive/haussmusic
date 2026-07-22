@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import SongCard from '@/components/ui/SongCard';
+import { toggleSongLike } from '@/lib/songLikes';
 
 export default function Playlist() {
   const navigate = useNavigate();
@@ -20,7 +21,12 @@ export default function Playlist() {
   const [uploading, setUploading] = useState(false);
   const [showAddSongsDialog, setShowAddSongsDialog] = useState(false);
   const [songSearch, setSongSearch] = useState('');
-  
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+  }, []);
+
   const urlParams = new URLSearchParams(window.location.search);
   const playlistId = urlParams.get('id');
 
@@ -140,7 +146,7 @@ export default function Playlist() {
   };
 
   const handleFavorite = async (song) => {
-    base44.entities.Song.update(song.id, { is_favorite: !song.is_favorite }).catch(() => {});
+    await toggleSongLike(song, user?.email).catch(() => {});
     queryClient.invalidateQueries({ queryKey: ['songs'] });
   };
 

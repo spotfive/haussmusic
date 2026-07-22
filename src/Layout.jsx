@@ -13,6 +13,7 @@ import { createPageUrl } from '@/utils';
 import { Home, Search, Library, Music2, Star, Award, LogIn, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { hasUserType } from '@/lib/utils';
+import { toggleSongLike } from '@/lib/songLikes';
 
 export default function Layout({ children, currentPageName }) {
   const queryClient = useQueryClient();
@@ -394,10 +395,10 @@ export default function Layout({ children, currentPageName }) {
     if (currentSong) {
       const newFavoriteState = !currentSong.is_favorite;
       setCurrentSong(prev => ({ ...prev, is_favorite: newFavoriteState }));
-      queryClient.setQueryData(['songs'], (oldSongs) => 
+      queryClient.setQueryData(['songs'], (oldSongs) =>
         oldSongs?.map(s => s.id === currentSong.id ? { ...s, is_favorite: newFavoriteState } : s)
       );
-      base44.entities.Song.update(currentSong.id, { is_favorite: newFavoriteState }).catch(() => {});
+      toggleSongLike(currentSong, user?.email).catch(() => {});
     }
   };
 

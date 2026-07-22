@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import SongCard from '@/components/ui/SongCard';
 import ProfileEditor from '@/components/profile/ProfileEditor';
+import { toggleSongLike } from '@/lib/songLikes';
 
 function formatDuration(sec) {
   if (!sec) return '0:00';
@@ -112,7 +113,7 @@ export default function Library() {
   const handleFavorite = async (song) => {
     const nf = !song.is_favorite;
     queryClient.setQueryData(['songs'], old => old?.map(s => s.id === song.id ? { ...s, is_favorite: nf } : s));
-    base44.entities.Song.update(song.id, { is_favorite: nf }).catch(() => {});
+    toggleSongLike(song, user?.email).catch(() => {});
   };
 
   const tabs = [

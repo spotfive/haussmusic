@@ -10,6 +10,7 @@ import ArtistNameBanner from '@/components/home/ArtistNameBanner';
 import HomeHeroCarousel from '@/components/home/HomeHeroCarousel';
 import { DiscordIcon } from '@/components/social/SocialBrandIcons';
 import { hasUserType } from '@/lib/utils';
+import { toggleSongLike } from '@/lib/songLikes';
 
 const pills = [
   { label: 'Tudo', key: 'all' },
@@ -190,7 +191,7 @@ export default function Home() {
     queryClient.setQueryData(['songs'], old =>
       old?.map(s => s.id === song.id ? { ...s, is_favorite: newFav } : s)
     );
-    base44.entities.Song.update(song.id, { is_favorite: newFav }).catch(() => {});
+    toggleSongLike(song, user?.email).catch(() => {});
   };
 
   const filteredSongs = activePill === 'songs' ? allSongs :

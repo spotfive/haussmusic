@@ -35,8 +35,10 @@ export default function Rankings() {
     .sort((a, b) => (b.plays || 0) - (a.plays || 0))
     .slice(0, TOP_N);
 
-  const topLiked = [...posts]
-    .filter(p => (p.likes || 0) > 0)
+  // Songs and albums together — likes aren't split by type the way plays
+  // are, it's one "most curtido on the platform" chart.
+  const topLiked = [...posts, ...songs]
+    .filter(item => (item.likes || 0) > 0)
     .sort((a, b) => (b.likes || 0) - (a.likes || 0))
     .slice(0, TOP_N);
 

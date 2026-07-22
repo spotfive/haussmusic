@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { hasUserType } from '@/lib/utils';
+import { toggleSongLike } from '@/lib/songLikes';
 
 const categoryCards = [
   { id: 'pop', label: 'Pop', color: 'from-zinc-300 to-zinc-500', icon: Mic2 },
@@ -208,7 +209,7 @@ export default function Search() {
   const handleFavorite = async (song) => {
     const nf = !song.is_favorite;
     queryClient.setQueryData(['songs'], old => old?.map(s => s.id === song.id ? { ...s, is_favorite: nf } : s));
-    base44.entities.Song.update(song.id, { is_favorite: nf }).catch(() => {});
+    toggleSongLike(song, currentUser?.email).catch(() => {});
   };
 
   const formatDuration = (s) => s ? `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}` : '--:--';
