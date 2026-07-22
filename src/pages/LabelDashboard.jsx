@@ -236,41 +236,54 @@ export default function LabelDashboard() {
   }
 
   if (!label) {
+    if (isStaffOrAdmin && labels.length > 0) {
+      return (
+        <div className="min-h-screen px-6 lg:px-8 py-10">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 rounded-xl bg-[#c0c0c8]/10 flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-5 h-5 text-[#c0c0c8]" />
+              </div>
+              <div>
+                <h1 className="text-xl lg:text-2xl font-bold text-white">Escolha uma gravadora para gerenciar</h1>
+                <p className="text-sm text-zinc-500">{labels.length} gravadora{labels.length !== 1 ? 's' : ''} cadastrada{labels.length !== 1 ? 's' : ''}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+              {labels.map((l) => (
+                <motion.button
+                  key={l.id}
+                  whileHover={{ y: -4 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setSelectedLabelId(l.id)}
+                  className="group flex flex-col items-center gap-2 text-center"
+                >
+                  <div className="w-full aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-[#c0c0c8]/30 to-[#18181b] ring-1 ring-white/10 group-hover:ring-[#c0c0c8]/50 shadow-lg group-hover:shadow-[#c0c0c8]/20 transition-all">
+                    {l.profile_picture ? (
+                      <img src={l.profile_picture} alt={l.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Music className="w-10 h-10 text-white/30" />
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-sm font-medium text-white truncate max-w-full group-hover:text-[#c0c0c8] transition-colors">{l.name}</span>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex items-center justify-center min-h-screen px-6">
-        <div className="flex flex-col items-center gap-4 text-center max-w-2xl">
+        <div className="flex flex-col items-center gap-4 text-center max-w-md">
           <AlertCircle className="w-8 h-8 text-[#c0c0c8]" />
-          {isStaffOrAdmin && labels.length > 0 ? (
-            <>
-              <p className="text-white font-semibold mb-2">Escolha uma gravadora para gerenciar</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
-                {labels.map((l) => (
-                  <motion.button
-                    key={l.id}
-                    whileHover={{ y: -4 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => setSelectedLabelId(l.id)}
-                    className="group flex flex-col items-center gap-2"
-                  >
-                    <div className="w-full aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-[#c0c0c8]/30 to-[#18181b] ring-1 ring-white/10 group-hover:ring-[#c0c0c8]/50 shadow-lg group-hover:shadow-[#c0c0c8]/10 transition-all">
-                      {l.profile_picture ? (
-                        <img src={l.profile_picture} alt={l.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Music className="w-10 h-10 text-white/30" />
-                        </div>
-                      )}
-                    </div>
-                    <span className="text-sm font-medium text-white truncate max-w-full group-hover:text-[#c0c0c8] transition-colors">{l.name}</span>
-                  </motion.button>
-                ))}
-              </div>
-            </>
-          ) : (
-            <p className="text-[#B3B3B3]">
-              Sua conta ainda não está associada a nenhuma gravadora. Peça a um admin para te adicionar como representante em Admin → Gravadoras.
-            </p>
-          )}
+          <p className="text-[#B3B3B3]">
+            Sua conta ainda não está associada a nenhuma gravadora. Peça a um admin para te adicionar como representante em Admin → Gravadoras.
+          </p>
         </div>
       </div>
     );
