@@ -78,17 +78,27 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
     setUploadingWhat(type === 'video' ? 'vídeo' : 'áudio');
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      if (type === 'video') setFormData(prev => ({ ...prev, background_video_url: file_url }));
-      else if (type === 'track') {
-        const audio = new Audio(file_url);
-        audio.onloadedmetadata = () => {
-          setFormData(prev => ({
-            ...prev,
-            tracks: [...prev.tracks, { title: file.name.replace(/\.[^/.]+$/, ''), featuring: '', audio_url: file_url, duration: Math.round(audio.duration), order: prev.tracks.length }]
-          }));
-        };
+      if (type === 'video') {
+        setFormData(prev => ({ ...prev, background_video_url: file_url }));
+      } else if (type === 'track') {
+        // Reading duration is async (the audio element has to actually load
+        // metadata) — wait for it instead of letting setUploading(false) fire
+        // first, and catch a failed/unreadable file instead of the track
+        // just silently never appearing in the list.
+        const duration = await new Promise((resolve, reject) => {
+          const audio = new Audio(file_url);
+          audio.onloadedmetadata = () => resolve(audio.duration);
+          audio.onerror = () => reject(new Error('Não foi possível ler o arquivo de áudio'));
+        });
+        setFormData(prev => ({
+          ...prev,
+          tracks: [...prev.tracks, { title: file.name.replace(/\.[^/.]+$/, ''), featuring: '', audio_url: file_url, duration: Math.round(duration), order: prev.tracks.length }]
+        }));
       }
-    } catch {}
+    } catch (err) {
+      console.error('Upload failed:', err);
+      toast.error(err.message || `Erro ao enviar ${type === 'video' ? 'vídeo' : 'áudio'}`);
+    }
     setUploading(false);
     setUploadingWhat('');
   };
