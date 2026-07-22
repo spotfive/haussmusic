@@ -59,7 +59,10 @@ export default function Sidebar({ currentPage }) {
                   : 'text-[#B3B3B3] hover:text-white'
               }`}
             >
-              <item.icon className={`w-6 h-6 ${isActive(item.page) ? 'fill-current/10' : ''}`} />
+              <item.icon
+                className={`w-6 h-6 ${isActive(item.page) ? 'fill-current' : ''}`}
+                style={isActive(item.page) ? { filter: 'drop-shadow(0 0 6px rgba(192,192,200,0.7))' } : undefined}
+              />
               <span className="text-[9px] font-medium leading-none">{item.label}</span>
             </motion.div>
           </Link>
@@ -101,7 +104,10 @@ export default function Sidebar({ currentPage }) {
                   : 'text-[#B3B3B3] hover:text-white'
               }`}
             >
-              <Award className="w-6 h-6" />
+              <Award
+                className={`w-6 h-6 ${isActive('ArtistDashboard') ? 'fill-current' : ''}`}
+                style={isActive('ArtistDashboard') ? { filter: 'drop-shadow(0 0 6px rgba(192,192,200,0.7))' } : undefined}
+              />
               <span className="text-[9px] font-medium leading-none">Artista</span>
             </motion.div>
           </Link>
@@ -119,7 +125,10 @@ export default function Sidebar({ currentPage }) {
                   : 'text-[#B3B3B3] hover:text-white'
               }`}
             >
-              <Music2 className="w-6 h-6" />
+              <Music2
+                className={`w-6 h-6 ${isActive('LabelDashboard') ? 'fill-current' : ''}`}
+                style={isActive('LabelDashboard') ? { filter: 'drop-shadow(0 0 6px rgba(192,192,200,0.7))' } : undefined}
+              />
               <span className="text-[9px] font-medium leading-none">Gravadora</span>
             </motion.div>
           </Link>
@@ -138,7 +147,10 @@ export default function Sidebar({ currentPage }) {
                   : 'text-[#B3B3B3] hover:text-white'
               }`}
             >
-              <Shield className="w-6 h-6" />
+              <Shield
+                className={`w-6 h-6 ${isActive('AdminDashboard') ? 'fill-current' : ''}`}
+                style={isActive('AdminDashboard') ? { filter: 'drop-shadow(0 0 6px rgba(192,192,200,0.7))' } : undefined}
+              />
               <span className="text-[9px] font-medium leading-none">Admin</span>
             </motion.div>
           </Link>
