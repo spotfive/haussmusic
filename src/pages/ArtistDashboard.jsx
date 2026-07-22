@@ -446,6 +446,11 @@ export default function ArtistDashboard() {
           setEditingRelease(null);
         }}
         releaseToEdit={editingRelease}
+        // Prefills artist/artist_id for a new release with the logged-in
+        // artist's own account — without this, self-posted releases had no
+        // artist_id at all, which is what a label (or anything else) needs
+        // to reliably recognize "this release belongs to this artist".
+        managedArtist={editingRelease ? null : user}
         onSuccess={() => {
           queryClient.invalidateQueries({ queryKey: ['my-releases'] });
           queryClient.invalidateQueries({ queryKey: ['my-songs'] });

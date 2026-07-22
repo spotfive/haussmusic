@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, Plus, Trash2, GripVertical, Image, Video, Save, Loader2, Music, Tag, Mic, Disc, Sparkles, Clock } from 'lucide-react';
+import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import ImageCropper from '@/components/profile/ImageCropper';
@@ -107,16 +108,21 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
   const handleSave = async (status = 'draft') => {
     setSaving(true);
     try {
-      if (labelContext && managedArtist) {
-        const user = await base44.auth.me();
-        if (!user?.managed_artists?.includes(managedArtist.id)) {
-          throw new Error('Esta gravadora não gerencia este artista.');
-        }
+      // Sanity check when a label is publishing on an artist's behalf —
+      // was previously checking the logged-in rep's own (always-empty)
+      // user_type.managed_artists instead of the label's, so this threw
+      // on literally every label-published release. labelContext.managed_artists
+      // is the label's real roster, passed in from LabelDashboard.
+      if (labelContext && managedArtist && !labelContext.managed_artists?.includes(managedArtist.id)) {
+        throw new Error('Esta gravadora não gerencia este artista.');
       }
 
       const postPayload = {
         ...formData,
-        artist: managedArtist?.display_name || managedArtist?.full_name || formData.artist,
+        // A label publishing locks the artist name to the managed artist's
+        // account name; an artist self-publishing can still edit it freely
+        // even though the field starts prefilled with their own name.
+        artist: labelContext ? (managedArtist?.display_name || managedArtist?.full_name || formData.artist) : formData.artist,
         artist_id: managedArtist?.id || formData.artist_id,
         artist_email: managedArtist?.email || formData.artist_email,
         label_id: labelContext?.label_id || formData.label_id || null,
@@ -186,7 +192,10 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
       }
       onSuccess?.();
       onClose();
-    } catch (err) { console.error('Save failed:', err); }
+    } catch (err) {
+      console.error('Save failed:', err);
+      toast.error(err.message || 'Erro ao salvar lançamento');
+    }
     setSaving(false);
   };
 
@@ -307,7 +316,7 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
                       type="text" value={formData.artist}
                       onChange={e => setFormData(p => ({ ...p, artist: e.target.value }))}
                       placeholder="Nome do artista *"
-                      disabled={!!managedArtist}
+                      disabled={!!managedArtist && !!labelContext}
                       className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-[#c0c0c8]/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                     />
                     <input

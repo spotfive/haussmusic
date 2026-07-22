@@ -61,18 +61,35 @@ export default function LabelDashboard() {
     enabled: !!label,
   });
 
-  const { data: labelPosts = [] } = useQuery({
-    queryKey: ['labelPosts', label?.id],
-    queryFn: () => base44.entities.Post.filter({ label_id: label?.id }, '-release_date', 50),
+  // Releases published directly by the label already carry label_id, but a
+  // managed artist's own self-posted releases never did — so filtering on
+  // label_id alone hid everything an artist posted outside the label flow,
+  // both before and after joining. Pull everything and match by whichever
+  // identifier the row actually has instead.
+  const { data: allPosts = [] } = useQuery({
+    queryKey: ['labelAllPosts'],
+    queryFn: () => base44.entities.Post.list('-release_date', 200),
     enabled: !!label,
     refetchInterval: 5000,
   });
 
-  const { data: labelSongs = [] } = useQuery({
-    queryKey: ['labelSongs', label?.id],
-    queryFn: () => base44.entities.Song.filter({ label_id: label?.id }, '-created_date', 100),
+  const { data: allSongs = [] } = useQuery({
+    queryKey: ['labelAllSongs'],
+    queryFn: () => base44.entities.Song.list('-created_date', 300),
     enabled: !!label,
   });
+
+  const managedArtistIds = new Set(label?.managed_artists || []);
+  const managedArtistEmails = new Set(managedArtists.map(a => a.email).filter(Boolean));
+  const managedArtistNames = new Set(managedArtists.flatMap(a => [a.display_name, a.full_name]).filter(Boolean));
+
+  const belongsToLabel = (item) =>
+    item.label_id === label?.id ||
+    (item.artist_id && managedArtistIds.has(item.artist_id)) ||
+    (item.created_by && managedArtistEmails.has(item.created_by)) ||
+    (item.artist && managedArtistNames.has(item.artist));
+
+  const labelPosts = allPosts.filter(belongsToLabel);
 
   const { data: allUsers = [] } = useQuery({
     queryKey: ['allUsers'],
@@ -94,18 +111,19 @@ export default function LabelDashboard() {
 
   const deletePostMutation = useMutation({
     mutationFn: async (postId) => {
-      const allSongs = await base44.entities.Song.list();
-      const posts = await base44.entities.Post.list();
-      const post = posts.find(p => p.id === postId);
+      const post = allPosts.find(p => p.id === postId);
       if (post) {
-        const songsToDelete = allSongs.filter(s => s.label_id === label.id && s.album === post.title);
+        // A post's own tracks are identified by album+artist matching the
+        // post itself — not by label_id, since the post may be one of the
+        // self-posted releases that never had label_id set in the first place.
+        const songsToDelete = allSongs.filter(s => s.album === post.title && (s.artist_id === post.artist_id || s.artist === post.artist));
         await Promise.all(songsToDelete.map(song => base44.entities.Song.delete(song.id)));
       }
       await base44.entities.Post.delete(postId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['labelPosts'] });
-      queryClient.invalidateQueries({ queryKey: ['labelSongs'] });
+      queryClient.invalidateQueries({ queryKey: ['labelAllPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['labelAllSongs'] });
       toast.success('Lançamento excluído');
     },
   });
@@ -720,11 +738,12 @@ export default function LabelDashboard() {
           label_id: label?.id,
           label_name: label?.name,
           label_logo: label?.profile_picture || '',
+          managed_artists: label?.managed_artists || [],
         }}
         onSuccess={() => {
           setShowReleaseCreator(false);
-          queryClient.invalidateQueries({ queryKey: ['labelPosts'] });
-          queryClient.invalidateQueries({ queryKey: ['labelSongs'] });
+          queryClient.invalidateQueries({ queryKey: ['labelAllPosts'] });
+          queryClient.invalidateQueries({ queryKey: ['labelAllSongs'] });
           queryClient.invalidateQueries({ queryKey: ['posts'] });
           queryClient.invalidateQueries({ queryKey: ['songs'] });
         }}

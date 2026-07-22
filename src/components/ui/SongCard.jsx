@@ -1,12 +1,22 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { Play, Pause, Heart, Music2, Timer, Share2, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { base44 } from '@/api/base44Client';
+import { getItemLabel } from '@/lib/utils';
 import SocialShareButtons from '@/components/songs/SocialShareButtons';
 import AddToPlaylistMenu from '@/components/playlist/AddToPlaylistMenu';
 
 export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFavorite, index, hidePlaylistButton = false, isScheduled = false, scheduledDatetime = null }) {
   const [copied, setCopied] = useState(false);
+
+  // Shared cache across every SongCard on the page — one request, not one per card.
+  const { data: labels = [] } = useQuery({
+    queryKey: ['labels'],
+    queryFn: () => base44.entities.Label.list('-created_date', 100),
+  });
+  const label = getItemLabel(song, labels);
 
   const formatDuration = (s) => {
     if (!s) return '--:--';
@@ -109,9 +119,9 @@ export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFav
           {song.artist}
           {song.featuring && <span className="text-[#696969]"> feat. {song.featuring}</span>}
         </p>
-        {song.label_name && (
+        {label && (
           <p className="text-[10px] text-[#696969] truncate">
-            {song.label_name}
+            {label.name}
           </p>
         )}
       </div>

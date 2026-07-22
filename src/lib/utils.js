@@ -47,6 +47,21 @@ export function withoutUserType(user, type) {
   return next.length > 0 ? next : ['ouvinte'];
 }
 
+// What label to show for a song/post. Prefers whatever was stamped at
+// publish time (label_name/label_logo, set when a label published it
+// directly) — that's a record of who actually released it. Falls back to
+// the artist's *current* label when the row wasn't stamped (the artist
+// posted it themselves), so an artist's back catalog picks up their label
+// as soon as they're linked, without needing to be republished.
+export function getItemLabel(item, labels) {
+  if (item?.label_name) {
+    return { name: item.label_name, logo: item.label_logo || '' };
+  }
+  if (!item?.artist_id) return null;
+  const label = (labels || []).find((l) => l.managed_artists?.includes(item.artist_id));
+  return label ? { name: label.name, logo: label.profile_picture || '' } : null;
+}
+
 export function decodeJwtPayload(token) {
   const base64Url = token.split('.')[1];
   const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');

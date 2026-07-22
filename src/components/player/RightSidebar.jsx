@@ -1,9 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { ChevronRight, Music2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { getItemLabel } from '@/lib/utils';
 import BackgroundMedia from '@/components/media/BackgroundMedia';
 
 export default function RightSidebar({ song, onClose }) {
@@ -24,6 +26,12 @@ export default function RightSidebar({ song, onClose }) {
     };
     if (song?.artist) loadArtist();
   }, [song?.artist, song?.id]);
+
+  const { data: labels = [] } = useQuery({
+    queryKey: ['labels'],
+    queryFn: () => base44.entities.Label.list('-created_date', 100),
+  });
+  const label = getItemLabel(song, labels);
 
   if (!song) return null;
 
@@ -88,6 +96,16 @@ export default function RightSidebar({ song, onClose }) {
               <span className="text-white/60 text-sm drop-shadow">feat. {song.featuring}</span>
             )}
           </div>
+          {label && (
+            <div className="flex items-center gap-1.5 mt-2 text-xs text-white/70 drop-shadow">
+              {label.logo ? (
+                <img src={label.logo} alt="" className="w-4 h-4 rounded-full object-cover" />
+              ) : (
+                <Music2 className="w-3 h-3" />
+              )}
+              <span>{label.name}</span>
+            </div>
+          )}
         </div>
       </div>
 

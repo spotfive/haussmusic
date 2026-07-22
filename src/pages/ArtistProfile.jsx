@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { TikTokIcon, SpotifyIcon } from '@/components/social/SocialBrandIcons';
-import { hasUserType } from '@/lib/utils';
+import { hasUserType, getItemLabel } from '@/lib/utils';
 import ArtistNameBanner from '@/components/home/ArtistNameBanner';
 
 function VerifiedBadge() {
@@ -68,6 +68,11 @@ export default function ArtistProfile() {
       return allSongs.filter(s => s.artist_id === artistId || s.artist === artist?.display_name || s.artist === artist?.full_name);
     },
     enabled: !!artist,
+  });
+
+  const { data: labels = [] } = useQuery({
+    queryKey: ['labels'],
+    queryFn: () => base44.entities.Label.list('-created_date', 100),
   });
 
   // Seguidores do artista em tempo real
@@ -169,8 +174,21 @@ export default function ArtistProfile() {
             </div>
 
             <div className="flex-1 pb-2">
-              <div className="text-sm text-zinc-200 mb-1">
-                {hasUserType(artist, 'artista') ? '🎤 Artista' : hasUserType(artist, 'staff') ? '⭐ Staff' : '🎧 Usuário'}
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <span className="text-sm text-zinc-200">
+                  {hasUserType(artist, 'artista') ? '🎤 Artista' : hasUserType(artist, 'staff') ? '⭐ Staff' : '🎧 Usuário'}
+                </span>
+                {(() => {
+                  const artistLabel = labels.find(l => l.managed_artists?.includes(artist.id));
+                  return artistLabel && (
+                    <span className="flex items-center gap-1.5 text-sm text-[#e5e5ea] bg-white/10 px-2.5 py-0.5 rounded-full">
+                      {artistLabel.profile_picture && (
+                        <img src={artistLabel.profile_picture} alt="" className="w-4 h-4 rounded-full object-cover" />
+                      )}
+                      {artistLabel.name}
+                    </span>
+                  );
+                })()}
               </div>
               <h1 className="text-4xl lg:text-5xl font-black text-white mb-2">{artist.display_name || artist.full_name}</h1>
               <div className="flex items-center gap-6 text-sm text-zinc-300 flex-wrap">
@@ -301,12 +319,15 @@ export default function ArtistProfile() {
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-white truncate">{song.title}</div>
                     <div className="text-sm text-zinc-500">{song.plays || 0} plays</div>
-                    {song.label_name && (
-                      <div className="flex items-center gap-1 text-xs text-[#e5e5ea] mt-0.5">
-                        <Music2 className="w-3 h-3" />
-                        <span>{song.label_name}</span>
-                      </div>
-                    )}
+                    {(() => {
+                      const label = getItemLabel(song, labels);
+                      return label && (
+                        <div className="flex items-center gap-1 text-xs text-[#e5e5ea] mt-0.5">
+                          <Music2 className="w-3 h-3" />
+                          <span>{label.name}</span>
+                        </div>
+                      );
+                    })()}
                   </div>
                   <motion.button
                     whileHover={{ scale: 1.1 }}
