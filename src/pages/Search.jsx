@@ -86,7 +86,7 @@ export default function Search() {
 
   const { data: songs = [] } = useQuery({
     queryKey: ['songs'],
-    queryFn: () => base44.entities.Song.list('-plays'),
+    queryFn: () => base44.entities.Song.list('-created_date'),
     refetchInterval: 3000,
   });
 
@@ -151,7 +151,9 @@ export default function Search() {
   }, [allUsers, query]);
 
   const filteredSongs = useMemo(() => {
-    let results = songs;
+    // The shared ['songs'] cache is sorted by -created_date now; keep Search's
+    // results ordered by plays like before by sorting locally.
+    let results = [...songs].sort((a, b) => (b.plays || 0) - (a.plays || 0));
     if (selectedCategory) results = results.filter(s => s.genre === selectedCategory);
     if (query.trim()) {
       const s = query.toLowerCase();

@@ -56,9 +56,15 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => { volumeRef.current = volume; }, [volume]);
   useEffect(() => { isMutedRef.current = isMuted; }, [isMuted]);
 
+  // Every page shares this ['songs'] cache. They MUST all fetch the same
+  // full list with the same sort, or their observers clobber each other's
+  // data (e.g. this always-mounted Layout used to cap it at 50-by-plays,
+  // which silently dropped liked songs outside the top 50 from Library's
+  // "Curtidas"). Each page sorts/slices its own view locally instead.
   const { data: songs = [] } = useQuery({
     queryKey: ['songs'],
-    queryFn: () => base44.entities.Song.list('-plays', 50),
+    queryFn: () => base44.entities.Song.list('-created_date'),
+    refetchInterval: 3000,
   });
 
   // ===== Initialize audio refs =====
@@ -513,6 +519,9 @@ export default function Layout({ children, currentPageName }) {
             onPrevious={handlePrevious}
             repeatMode={repeatMode}
             onToggleRepeat={handleToggleRepeat}
+            currentTime={currentTime}
+            duration={duration}
+            onSeek={handleSeek}
           />
         )}
       </AnimatePresence>

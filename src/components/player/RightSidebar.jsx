@@ -1,16 +1,25 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronRight, Music2 } from 'lucide-react';
+import { ChevronRight, Music2, Mic } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { getItemLabel } from '@/lib/utils';
 import BackgroundMedia from '@/components/media/BackgroundMedia';
+import LyricsView from '@/components/player/LyricsView';
 
-export default function RightSidebar({ song, onClose }) {
+export default function RightSidebar({ song, onClose, currentTime = 0, duration = 0, onSeek }) {
   const videoRef = useRef(null);
   const [artist, setArtist] = useState(null);
+  const [showLyrics, setShowLyrics] = useState(false);
+
+  // A different track is now playing — drop back out of the lyrics view so it
+  // doesn't sit there showing the previous song's words.
+  useEffect(() => { setShowLyrics(false); }, [song?.id]);
+
+  const credits = Array.isArray(song?.credits) ? song.credits.filter((c) => c && (c.title || c.description)) : [];
+  const hasLyrics = Array.isArray(song?.lyrics) && song.lyrics.length > 0;
 
   useEffect(() => {
     const loadArtist = async () => {
@@ -109,8 +118,8 @@ export default function RightSidebar({ song, onClose }) {
         </div>
       </div>
 
-      {/* Data — plays, rating, duration, genre */}
-      <div className="flex-1 p-6 overflow-y-auto">
+      {/* Data — plays, rating, duration, genre, credits */}
+      <div className="flex-1 p-6 overflow-y-auto min-h-0">
         <div className="space-y-5">
           <div className="grid grid-cols-3 gap-2">
             <div className="text-center p-3 rounded-xl bg-black border border-white/[0.06]">
@@ -132,8 +141,54 @@ export default function RightSidebar({ song, onClose }) {
               {song.genre}
             </span>
           )}
+
+          {/* Lyrics — the mic opens the synced, karaoke-style view */}
+          <button
+            onClick={() => setShowLyrics(true)}
+            className={`w-full flex items-center gap-3 p-4 rounded-2xl border transition-all ${
+              hasLyrics
+                ? 'bg-[#c0c0c8]/10 border-[#c0c0c8]/25 hover:bg-[#c0c0c8]/15 text-white'
+                : 'bg-white/[0.02] border-white/[0.06] text-white/50 hover:bg-white/[0.04]'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${hasLyrics ? 'bg-[#c0c0c8]/20' : 'bg-white/[0.04]'}`}>
+              <Mic className={`w-5 h-5 ${hasLyrics ? 'text-[#e5e5ea]' : 'text-white/40'}`} />
+            </div>
+            <div className="text-left min-w-0">
+              <p className="text-sm font-semibold">Letra</p>
+              <p className="text-xs opacity-60 truncate">{hasLyrics ? 'Acompanhe sincronizada com a música' : 'Sem letra disponível'}</p>
+            </div>
+          </button>
+
+          {/* Credits */}
+          {credits.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-white mb-3">Créditos</h3>
+              <div className="space-y-3">
+                {credits.map((c, i) => (
+                  <div key={i}>
+                    <p className="text-sm font-semibold text-white leading-tight">{c.title || '—'}</p>
+                    {c.description && <p className="text-xs text-[#B3B3B3] mt-0.5">{c.description}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Synced lyrics overlay */}
+      <AnimatePresence>
+        {showLyrics && (
+          <LyricsView
+            song={song}
+            currentTime={currentTime}
+            duration={duration || song.duration || 0}
+            onSeek={onSeek}
+            onClose={() => setShowLyrics(false)}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

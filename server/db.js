@@ -210,6 +210,7 @@ for (const [table, column, definition] of [
   ['follows', 'updated_date', 'text'],
   ['user_favorites', 'updated_date', 'text'],
   ['songs', 'likes', 'real not null default 0'],
+  ['songs', 'credits', "text default '[]'"],
   ['banners', 'button_text', 'text'],
   ['banners', 'category', 'text'],
   ['banners', 'duration_seconds', 'real not null default 7'],
@@ -274,7 +275,7 @@ db.exec(`update posts set tracks = replace(tracks, 'http://', 'https://') where 
 // entity name (as used by the frontend) -> { table, json: [...], bool: [...] }
 const ENTITIES = {
   User: { table: 'users', json: ['managed_artists', 'representatives', 'social_links', 'user_type'], bool: ['verified', 'profile_completed'] },
-  Song: { table: 'songs', json: ['lyrics'], bool: ['is_favorite', 'published_by_label'] },
+  Song: { table: 'songs', json: ['lyrics', 'credits'], bool: ['is_favorite', 'published_by_label'] },
   Post: { table: 'posts', json: ['tracks'], bool: ['is_featured', 'is_scheduled', 'published_by_label'] },
   Playlist: { table: 'playlists', json: ['song_ids'], bool: ['is_public'] },
   Banner: { table: 'banners', json: [], bool: ['is_active'] },

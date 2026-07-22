@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Play, Pause, SkipForward, SkipBack, Heart, Repeat, Shuffle, Volume2, GitMerge } from 'lucide-react';
+import { ChevronDown, Play, Pause, SkipForward, SkipBack, Heart, Repeat, Shuffle, Volume2, GitMerge, Mic } from 'lucide-react';
 import AddToPlaylistMenu from '@/components/playlist/AddToPlaylistMenu';
 import ActiveGlow from '@/components/player/ActiveGlow';
+import LyricsView from '@/components/player/LyricsView';
 
 export default function ExpandedMobilePlayer({
   isOpen,
@@ -33,6 +34,9 @@ export default function ExpandedMobilePlayer({
     return `${m}:${String(s).padStart(2, '0')}`;
   };
 
+  const [showLyrics, setShowLyrics] = useState(false);
+  useEffect(() => { setShowLyrics(false); }, [currentSong?.id]);
+
   const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   const handleProgressClick = (e) => {
@@ -58,8 +62,27 @@ export default function ExpandedMobilePlayer({
               <ChevronDown className="w-6 h-6" />
             </button>
             <span className="text-xs text-[#696969] font-medium">TOCANDO AGORA</span>
-            <div className="w-10" />
+            <button
+              onClick={() => setShowLyrics(true)}
+              title="Letra"
+              className={`p-2 transition-colors ${Array.isArray(currentSong?.lyrics) && currentSong.lyrics.length > 0 ? 'text-[#c0c0c8] active:text-white' : 'text-[#696969] active:text-white'}`}
+            >
+              <Mic className="w-5 h-5" />
+            </button>
           </div>
+
+          {/* Synced lyrics overlay */}
+          <AnimatePresence>
+            {showLyrics && (
+              <LyricsView
+                song={currentSong}
+                currentTime={currentTime}
+                duration={duration || currentSong?.duration || 0}
+                onSeek={onSeek}
+                onClose={() => setShowLyrics(false)}
+              />
+            )}
+          </AnimatePresence>
 
           {/* Content */}
           <div className="flex flex-col h-full overflow-y-auto pb-safe">

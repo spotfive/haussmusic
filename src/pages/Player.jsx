@@ -25,7 +25,7 @@ export default function Player() {
 
   const { data: songs = [] } = useQuery({
     queryKey: ['songs'],
-    queryFn: () => base44.entities.Song.list('-plays', 50),
+    queryFn: () => base44.entities.Song.list('-created_date'),
     refetchInterval: 3000,
   });
 

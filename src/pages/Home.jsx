@@ -88,9 +88,11 @@ export default function Home() {
 
   const { isLiked, toggle } = useSongLikes(user?.email);
 
+  // Shared ['songs'] cache — fetch the full list (same queryFn everywhere so
+  // observers don't clobber each other); the sections below sort/slice it.
   const { data: allSongs = [], isLoading: songsLoading } = useQuery({
     queryKey: ['songs'],
-    queryFn: () => base44.entities.Song.list('-plays', 50),
+    queryFn: () => base44.entities.Song.list('-created_date'),
     refetchInterval: 3000,
   });
 

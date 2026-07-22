@@ -1,11 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, Plus, Trash2, GripVertical, Image, Video, Save, Loader2, Music, Tag, Mic, Disc, Sparkles, Clock } from 'lucide-react';
+import { X, Upload, Plus, Trash2, GripVertical, Image, Video, Save, Loader2, Music, Tag, Mic, Disc, Sparkles, Clock, ChevronDown, FileText, Users, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import ImageCropper from '@/components/profile/ImageCropper';
 import BackgroundMedia from '@/components/media/BackgroundMedia';
+
+// Lyrics are edited as plain text (one line per row). A line may carry an
+// optional [mm:ss] timestamp so the player can highlight/scroll it in sync
+// with playback — that prefix is what "synced lyrics" (LRC) means everywhere.
+// Author flow: type the lines, optionally hit "distribuir tempos" to spread
+// them evenly across the track's duration, then fine-tune any [mm:ss] by hand.
+export function parseLyrics(raw) {
+  return (raw || '').split('\n').map((line) => {
+    const m = line.match(/^\s*\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]\s?(.*)$/);
+    if (m) {
+      const time = (+m[1]) * 60 + (+m[2]) + (m[3] ? +('0.' + m[3]) : 0);
+      return { text: m[4], time };
+    }
+    return { text: line.trim(), time: null };
+  }).filter((l) => l.text.length || l.time != null);
+}
+
+export function formatLyrics(lines) {
+  return (lines || []).map((l) =>
+    l.time != null
+      ? `[${String(Math.floor(l.time / 60)).padStart(2, '0')}:${String(Math.floor(l.time % 60)).padStart(2, '0')}] ${l.text}`
+      : l.text
+  ).join('\n');
+}
+
+function autoDistributeLyrics(raw, duration) {
+  const lines = (raw || '')
+    .split('\n')
+    .map((s) => s.replace(/^\s*\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]\s?/, '').trim())
+    .filter(Boolean);
+  if (!lines.length) return raw;
+  const dur = duration || lines.length * 4; // ~4s/line when duration unknown
+  const start = Math.min(2, dur * 0.05);
+  const span = Math.max(dur - start - 1, 1);
+  return lines.map((text, i) => {
+    const t = start + span * (i / Math.max(lines.length, 1));
+    const mm = String(Math.floor(t / 60)).padStart(2, '0');
+    const ss = String(Math.floor(t % 60)).padStart(2, '0');
+    return `[${mm}:${ss}] ${text}`;
+  }).join('\n');
+}
 
 const GENRES = ['pop', 'rock', 'hip-hop', 'electronic', 'jazz', 'r&b', 'latin', 'indie', 'forró', 'other'];
 const GENRE_LABELS = { pop: 'Pop', rock: 'Rock', 'hip-hop': 'Hip-Hop', electronic: 'Eletrônico', jazz: 'Jazz', 'r&b': 'R&B', latin: 'Latino', indie: 'Indie', forró: 'Forró', other: 'Outro' };
@@ -20,6 +61,24 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
   const [saving, setSaving] = useState(false);
   const [uploadingWhat, setUploadingWhat] = useState('');
   const [cropperImage, setCropperImage] = useState(null);
+  const [expandedTrack, setExpandedTrack] = useState(null);
+
+  const updateTrack = (index, patch) => {
+    setFormData((p) => {
+      const t = [...p.tracks];
+      t[index] = { ...t[index], ...patch };
+      return { ...p, tracks: t };
+    });
+  };
+
+  // Credits/lyrics live per-track and get copied onto each Song row so the
+  // player can show them. Only persisted when the author ticked the box.
+  const trackContentFields = (track) => ({
+    lyrics: track?.has_lyrics ? parseLyrics(track.lyrics_raw) : [],
+    credits: track?.has_credits
+      ? (track.credits || []).filter((c) => (c.title || '').trim() || (c.description || '').trim())
+      : [],
+  });
 
   const getTodayDate = () => {
     const d = new Date();
@@ -159,7 +218,8 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
                 label_id: postPayload.label_id,
                 label_name: postPayload.label_name,
                 label_logo: postPayload.label_logo,
-                published_by_label: postPayload.published_by_label
+                published_by_label: postPayload.published_by_label,
+                ...trackContentFields(track)
               });
             }
           }
@@ -177,6 +237,7 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
               label_name: postPayload.label_name,
               label_logo: postPayload.label_logo,
               published_by_label: postPayload.published_by_label,
+              ...trackContentFields(track),
               plays: 0, is_favorite: false, rating: 0, rating_count: 0
             })));
           }
@@ -196,6 +257,7 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
             label_name: postPayload.label_name,
             label_logo: postPayload.label_logo,
             published_by_label: postPayload.published_by_label,
+            ...trackContentFields(track),
             plays: 0, is_favorite: false, rating: 0, rating_count: 0
           })));
         }
@@ -487,45 +549,154 @@ export default function ReleaseCreatorPanel({ isOpen, onClose, releaseToEdit, on
                               {provided => (
                                 <div
                                   ref={provided.innerRef} {...provided.draggableProps}
-                                  className="flex items-center gap-3 p-3 bg-white/[0.03] border border-white/[0.06] rounded-2xl group hover:bg-white/[0.06] hover:border-white/10 transition-all"
+                                  className="bg-white/[0.03] border border-white/[0.06] rounded-2xl group hover:border-white/10 transition-all overflow-hidden"
                                 >
-                                  <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing text-zinc-600 hover:text-zinc-400 transition-colors">
-                                    <GripVertical className="w-4 h-4" />
-                                  </div>
-                                  <span className="text-xs text-zinc-600 w-5 text-right font-mono">{index + 1}</span>
-                                  <div className="flex-1 min-w-0 space-y-1">
-                                    <input
-                                      type="text" value={track.title}
-                                      onChange={e => {
-                                        const t = [...formData.tracks];
-                                        t[index].title = e.target.value;
-                                        setFormData(p => ({ ...p, tracks: t }));
-                                      }}
-                                      className="w-full bg-transparent text-white text-sm font-medium focus:outline-none placeholder:text-zinc-600"
-                                      placeholder="Nome da faixa"
-                                    />
-                                    {(formData.type === 'album' || formData.type === 'ep') && (
+                                  <div className="flex items-center gap-3 p-3">
+                                    <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing text-zinc-600 hover:text-zinc-400 transition-colors">
+                                      <GripVertical className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-xs text-zinc-600 w-5 text-right font-mono">{index + 1}</span>
+                                    <div className="flex-1 min-w-0 space-y-1">
                                       <input
-                                        type="text" value={track.featuring || ''}
-                                        onChange={e => {
-                                          const t = [...formData.tracks];
-                                          t[index].featuring = e.target.value;
-                                          setFormData(p => ({ ...p, tracks: t }));
-                                        }}
-                                        className="w-full bg-transparent text-zinc-500 text-xs focus:outline-none placeholder:text-zinc-700"
-                                        placeholder="feat. (opcional)"
+                                        type="text" value={track.title}
+                                        onChange={e => updateTrack(index, { title: e.target.value })}
+                                        className="w-full bg-transparent text-white text-sm font-medium focus:outline-none placeholder:text-zinc-600"
+                                        placeholder="Nome da faixa"
                                       />
-                                    )}
+                                      {(formData.type === 'album' || formData.type === 'ep') && (
+                                        <input
+                                          type="text" value={track.featuring || ''}
+                                          onChange={e => updateTrack(index, { featuring: e.target.value })}
+                                          className="w-full bg-transparent text-zinc-500 text-xs focus:outline-none placeholder:text-zinc-700"
+                                          placeholder="feat. (opcional)"
+                                        />
+                                      )}
+                                    </div>
+                                    <span className="text-xs text-zinc-600 tabular-nums w-12 text-right">
+                                      {Math.floor(track.duration/60)}:{String(track.duration%60).padStart(2,'0')}
+                                    </span>
+                                    <button
+                                      onClick={() => handleRemoveTrack(index)}
+                                      className="p-1.5 rounded-lg text-zinc-700 hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
                                   </div>
-                                  <span className="text-xs text-zinc-600 tabular-nums w-12 text-right">
-                                    {Math.floor(track.duration/60)}:{String(track.duration%60).padStart(2,'0')}
-                                  </span>
+
+                                  {/* Always-visible strip so it's obvious each track can carry
+                                      credits + lyrics — clicking it opens the editors below */}
                                   <button
-                                    onClick={() => handleRemoveTrack(index)}
-                                    className="p-1.5 rounded-lg text-zinc-700 hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                                    onClick={() => setExpandedTrack(expandedTrack === index ? null : index)}
+                                    className="w-full flex items-center justify-between px-3 py-2.5 border-t border-white/[0.05] text-xs font-medium text-zinc-400 hover:text-white hover:bg-white/[0.03] transition-colors"
                                   >
-                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <span className="flex items-center gap-2">
+                                      <FileText className="w-3.5 h-3.5 text-[#c0c0c8]" />
+                                      Créditos e letra
+                                      {(track.has_credits || track.has_lyrics) && (
+                                        <span className="text-[10px] font-semibold text-[#c0c0c8] bg-[#c0c0c8]/10 px-1.5 py-0.5 rounded-full">
+                                          {[track.has_credits && 'créditos', track.has_lyrics && 'letra'].filter(Boolean).join(' + ')}
+                                        </span>
+                                      )}
+                                    </span>
+                                    <ChevronDown className={`w-4 h-4 transition-transform ${expandedTrack === index ? 'rotate-180' : ''}`} />
                                   </button>
+
+                                  {/* Per-track credits + lyrics — the two checkboxes reveal their
+                                      editors; both are optional and saved onto the track's Song row */}
+                                  <AnimatePresence>
+                                    {expandedTrack === index && (
+                                      <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        className="border-t border-white/[0.06] overflow-hidden"
+                                      >
+                                        <div className="p-4 space-y-4">
+                                          {/* Credits */}
+                                          <div>
+                                            <label className="flex items-center gap-2.5 cursor-pointer w-fit">
+                                              <input
+                                                type="checkbox"
+                                                checked={!!track.has_credits}
+                                                onChange={e => updateTrack(index, { has_credits: e.target.checked, credits: (track.credits && track.credits.length) ? track.credits : [{ title: '', description: '' }] })}
+                                                className="w-4 h-4 rounded border-white/20 bg-white/5 text-[#c0c0c8] focus:ring-[#c0c0c8] focus:ring-offset-0"
+                                              />
+                                              <Users className="w-4 h-4 text-[#c0c0c8]" />
+                                              <span className="text-sm font-semibold text-white">Créditos</span>
+                                            </label>
+                                            {track.has_credits && (
+                                              <div className="mt-3 space-y-2 pl-1">
+                                                {(track.credits || []).map((c, ci) => (
+                                                  <div key={ci} className="flex gap-2 items-start">
+                                                    <div className="flex-1 space-y-1.5">
+                                                      <input
+                                                        type="text" value={c.title || ''}
+                                                        onChange={e => updateTrack(index, { credits: (track.credits || []).map((x, j) => j === ci ? { ...x, title: e.target.value } : x) })}
+                                                        placeholder="Categoria (ex: Produção e engenharia)"
+                                                        className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-[#c0c0c8]/40"
+                                                      />
+                                                      <input
+                                                        type="text" value={c.description || ''}
+                                                        onChange={e => updateTrack(index, { credits: (track.credits || []).map((x, j) => j === ci ? { ...x, description: e.target.value } : x) })}
+                                                        placeholder="Descrição (ex: Nome do produtor)"
+                                                        className="w-full px-3 py-2 bg-white/[0.02] border border-white/[0.06] rounded-xl text-zinc-300 text-xs placeholder:text-zinc-700 focus:outline-none focus:border-[#c0c0c8]/30"
+                                                      />
+                                                    </div>
+                                                    <button
+                                                      onClick={() => updateTrack(index, { credits: (track.credits || []).filter((_, j) => j !== ci) })}
+                                                      className="p-2 mt-0.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                                                    >
+                                                      <Trash2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                  </div>
+                                                ))}
+                                                <button
+                                                  onClick={() => updateTrack(index, { credits: [...(track.credits || []), { title: '', description: '' }] })}
+                                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 text-xs font-medium transition-colors"
+                                                >
+                                                  <Plus className="w-3.5 h-3.5" /> Adicionar categoria
+                                                </button>
+                                              </div>
+                                            )}
+                                          </div>
+
+                                          {/* Lyrics */}
+                                          <div>
+                                            <label className="flex items-center gap-2.5 cursor-pointer w-fit">
+                                              <input
+                                                type="checkbox"
+                                                checked={!!track.has_lyrics}
+                                                onChange={e => updateTrack(index, { has_lyrics: e.target.checked, lyrics_raw: track.lyrics_raw ?? formatLyrics(track.lyrics || []) })}
+                                                className="w-4 h-4 rounded border-white/20 bg-white/5 text-[#c0c0c8] focus:ring-[#c0c0c8] focus:ring-offset-0"
+                                              />
+                                              <FileText className="w-4 h-4 text-[#c0c0c8]" />
+                                              <span className="text-sm font-semibold text-white">Letra</span>
+                                            </label>
+                                            {track.has_lyrics && (
+                                              <div className="mt-3 space-y-2 pl-1">
+                                                <textarea
+                                                  value={track.lyrics_raw ?? formatLyrics(track.lyrics || [])}
+                                                  onChange={e => updateTrack(index, { lyrics_raw: e.target.value })}
+                                                  rows={7}
+                                                  placeholder={'Uma linha por verso.\nOpcional: [00:12] no início da linha para sincronizar com a voz.'}
+                                                  className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm leading-relaxed placeholder:text-zinc-600 focus:outline-none focus:border-[#c0c0c8]/40 resize-y font-mono"
+                                                />
+                                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                                  <button
+                                                    onClick={() => updateTrack(index, { lyrics_raw: autoDistributeLyrics(track.lyrics_raw ?? formatLyrics(track.lyrics || []), track.duration) })}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c0c0c8]/15 hover:bg-[#c0c0c8]/25 text-[#e5e5ea] text-xs font-medium transition-colors"
+                                                  >
+                                                    <Wand2 className="w-3.5 h-3.5" /> Distribuir tempos automaticamente
+                                                  </button>
+                                                  <span className="text-[10px] text-zinc-600">espalha os versos pela duração da faixa</span>
+                                                </div>
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </motion.div>
+                                    )}
+                                  </AnimatePresence>
                                 </div>
                               )}
                             </Draggable>
