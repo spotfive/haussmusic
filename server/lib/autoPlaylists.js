@@ -9,7 +9,7 @@ const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const { db } = require('../db');
 const { UPLOADS_DIR } = require('../routes/upload');
-const { classifyGenre } = require('./audioGenre');
+const { runInWorker } = require('./mlWorker');
 const { generatePlaylistName, generatePlaylistCover, isConfigured: aiConfigured } = require('./aiCreative');
 const { cleanupOrphanedFiles, extractUploadUrls } = require('../fileCleanup');
 
@@ -58,7 +58,7 @@ async function ensureGenreDetected(song) {
   const filePath = path.join(UPLOADS_DIR, filename);
   if (!fs.existsSync(filePath)) return null;
   try {
-    const result = await classifyGenre(filePath);
+    const result = await runInWorker('genreWorker.js', { filePath });
     const genre = result?.genre || null;
     if (genre) db.prepare('update songs set detected_genre = ? where id = ?').run(genre, song.id);
     return genre;

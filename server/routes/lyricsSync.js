@@ -3,7 +3,7 @@ const fs = require('fs');
 const express = require('express');
 const { requireAuth } = require('../auth');
 const { UPLOADS_DIR } = require('./upload');
-const { syncLyricsToAudio } = require('../lib/lyricsSync');
+const { runInWorker } = require('../lib/mlWorker');
 
 const router = express.Router();
 
@@ -23,7 +23,7 @@ router.post('/', requireAuth, async (req, res, next) => {
     const filePath = path.join(UPLOADS_DIR, filename);
     if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Arquivo de áudio não encontrado' });
 
-    const synced = await syncLyricsToAudio(filePath, lines);
+    const synced = await runInWorker('lyricsSyncWorker.js', { filePath, lines });
     res.json({ lines: synced });
   } catch (err) { next(err); }
 });
