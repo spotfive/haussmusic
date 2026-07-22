@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import SongCard from '@/components/ui/SongCard';
-import { toggleSongLike } from '@/lib/songLikes';
+import { useSongLikes } from '@/lib/songLikes';
 
 export default function Playlist() {
   const navigate = useNavigate();
@@ -26,6 +26,8 @@ export default function Playlist() {
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
+
+  const { isLiked, toggle } = useSongLikes(user?.email);
 
   const urlParams = new URLSearchParams(window.location.search);
   const playlistId = urlParams.get('id');
@@ -146,10 +148,7 @@ export default function Playlist() {
     }
   };
 
-  const handleFavorite = async (song) => {
-    await toggleSongLike(song, user?.email).catch(() => {});
-    queryClient.invalidateQueries({ queryKey: ['songs'] });
-  };
+  const handleFavorite = (song) => toggle(song);
 
   if (!playlist) {
     return (
@@ -428,6 +427,7 @@ export default function Playlist() {
                   isCurrentSong={currentSong?.id === song.id}
                   onPlay={handlePlay}
                   onFavorite={handleFavorite}
+                  isLiked={isLiked(song)}
                   hidePlaylistButton={true}
                 />
                 <button

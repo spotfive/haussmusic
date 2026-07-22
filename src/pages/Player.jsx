@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ListMusic, Share2, MoreHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -9,10 +9,11 @@ import GlowingOrb from '@/components/player/GlowingOrb';
 import AudioVisualizer from '@/components/player/AudioVisualizer';
 import PlayerControls from '@/components/player/PlayerControls';
 import SongCard from '@/components/ui/SongCard';
+import { useSongLikes } from '@/lib/songLikes';
 
 export default function Player() {
-  const queryClient = useQueryClient();
   const audioRef = useRef(null);
+  const [user, setUser] = useState(null);
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -25,9 +26,16 @@ export default function Player() {
   const { data: songs = [] } = useQuery({
     queryKey: ['songs'],
     queryFn: () => base44.entities.Song.list('-plays', 50),
+    refetchInterval: 3000,
   });
 
+  const { isLiked, toggle } = useSongLikes(user?.email);
+
   const currentSong = songs[currentSongIndex];
+
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -101,10 +109,9 @@ export default function Player() {
     setRepeatMode(modes[(currentIndex + 1) % modes.length]);
   };
 
-  const handleFavorite = async () => {
+  const handleFavorite = () => {
     if (currentSong) {
-      base44.entities.Song.update(currentSong.id, { is_favorite: !currentSong.is_favorite }).catch(() => {});
-      queryClient.invalidateQueries({ queryKey: ['songs'] });
+      toggle(currentSong);
     }
   };
 
@@ -235,7 +242,7 @@ export default function Player() {
               onSeek={handleSeek}
               volume={volume}
               onVolumeChange={setVolume}
-              isFavorite={currentSong?.is_favorite}
+              isFavorite={currentSong ? isLiked(currentSong) : false}
               onFavoriteToggle={handleFavorite}
               isShuffled={isShuffled}
               onShuffleToggle={() => setIsShuffled(!isShuffled)}
@@ -267,7 +274,8 @@ export default function Player() {
                     isPlaying={isPlaying}
                     isCurrentSong={currentSongIndex === index}
                     onPlay={handlePlayFromQueue}
-                    onFavorite={() => {}}
+                    onFavorite={() => toggle(song)}
+                    isLiked={isLiked(song)}
                   />
                 ))}
               </div>

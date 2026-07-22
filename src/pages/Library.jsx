@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import SongCard from '@/components/ui/SongCard';
 import ProfileEditor from '@/components/profile/ProfileEditor';
-import { toggleSongLike } from '@/lib/songLikes';
+import { useSongLikes } from '@/lib/songLikes';
 
 function formatDuration(sec) {
   if (!sec) return '0:00';
@@ -55,14 +55,7 @@ export default function Library() {
     enabled: !!user,
   });
 
-  const { data: favorites = [] } = useQuery({
-    queryKey: ['user-favorites', user?.email],
-    queryFn: async () => {
-      const allFavorites = await base44.entities.UserFavorite.list();
-      return allFavorites.filter(f => f.created_by === user?.email);
-    },
-    enabled: !!user,
-  });
+  const { favorites, likedSongIds, isLiked, toggle } = useSongLikes(user?.email);
 
   const { data: allPosts = [] } = useQuery({
     queryKey: ['posts'],
@@ -71,7 +64,7 @@ export default function Library() {
 
   const scheduledAlbums = new Set(allPosts.filter(p => p.is_scheduled && p.scheduled_datetime && new Date(p.scheduled_datetime) > new Date()).map(p => p.title));
   const isSongScheduled = (song) => song.album && scheduledAlbums.has(song.album);
-  const favoriteSongs = songs.filter(s => s.is_favorite);
+  const favoriteSongs = songs.filter(s => likedSongIds.has(s.id));
   const likedReleases = allPosts.filter(post => favorites.some(f => f.item_id === post.id && f.item_type === 'post'));
     const createPlaylistMutation = useMutation({
     mutationFn: (data) => base44.entities.Playlist.create(data),
@@ -111,11 +104,7 @@ export default function Library() {
     }
   };
 
-  const handleFavorite = async (song) => {
-    const nf = !song.is_favorite;
-    queryClient.setQueryData(['songs'], old => old?.map(s => s.id === song.id ? { ...s, is_favorite: nf } : s));
-    toggleSongLike(song, user?.email).catch(() => {});
-  };
+  const handleFavorite = (song) => toggle(song);
 
   const tabs = [
     { value: 'favorites', icon: Heart, label: 'Curtidas' },
@@ -226,7 +215,7 @@ export default function Library() {
                     const sched = isSongScheduled(song);
                     const schedPost = sched ? allPosts.find(p => p.title === song.album && p.is_scheduled) : null;
                     return (
-                      <SongCard key={song.id} song={song} index={i} isPlaying={isPlaying} isCurrentSong={currentSong?.id === song.id} onPlay={handlePlay} onFavorite={handleFavorite} isScheduled={sched} scheduledDatetime={schedPost?.scheduled_datetime || null} />
+                      <SongCard key={song.id} song={song} index={i} isPlaying={isPlaying} isCurrentSong={currentSong?.id === song.id} onPlay={handlePlay} onFavorite={handleFavorite} isLiked={isLiked(song)} isScheduled={sched} scheduledDatetime={schedPost?.scheduled_datetime || null} />
                     );
                   })}
                 </div>

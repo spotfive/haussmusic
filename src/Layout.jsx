@@ -13,11 +13,12 @@ import { createPageUrl } from '@/utils';
 import { Home, Search, Library, Music2, Star, Award, LogIn, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { hasUserType } from '@/lib/utils';
-import { toggleSongLike } from '@/lib/songLikes';
+import { useSongLikes } from '@/lib/songLikes';
 
 export default function Layout({ children, currentPageName }) {
   const queryClient = useQueryClient();
   const { user, isAuthenticated, refreshUser } = useAuth();
+  const { isLiked, toggle } = useSongLikes(user?.email);
 
   // ===== PLAYER STATE =====
   const audioA = useRef(null);
@@ -391,15 +392,8 @@ export default function Layout({ children, currentPageName }) {
     }
   };
 
-  const handleFavoriteToggle = async () => {
-    if (currentSong) {
-      const newFavoriteState = !currentSong.is_favorite;
-      setCurrentSong(prev => ({ ...prev, is_favorite: newFavoriteState }));
-      queryClient.setQueryData(['songs'], (oldSongs) =>
-        oldSongs?.map(s => s.id === currentSong.id ? { ...s, is_favorite: newFavoriteState } : s)
-      );
-      toggleSongLike(currentSong, user?.email).catch(() => {});
-    }
+  const handleFavoriteToggle = () => {
+    if (currentSong) toggle(currentSong);
   };
 
   // ===== HANDLE PLAY/PAUSE =====
@@ -512,7 +506,7 @@ export default function Layout({ children, currentPageName }) {
             song={currentSong}
             isPlaying={isPlaying}
             onClose={() => setShowRightSidebar(false)}
-            isFavorite={currentSong?.is_favorite}
+            isFavorite={currentSong ? isLiked(currentSong) : false}
             onFavoriteToggle={handleFavoriteToggle}
             onPlayPause={() => setIsPlaying(!isPlaying)}
             onNext={handleNext}
@@ -557,7 +551,7 @@ export default function Layout({ children, currentPageName }) {
           currentTime={currentTime}
           duration={duration}
           onSeek={handleSeek}
-          isFavorite={currentSong?.is_favorite}
+          isFavorite={currentSong ? isLiked(currentSong) : false}
           onFavoriteToggle={handleFavoriteToggle}
           repeatMode={repeatMode}
           onToggleRepeat={handleToggleRepeat}
@@ -584,7 +578,7 @@ export default function Layout({ children, currentPageName }) {
           onSeek={handleSeek}
           onExpand={() => setShowRightSidebar(true)}
           onExpandMobile={() => setShowMobilePlayer(true)}
-          isFavorite={currentSong?.is_favorite}
+          isFavorite={currentSong ? isLiked(currentSong) : false}
           onFavoriteToggle={handleFavoriteToggle}
           volume={volume}
           isMuted={isMuted}

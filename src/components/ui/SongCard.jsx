@@ -7,7 +7,10 @@ import { base44 } from '@/api/base44Client';
 import { getItemLabel } from '@/lib/utils';
 import AddToPlaylistMenu from '@/components/playlist/AddToPlaylistMenu';
 
-export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFavorite, index, hidePlaylistButton = false, isScheduled = false, scheduledDatetime = null }) {
+export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFavorite, index, hidePlaylistButton = false, isScheduled = false, scheduledDatetime = null, isLiked }) {
+  // Prefer the per-user liked state passed in; fall back to the global flag
+  // only when the parent doesn't track likes (e.g. anonymous surfaces).
+  const liked = isLiked !== undefined ? isLiked : song.is_favorite;
   const [copied, setCopied] = useState(false);
 
   // Shared cache across every SongCard on the page — one request, not one per card.
@@ -151,9 +154,9 @@ export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFav
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onFavorite(song); }}
-            className={`p-1.5 rounded-lg transition-colors ${song.is_favorite ? 'text-[#c0c0c8]' : 'text-[#696969] hover:text-white hover:bg-[#333]'}`}
+            className={`p-1.5 rounded-lg transition-colors ${liked ? 'text-[#c0c0c8]' : 'text-[#696969] hover:text-white hover:bg-[#333]'}`}
           >
-            <Heart className={`w-3.5 h-3.5 ${song.is_favorite ? 'fill-current' : ''}`} />
+            <Heart className={`w-3.5 h-3.5 ${liked ? 'fill-current' : ''}`} />
           </button>
         </div>
       )}

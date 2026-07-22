@@ -11,7 +11,7 @@ import HomeHeroCarousel from '@/components/home/HomeHeroCarousel';
 import BackgroundMedia from '@/components/media/BackgroundMedia';
 import { DiscordIcon } from '@/components/social/SocialBrandIcons';
 import { hasUserType } from '@/lib/utils';
-import { toggleSongLike } from '@/lib/songLikes';
+import { useSongLikes } from '@/lib/songLikes';
 
 const pills = [
   { label: 'Tudo', key: 'all' },
@@ -85,6 +85,8 @@ export default function Home() {
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
+
+  const { isLiked, toggle } = useSongLikes(user?.email);
 
   const { data: allSongs = [], isLoading: songsLoading } = useQuery({
     queryKey: ['songs'],
@@ -188,13 +190,9 @@ export default function Home() {
     }
   };
 
-  const toggleFavorite = async (song, e) => {
+  const toggleFavorite = (song, e) => {
     e.stopPropagation();
-    const newFav = !song.is_favorite;
-    queryClient.setQueryData(['songs'], old =>
-      old?.map(s => s.id === song.id ? { ...s, is_favorite: newFav } : s)
-    );
-    toggleSongLike(song, user?.email).catch(() => {});
+    toggle(song);
   };
 
   const filteredSongs = activePill === 'songs' ? allSongs :
@@ -261,9 +259,9 @@ export default function Home() {
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={(e) => toggleFavorite(featuredSong, e)}
-                    className={`p-2 rounded-full ${featuredSong.is_favorite ? 'text-[#c0c0c8]' : 'text-white/60 hover:text-white'}`}
+                    className={`p-2 rounded-full ${isLiked(featuredSong) ? 'text-[#c0c0c8]' : 'text-white/60 hover:text-white'}`}
                   >
-                    <Heart className={`w-5 h-5 ${featuredSong.is_favorite ? 'fill-current' : ''}`} />
+                    <Heart className={`w-5 h-5 ${isLiked(featuredSong) ? 'fill-current' : ''}`} />
                   </motion.button>
                   <span className="text-white/50 text-sm">{formatPlays(featuredSong.plays)} plays</span>
                 </div>
@@ -511,9 +509,9 @@ export default function Home() {
                             <motion.button
                               whileTap={{ scale: 0.9 }}
                               onClick={(e) => toggleFavorite(song, e)}
-                              className={`p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${song.is_favorite ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`}
+                              className={`p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${isLiked(song) ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`}
                             >
-                              <Heart className={`w-4 h-4 ${song.is_favorite ? 'fill-current' : ''}`} />
+                              <Heart className={`w-4 h-4 ${isLiked(song) ? 'fill-current' : ''}`} />
                             </motion.button>
                           </motion.div>
                         )})}
@@ -687,9 +685,9 @@ export default function Home() {
                                 <motion.button
                                   whileTap={{ scale: 0.9 }}
                                   onClick={(e) => toggleFavorite(song, e)}
-                                  className={`absolute top-2 right-2 p-1.5 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity ${song.is_favorite ? 'text-[#c0c0c8]' : 'text-white hover:text-[#c0c0c8]'}`}
+                                  className={`absolute top-2 right-2 p-1.5 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity ${isLiked(song) ? 'text-[#c0c0c8]' : 'text-white hover:text-[#c0c0c8]'}`}
                                 >
-                                  <Heart className={`w-4 h-4 ${song.is_favorite ? 'fill-current' : ''}`} />
+                                  <Heart className={`w-4 h-4 ${isLiked(song) ? 'fill-current' : ''}`} />
                                 </motion.button>
                               </>
                             )}

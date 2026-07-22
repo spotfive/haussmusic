@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { hasUserType } from '@/lib/utils';
-import { toggleSongLike } from '@/lib/songLikes';
+import { useSongLikes } from '@/lib/songLikes';
 
 const categoryCards = [
   { id: 'pop', label: 'Pop', color: 'from-zinc-300 to-zinc-500', icon: Mic2 },
@@ -81,6 +81,8 @@ export default function Search() {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => { base44.auth.me().then(setCurrentUser).catch(() => {}); }, []);
+
+  const { isLiked, toggle } = useSongLikes(currentUser?.email);
 
   const { data: songs = [] } = useQuery({
     queryKey: ['songs'],
@@ -206,11 +208,7 @@ export default function Search() {
     return () => { window.removeEventListener('playSong', h1); window.removeEventListener('togglePlayPause', h2); };
   }, []);
 
-  const handleFavorite = async (song) => {
-    const nf = !song.is_favorite;
-    queryClient.setQueryData(['songs'], old => old?.map(s => s.id === song.id ? { ...s, is_favorite: nf } : s));
-    toggleSongLike(song, currentUser?.email).catch(() => {});
-  };
+  const handleFavorite = (song) => toggle(song);
 
   const formatDuration = (s) => s ? `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}` : '--:--';
   const hasResults = filteredArtists.length > 0 || filteredReleases.length > 0 || filteredSongs.length > 0;
@@ -358,8 +356,8 @@ export default function Search() {
                         </div>
                         <span className="text-xs text-[#535353] w-10 text-right">{formatDuration(song.duration)}</span>
                         <button onClick={(e) => { e.stopPropagation(); handleFavorite(song); }}
-                          className={`p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity ${song.is_favorite ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`}>
-                          <Heart className={`w-4 h-4 ${song.is_favorite ? 'fill-current' : ''}`} />
+                          className={`p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity ${isLiked(song) ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`}>
+                          <Heart className={`w-4 h-4 ${isLiked(song) ? 'fill-current' : ''}`} />
                         </button>
                       </motion.div>
                     )})}
