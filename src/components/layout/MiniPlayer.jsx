@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, SkipForward, SkipBack, Heart, Volume2, VolumeX, Repeat, Maximize2, Music2, ListPlus, GitMerge, Shuffle } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Play, Pause, SkipForward, SkipBack, Heart, Volume2, VolumeX, Repeat, Maximize2, Music2, GitMerge, Shuffle } from 'lucide-react';
+import AddToPlaylistMenu from '@/components/playlist/AddToPlaylistMenu';
 
-export default function MiniPlayer({ 
+export default function MiniPlayer({
   currentSong, isPlaying, onPlayPause, onNext, onPrevious,
   progress, currentTime, duration, onSeek,
   onExpand, isFavorite, onFavoriteToggle,
@@ -14,30 +13,6 @@ export default function MiniPlayer({
   shuffleEnabled, onToggleShuffle,
   onExpandMobile
 }) {
-  const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
-  const [user, setUser] = useState(null);
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-  }, []);
-
-  const { data: playlists = [] } = useQuery({
-    queryKey: ['playlists'],
-    queryFn: async () => {
-      const all = await base44.entities.Playlist.list('-created_date');
-      return all.filter(p => p.created_by === user?.email);
-    },
-    enabled: !!user && showPlaylistMenu,
-  });
-
-  const addToPlaylistMutation = useMutation({
-    mutationFn: ({ playlistId, songIds }) => base44.entities.Playlist.update(playlistId, { song_ids: songIds }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['playlists'] });
-      setShowPlaylistMenu(false);
-    },
-  });
   const formatTime = (t) => {
     if (!t || isNaN(t)) return '0:00';
     const m = Math.floor(t / 60);
@@ -58,44 +33,6 @@ export default function MiniPlayer({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 lg:px-2 lg:pb-2 lg:pl-[80px]">
-      {/* Playlist menu - outside overflow container to avoid clipping */}
-      <div className="absolute bottom-full right-2 mb-2 pointer-events-none z-[9999]">
-        <AnimatePresence>
-          {showPlaylistMenu && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -4 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="w-44 bg-[#282828] border border-[#383838] rounded-xl shadow-2xl overflow-hidden pointer-events-auto"
-            >
-              <div className="px-3 py-2 border-b border-[#383838]">
-                <span className="text-[11px] text-[#B3B3B3] font-medium uppercase tracking-wider">Adicionar à playlist</span>
-              </div>
-              <div className="max-h-40 overflow-y-auto">
-                {playlists.length > 0 ? playlists.map((pl) => (
-                  <button
-                    key={pl.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const ids = pl.song_ids || [];
-                      if (!ids.includes(currentSong.id)) {
-                        addToPlaylistMutation.mutate({ playlistId: pl.id, songIds: [...ids, currentSong.id] });
-                      }
-                    }}
-                    className="w-full px-3 py-2 text-left text-xs text-white hover:bg-[#383838] transition-colors truncate"
-                  >
-                    {pl.name}
-                  </button>
-                )) : (
-                  <p className="px-3 py-3 text-xs text-[#696969] text-center">Nenhuma playlist</p>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
       <div className="bg-[#181818] border-t border-[#282828] lg:border lg:rounded-2xl mx-auto lg:max-w-5xl overflow-hidden">
         {/* Progress bar */}
         <div className="relative h-1 bg-[#282828] group/progress cursor-pointer" onClick={handleProgressClick}>
@@ -232,12 +169,11 @@ export default function MiniPlayer({
             <button onClick={onToggleCrossfade} className={`p-2 rounded-lg transition-colors ${crossfadeEnabled ? 'text-[#c0c0c8]' : 'text-[#B3B3B3] hover:text-white'}`} title="Crossfade entre faixas">
               <GitMerge className="w-4 h-4" />
             </button>
-            <button 
-              onClick={() => setShowPlaylistMenu(!showPlaylistMenu)}
-              className="p-2 rounded-lg text-[#B3B3B3] hover:text-white transition-colors"
-            >
-              <ListPlus className="w-4 h-4" />
-            </button>
+            <AddToPlaylistMenu
+              songId={currentSong.id}
+              buttonClassName="p-2 rounded-lg text-[#B3B3B3] hover:text-white transition-colors"
+              iconClassName="w-4 h-4"
+            />
           </div>
 
           {/* Time + Volume */}

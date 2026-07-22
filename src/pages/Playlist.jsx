@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Play, Pause, ArrowLeft, Music2, Trash2, Clock, Edit2, Upload, Loader2 } from 'lucide-react';
+import { Play, Pause, ArrowLeft, Music2, Trash2, Clock, Edit2, Upload, Loader2, Plus, Check, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,8 @@ export default function Playlist() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', description: '', cover_url: '' });
   const [uploading, setUploading] = useState(false);
+  const [showAddSongsDialog, setShowAddSongsDialog] = useState(false);
+  const [songSearch, setSongSearch] = useState('');
   
   const urlParams = new URLSearchParams(window.location.search);
   const playlistId = urlParams.get('id');
@@ -54,6 +56,17 @@ export default function Playlist() {
     },
   });
 
+  const toggleSongInPlaylistMutation = useMutation({
+    mutationFn: (songId) => {
+      const ids = playlist?.song_ids || [];
+      const nextIds = ids.includes(songId) ? ids.filter(id => id !== songId) : [...ids, songId];
+      return base44.entities.Playlist.update(playlistId, { song_ids: nextIds });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['playlist', playlistId] });
+    },
+  });
+
   const updatePlaylistMutation = useMutation({
     mutationFn: (data) => base44.entities.Playlist.update(playlistId, data),
     onSuccess: () => {
@@ -82,6 +95,13 @@ export default function Playlist() {
 
   const songs = allSongs.filter(s => playlist?.song_ids?.includes(s.id)) || [];
   const totalDuration = songs.reduce((acc, s) => acc + (s.duration || 0), 0);
+
+  const searchableSongs = songSearch.trim()
+    ? allSongs.filter(s =>
+        s.title.toLowerCase().includes(songSearch.trim().toLowerCase()) ||
+        s.artist.toLowerCase().includes(songSearch.trim().toLowerCase())
+      )
+    : allSongs;
 
   const handlePlay = (song) => {
     if (currentSong?.id === song.id) {
@@ -251,6 +271,16 @@ export default function Playlist() {
         <Button
           variant="ghost"
           size="icon"
+          onClick={() => setShowAddSongsDialog(true)}
+          className="text-zinc-300 hover:bg-zinc-400/10"
+          title="Adicionar músicas"
+        >
+          <Plus className="w-5 h-5" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleEditClick}
           className="text-zinc-300 hover:bg-zinc-400/10"
         >
@@ -329,6 +359,55 @@ export default function Playlist() {
         </DialogContent>
       </Dialog>
 
+      {/* Add Songs Dialog */}
+      <Dialog open={showAddSongsDialog} onOpenChange={(open) => { setShowAddSongsDialog(open); if (!open) setSongSearch(''); }}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Adicionar músicas</DialogTitle>
+          </DialogHeader>
+          <div className="relative mt-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <Input
+              value={songSearch}
+              onChange={(e) => setSongSearch(e.target.value)}
+              placeholder="Buscar por título ou artista..."
+              className="bg-zinc-800 border-zinc-700 pl-9"
+              autoFocus
+            />
+          </div>
+          <div className="flex-1 overflow-y-auto -mx-2 px-2 space-y-0.5 mt-1">
+            {searchableSongs.length > 0 ? searchableSongs.map((song) => {
+              const inPlaylist = (playlist?.song_ids || []).includes(song.id);
+              return (
+                <button
+                  key={song.id}
+                  onClick={() => toggleSongInPlaylistMutation.mutate(song.id)}
+                  disabled={toggleSongInPlaylistMutation.isPending}
+                  className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800 transition-colors text-left disabled:opacity-50"
+                >
+                  <div className="w-10 h-10 rounded-md overflow-hidden bg-zinc-800 flex-shrink-0 flex items-center justify-center">
+                    {song.cover_url ? (
+                      <img src={song.cover_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <Music2 className="w-4 h-4 text-zinc-600" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-white truncate">{song.title}</p>
+                    <p className="text-xs text-zinc-500 truncate">{song.artist}</p>
+                  </div>
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 border ${inPlaylist ? 'bg-zinc-300 border-zinc-300' : 'border-zinc-600'}`}>
+                    {inPlaylist && <Check className="w-3 h-3 text-black" />}
+                  </span>
+                </button>
+              );
+            }) : (
+              <p className="text-center text-zinc-500 py-8 text-sm">Nenhuma música encontrada</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Songs List */}
       <div className="px-6 lg:px-8">
         {songs.length > 0 ? (
@@ -357,7 +436,11 @@ export default function Playlist() {
           <div className="text-center py-16">
             <Music2 className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">Playlist vazia</h3>
-            <p className="text-zinc-500">Adicione músicas para começar</p>
+            <p className="text-zinc-500 mb-5">Adicione músicas para começar</p>
+            <Button onClick={() => setShowAddSongsDialog(true)} className="bg-zinc-300 hover:bg-zinc-200 text-black">
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar músicas
+            </Button>
           </div>
         )}
       </div>

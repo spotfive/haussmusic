@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Play, Pause, SkipForward, SkipBack, Heart, Repeat, Shuffle, Volume2 } from 'lucide-react';
+import AddToPlaylistMenu from '@/components/playlist/AddToPlaylistMenu';
 
 export default function ExpandedMobilePlayer({
   isOpen,
@@ -181,7 +182,14 @@ export default function ExpandedMobilePlayer({
                 />
               </div>
 
-              <div className="w-8" />
+              {currentSong && (
+                <AddToPlaylistMenu
+                  songId={currentSong.id}
+                  buttonClassName="p-2 rounded-full text-[#B3B3B3] transition-colors"
+                  iconClassName="w-5 h-5"
+                  align="start"
+                />
+              )}
             </div>
           </div>
         </motion.div>

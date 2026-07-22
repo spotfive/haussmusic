@@ -1,37 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, Heart, ListPlus, Music2, Timer, Share2, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Play, Pause, Heart, Music2, Timer, Share2, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import SocialShareButtons from '@/components/songs/SocialShareButtons';
+import AddToPlaylistMenu from '@/components/playlist/AddToPlaylistMenu';
 
 export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFavorite, index, hidePlaylistButton = false, isScheduled = false, scheduledDatetime = null }) {
-  const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
-  const [user, setUser] = useState(null);
   const [copied, setCopied] = useState(false);
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-  }, []);
-
-  const { data: playlists = [] } = useQuery({
-    queryKey: ['playlists'],
-    queryFn: async () => {
-      const all = await base44.entities.Playlist.list('-created_date');
-      return all.filter(p => p.created_by === user?.email);
-    },
-    enabled: !!user && showPlaylistMenu,
-  });
-
-  const addToPlaylistMutation = useMutation({
-    mutationFn: ({ playlistId, songIds }) => base44.entities.Playlist.update(playlistId, { song_ids: songIds }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['playlists'] });
-      setShowPlaylistMenu(false);
-    },
-  });
 
   const formatDuration = (s) => {
     if (!s) return '--:--';
@@ -186,48 +161,7 @@ export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFav
       {/* Playlist Menu */}
       {!hidePlaylistButton && (
         <div className={`transition-opacity duration-150 flex-shrink-0 ${isScheduled ? 'opacity-0' : 'opacity-60 group-hover:opacity-100'}`}>
-          <div className="relative">
-            <button 
-              onClick={(e) => { e.stopPropagation(); setShowPlaylistMenu(!showPlaylistMenu); }}
-              className="p-1.5 rounded-lg text-[#696969] hover:text-white hover:bg-[#333] transition-colors"
-            >
-              <ListPlus className="w-3.5 h-3.5" />
-            </button>
-            <AnimatePresence>
-              {showPlaylistMenu && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: -4 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full mt-1 w-44 bg-[#282828] border border-[#383838] rounded-xl shadow-2xl z-50 overflow-hidden"
-                >
-                  <div className="px-3 py-2 border-b border-[#383838]">
-                    <span className="text-[11px] text-[#B3B3B3] font-medium uppercase tracking-wider">Adicionar à playlist</span>
-                  </div>
-                  <div className="max-h-40 overflow-y-auto">
-                    {playlists.length > 0 ? playlists.map((pl) => (
-                      <button
-                        key={pl.id}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const ids = pl.song_ids || [];
-                          if (!ids.includes(song.id)) {
-                            addToPlaylistMutation.mutate({ playlistId: pl.id, songIds: [...ids, song.id] });
-                          }
-                        }}
-                        className="w-full px-3 py-2 text-left text-xs text-white hover:bg-[#383838] transition-colors truncate"
-                      >
-                        {pl.name}
-                      </button>
-                    )) : (
-                      <p className="px-3 py-3 text-xs text-[#696969] text-center">Nenhuma playlist</p>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <AddToPlaylistMenu songId={song.id} />
         </div>
       )}
     </motion.div>
