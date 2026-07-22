@@ -13,7 +13,14 @@ export default function ImageCropper({ imageUrl, onSave, onCancel, aspectRatio =
   const [imageLoaded, setImageLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const CROP_SIZE = 320;
+  // DISPLAY_SIZE is the interactive box's CSS size — what pointer drags and
+  // the zoom slider operate in. EXPORT_SIZE is the canvas's actual backing
+  // resolution, kept much higher (like a retina canvas) so the exported
+  // image isn't just a stretched-out 320px square — that was why banners
+  // (and any other crop) came out visibly blurry once shown at real size.
+  const DISPLAY_SIZE = 320;
+  const EXPORT_SIZE = 1600;
+  const pixelRatio = EXPORT_SIZE / DISPLAY_SIZE;
 
   useEffect(() => {
     const img = new Image();
@@ -33,8 +40,8 @@ export default function ImageCropper({ imageUrl, onSave, onCancel, aspectRatio =
     const ctx = canvas.getContext('2d');
     const img = imageRef.current;
 
-    canvas.width = CROP_SIZE;
-    canvas.height = CROP_SIZE / aspectRatio;
+    canvas.width = EXPORT_SIZE;
+    canvas.height = EXPORT_SIZE / aspectRatio;
 
     const cropW = canvas.width;
     const cropH = canvas.height;
@@ -46,8 +53,10 @@ export default function ImageCropper({ imageUrl, onSave, onCancel, aspectRatio =
     const drawW = img.width * scale;
     const drawH = img.height * scale;
 
-    const x = (cropW - drawW) / 2 + offset.x;
-    const y = (cropH - drawH) / 2 + offset.y;
+    // offset comes from pointer movement in DISPLAY_SIZE (CSS pixel) space —
+    // scale it up to match the higher-resolution canvas coordinate space.
+    const x = (cropW - drawW) / 2 + offset.x * pixelRatio;
+    const y = (cropH - drawH) / 2 + offset.y * pixelRatio;
 
     ctx.clearRect(0, 0, cropW, cropH);
     ctx.drawImage(img, x, y, drawW, drawH);
@@ -97,7 +106,7 @@ export default function ImageCropper({ imageUrl, onSave, onCancel, aspectRatio =
     setSaving(false);
   };
 
-  const cropH = CROP_SIZE / aspectRatio;
+  const cropH = DISPLAY_SIZE / aspectRatio;
 
   return (
     <motion.div
@@ -133,7 +142,7 @@ export default function ImageCropper({ imageUrl, onSave, onCancel, aspectRatio =
           <div
             ref={containerRef}
             className="relative mx-auto overflow-hidden rounded-2xl bg-black select-none touch-none cursor-grab active:cursor-grabbing"
-            style={{ width: CROP_SIZE, height: cropH, maxWidth: '100%' }}
+            style={{ width: DISPLAY_SIZE, height: cropH, maxWidth: '100%' }}
             onMouseDown={handlePointerDown}
             onMouseMove={handlePointerMove}
             onMouseUp={handlePointerUp}
@@ -151,7 +160,7 @@ export default function ImageCropper({ imageUrl, onSave, onCancel, aspectRatio =
             {/* Grid overlay */}
             <div className="absolute inset-0 pointer-events-none" style={{
               backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)',
-              backgroundSize: `${CROP_SIZE/3}px ${cropH/3}px`
+              backgroundSize: `${DISPLAY_SIZE/3}px ${cropH/3}px`
             }} />
             {/* Corner guides */}
             {[['top-0 left-0','border-t-2 border-l-2 rounded-tl-lg'], ['top-0 right-0','border-t-2 border-r-2 rounded-tr-lg'], ['bottom-0 left-0','border-b-2 border-l-2 rounded-bl-lg'], ['bottom-0 right-0','border-b-2 border-r-2 rounded-br-lg']].map(([pos, style]) => (
