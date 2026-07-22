@@ -81,7 +81,7 @@ export default function ArtistDashboard() {
   const totalPlays = mySongs.reduce((acc, song) => acc + (song.plays || 0), 0) + 
                      myReleases.reduce((acc, release) => acc + (release.plays || 0), 0);
   const totalLikes = myReleases.reduce((acc, release) => acc + (release.likes || 0), 0) +
-                     mySongs.reduce((acc, song) => acc + (song.is_favorite ? 1 : 0), 0);
+                     mySongs.reduce((acc, song) => acc + (song.likes || 0), 0);
 
   const deleteReleaseMutation = useMutation({
     mutationFn: async (releaseId) => {

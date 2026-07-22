@@ -220,6 +220,15 @@ for (const [table, column, definition] of [
   }
 }
 
+// Migration: songs.likes was only just introduced — before it existed,
+// "liking" a song just flipped is_favorite with nothing counting it. Give
+// every song that was already favorited a starting count of 1 instead of
+// silently showing 0 (and never appearing in HAUSS HITS' Curtidas chart)
+// until someone happens to unlike/relike it. Naturally a no-op after the
+// first run: going forward is_favorite and likes are always kept in sync,
+// so this combination shouldn't recur.
+db.exec(`update songs set likes = 1 where is_favorite = 1 and likes = 0;`);
+
 // Migration: user_type used to be a single string column (e.g. "gravadora").
 // It's now a JSON array (people can hold more than one cargo at once) —
 // wrap any leftover plain-string values so existing accounts keep their

@@ -93,6 +93,7 @@ export default function LabelDashboard() {
     (item.artist && managedArtistNames.has(item.artist));
 
   const labelPosts = allPosts.filter(belongsToLabel);
+  const labelSongs = allSongs.filter(belongsToLabel);
 
   const filteredLabelPosts = releaseSearch.trim()
     ? labelPosts.filter(p =>
@@ -203,8 +204,8 @@ export default function LabelDashboard() {
 
   const selectedArtistObject = managedArtists.find(a => a.id === selectedArtistId);
 
-  const totalPlays = labelPosts.reduce((acc, post) => acc + (post.plays || 0), 0);
-  const totalLikes = labelPosts.reduce((acc, post) => acc + (post.likes || 0), 0);
+  const totalPlays = labelPosts.reduce((acc, post) => acc + (post.plays || 0), 0) + labelSongs.reduce((acc, s) => acc + (s.plays || 0), 0);
+  const totalLikes = labelPosts.reduce((acc, post) => acc + (post.likes || 0), 0) + labelSongs.reduce((acc, s) => acc + (s.likes || 0), 0);
 
   const stats = [
     { icon: Music, value: managedArtists.length, label: 'Artistas', color: 'from-zinc-300 to-zinc-500', bg: 'bg-zinc-400/10', text: 'text-zinc-300' },

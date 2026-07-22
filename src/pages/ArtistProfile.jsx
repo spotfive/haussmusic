@@ -111,7 +111,7 @@ export default function ArtistProfile() {
   });
 
   const totalPlays = songs.reduce((acc, s) => acc + (s.plays || 0), 0);
-  const totalLikes = posts.reduce((acc, p) => acc + (p.likes || 0), 0);
+  const totalLikes = posts.reduce((acc, p) => acc + (p.likes || 0), 0) + songs.reduce((acc, s) => acc + (s.likes || 0), 0);
   const now = new Date();
   const availablePosts = posts.filter(p => !p.premiere_datetime || new Date(p.premiere_datetime) <= now);
 
