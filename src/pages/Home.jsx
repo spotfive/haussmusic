@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Play, Pause, Heart, Music2, TrendingUp, Star, Calendar, User, Timer } from 'lucide-react';
+import { Play, Pause, Heart, Music2, TrendingUp, Star, Calendar, User, Timer, Newspaper } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ArtistNameBanner from '@/components/home/ArtistNameBanner';
 import HomeHeroCarousel from '@/components/home/HomeHeroCarousel';
+import { DiscordIcon } from '@/components/social/SocialBrandIcons';
 import { hasUserType } from '@/lib/utils';
 
 const pills = [
@@ -108,6 +109,8 @@ export default function Home() {
   });
 
   const logoUrl = appSettings.find(s => s.key === 'logo_url')?.value || '/logo.png';
+  const discordUrl = appSettings.find(s => s.key === 'discord_url')?.value;
+  const revistaUrl = appSettings.find(s => s.key === 'revista_url')?.value;
 
   const { data: banners = [] } = useQuery({
     queryKey: ['banners'],
@@ -349,16 +352,45 @@ export default function Home() {
         <div className="px-4 lg:px-6 py-4 lg:py-6 max-w-[1600px] mx-auto">
 
           {/* Top Filter Pills */}
-          <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1 scrollbar-none">
-            {pills.map((pill) => (
-              <button
-                key={pill.key}
-                onClick={() => setActivePill(pill.key)}
-                className={activePill === pill.key ? 'btn-pill-active' : 'btn-pill-inactive'}
-              >
-                {pill.label}
-              </button>
-            ))}
+          <div className="flex items-center justify-between gap-3 mb-6">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {pills.map((pill) => (
+                <button
+                  key={pill.key}
+                  onClick={() => setActivePill(pill.key)}
+                  className={activePill === pill.key ? 'btn-pill-active' : 'btn-pill-inactive'}
+                >
+                  {pill.label}
+                </button>
+              ))}
+            </div>
+
+            {(discordUrl || revistaUrl) && (
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {discordUrl && (
+                  <a
+                    href={discordUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Discord"
+                    className="w-9 h-9 rounded-full bg-white/5 hover:bg-[#5865F2]/20 border border-white/10 hover:border-[#5865F2]/40 flex items-center justify-center text-[#B3B3B3] hover:text-[#5865F2] transition-colors"
+                  >
+                    <DiscordIcon className="w-4 h-4" />
+                  </a>
+                )}
+                {revistaUrl && (
+                  <a
+                    href={revistaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Revista"
+                    className="w-9 h-9 rounded-full bg-white/5 hover:bg-[#c0c0c8]/20 border border-white/10 hover:border-[#c0c0c8]/40 flex items-center justify-center text-[#B3B3B3] hover:text-[#c0c0c8] transition-colors"
+                  >
+                    <Newspaper className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Hero Carousel — "Mais Ouvidas" + active admin banners, rotating */}

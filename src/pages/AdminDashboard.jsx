@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Upload, Trash2, Save, Loader2, Image as ImageIcon, Music, Music2, Users, Shield, Edit2, Camera, Eye, Search } from 'lucide-react';
+import { Plus, Upload, Trash2, Save, Loader2, Image as ImageIcon, Music, Music2, Users, Shield, Edit2, Camera, Eye, Search, Link as LinkIcon, Newspaper } from 'lucide-react';
+import { DiscordIcon } from '@/components/social/SocialBrandIcons';
 import ImageCropper from '@/components/profile/ImageCropper';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -97,6 +98,27 @@ export default function AdminDashboard() {
   const { data: labels = [] } = useQuery({
     queryKey: ['labels'],
     queryFn: () => base44.entities.Label.list('-created_date', 100),
+  });
+
+  const { data: appSettings = [] } = useQuery({
+    queryKey: ['appSettings'],
+    queryFn: () => base44.entities.AppSettings.list(),
+  });
+
+  const discordUrl = appSettings.find(s => s.key === 'discord_url')?.value || '';
+  const revistaUrl = appSettings.find(s => s.key === 'revista_url')?.value || '';
+
+  const updateAppSettingMutation = useMutation({
+    mutationFn: async ({ key, value }) => {
+      const existing = appSettings.find(s => s.key === key);
+      if (existing) await base44.entities.AppSettings.update(existing.id, { value });
+      else await base44.entities.AppSettings.create({ key, value });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appSettings'] });
+      toast.success('Link salvo!');
+    },
+    onError: () => toast.error('Erro ao salvar link'),
   });
 
   const createBannerMutation = useMutation({
@@ -444,6 +466,9 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="labels" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900">
               <Music2 className="w-4 h-4 mr-2" />Gravadoras
+            </TabsTrigger>
+            <TabsTrigger value="links" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900">
+              <LinkIcon className="w-4 h-4 mr-2" />Links
             </TabsTrigger>
           </TabsList>
 
@@ -861,6 +886,51 @@ export default function AdminDashboard() {
                 <div className="divide-y divide-white/5">
                   {labels.map((label) => (<div key={label.id} className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">{label.profile_picture ? (<img src={label.profile_picture} alt="" className="w-11 h-11 rounded-xl object-cover flex-shrink-0 ring-1 ring-white/10" />) : (<div className="w-11 h-11 rounded-xl bg-gradient-to-br from-slate-400/40 to-slate-600/40 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{label.name?.[0]?.toUpperCase() || 'G'}</div>)}<div className="flex-1 min-w-0"><p className="text-sm font-semibold text-white truncate">{label.name}</p>{label.managed_artists && label.managed_artists.length > 0 && (<p className="text-xs text-[#c0c0c8] mt-1">{label.managed_artists.length} artista(s)</p>)}</div><div className="flex gap-2"><Button variant="ghost" size="sm" onClick={() => setEditingUser({ ...label, isLabel: true })} className="h-8 px-2.5 text-xs rounded-lg bg-white/5 hover:bg-white/10"><Edit2 className="w-3.5 h-3.5 mr-1" /> Gerenciar</Button><Button variant="ghost" size="sm" onClick={() => { if (confirm('Excluir esta gravadora?')) deleteLabelMutation.mutate(label.id); }} className="h-8 px-2.5 text-xs rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300"><Trash2 className="w-3.5 h-3.5" /></Button></div></div>))}{labels.length === 0 && (<div className="text-center py-16"><Music2 className="w-12 h-12 text-zinc-700 mx-auto mb-3" /><p className="text-zinc-500">Nenhuma gravadora criada</p></div>)}
                 </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Links Tab */}
+          <TabsContent value="links" className="mt-6">
+            <div className="max-w-md space-y-4">
+              <div className="bg-[#181818] rounded-2xl border border-white/5 p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-[#5865F2]/15 flex items-center justify-center flex-shrink-0">
+                    <DiscordIcon className="w-5 h-5 text-[#5865F2]" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-white">Servidor do Discord</h2>
+                    <p className="text-xs text-zinc-500">Link do convite, mostrado na Home</p>
+                  </div>
+                </div>
+                <Input
+                  placeholder="https://discord.gg/..."
+                  defaultValue={discordUrl}
+                  onBlur={(e) => {
+                    if (e.target.value !== discordUrl) updateAppSettingMutation.mutate({ key: 'discord_url', value: e.target.value });
+                  }}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600"
+                />
+              </div>
+
+              <div className="bg-[#181818] rounded-2xl border border-white/5 p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-[#c0c0c8]/10 flex items-center justify-center flex-shrink-0">
+                    <Newspaper className="w-5 h-5 text-[#c0c0c8]" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-white">Revista</h2>
+                    <p className="text-xs text-zinc-500">Link do site da revista, mostrado na Home</p>
+                  </div>
+                </div>
+                <Input
+                  placeholder="https://..."
+                  defaultValue={revistaUrl}
+                  onBlur={(e) => {
+                    if (e.target.value !== revistaUrl) updateAppSettingMutation.mutate({ key: 'revista_url', value: e.target.value });
+                  }}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600"
+                />
               </div>
             </div>
           </TabsContent>
