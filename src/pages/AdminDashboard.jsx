@@ -29,6 +29,7 @@ export default function AdminDashboard() {
   const [newBanner, setNewBanner] = useState({
     title: '', description: '', artist_name: '', image_url: '', link_url: '', priority: 0
   });
+  const [editingBannerId, setEditingBannerId] = useState(null);
   const [repSearchTerm, setRepSearchTerm] = useState('');
   const [artistSearchTerm, setArtistSearchTerm] = useState('');
   const [cropperImage, setCropperImage] = useState(null);
@@ -89,6 +90,17 @@ export default function AdminDashboard() {
       toast.success('Banner criado!');
     },
     onError: () => toast.error('Erro ao criar banner'),
+  });
+
+  const updateBannerMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Banner.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['banners'] });
+      setNewBanner({ title: '', description: '', artist_name: '', image_url: '', link_url: '', priority: 0 });
+      setEditingBannerId(null);
+      toast.success('Banner atualizado!');
+    },
+    onError: () => toast.error('Erro ao atualizar banner'),
   });
 
   const deleteBannerMutation = useMutation({
@@ -418,7 +430,8 @@ export default function AdminDashboard() {
               {/* Creator Panel */}
               <div className="lg:col-span-2 bg-[#181818] rounded-2xl border border-white/5 p-6">
                 <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <Plus className="w-5 h-5 text-[#c0c0c8]" /> Criar Banner
+                  {editingBannerId ? <Edit2 className="w-5 h-5 text-[#c0c0c8]" /> : <Plus className="w-5 h-5 text-[#c0c0c8]" />}
+                  {editingBannerId ? 'Editar Banner' : 'Criar Banner'}
                 </h2>
                 <div className="space-y-3">
                   <Input placeholder="Título do banner" value={newBanner.title}
@@ -448,14 +461,29 @@ export default function AdminDashboard() {
                     )}
                     <input type="file" accept="image/*" className="hidden" onChange={handleUploadImage} />
                   </label>
-                  <Button
-                    onClick={() => createBannerMutation.mutate(newBanner)}
-                    disabled={!newBanner.title || !newBanner.image_url || createBannerMutation.isPending}
-                    className="w-full btn-metal rounded-xl h-11"
-                  >
-                    {createBannerMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-                    Criar Banner
-                  </Button>
+                  <div className="flex gap-2">
+                    {editingBannerId && (
+                      <Button
+                        onClick={() => { setEditingBannerId(null); setNewBanner({ title: '', description: '', artist_name: '', image_url: '', link_url: '', priority: 0 }); }}
+                        variant="ghost"
+                        className="rounded-xl h-11 bg-white/5 hover:bg-white/10 text-zinc-300"
+                      >
+                        Cancelar
+                      </Button>
+                    )}
+                    <Button
+                      onClick={() => editingBannerId
+                        ? updateBannerMutation.mutate({ id: editingBannerId, data: newBanner })
+                        : createBannerMutation.mutate(newBanner)}
+                      disabled={!newBanner.title || !newBanner.image_url || createBannerMutation.isPending || updateBannerMutation.isPending}
+                      className="flex-1 w-full btn-metal rounded-xl h-11"
+                    >
+                      {(createBannerMutation.isPending || updateBannerMutation.isPending)
+                        ? <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        : editingBannerId ? <Save className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                      {editingBannerId ? 'Salvar Alterações' : 'Criar Banner'}
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -479,10 +507,31 @@ export default function AdminDashboard() {
                           {banner.link_url && <span className="text-[10px] text-zinc-500 truncate">{banner.link_url}</span>}
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => deleteBannerMutation.mutate(banner.id)}
-                        className="text-zinc-600 hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                        <Button variant="ghost" size="icon"
+                          onClick={() => {
+                            setEditingBannerId(banner.id);
+                            setNewBanner({
+                              title: banner.title || '',
+                              description: banner.description || '',
+                              artist_name: banner.artist_name || '',
+                              image_url: banner.image_url || '',
+                              link_url: banner.link_url || '',
+                              priority: banner.priority || 0,
+                            });
+                          }}
+                          className="text-zinc-600 hover:text-[#c0c0c8] hover:bg-[#c0c0c8]/10">
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon"
+                          onClick={() => {
+                            if (editingBannerId === banner.id) { setEditingBannerId(null); setNewBanner({ title: '', description: '', artist_name: '', image_url: '', link_url: '', priority: 0 }); }
+                            deleteBannerMutation.mutate(banner.id);
+                          }}
+                          className="text-zinc-600 hover:text-red-400 hover:bg-red-500/10">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </motion.div>
                   ))}
                   {banners.length === 0 && (
