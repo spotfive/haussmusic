@@ -11,6 +11,14 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const ORIGIN = process.env.CORS_ORIGIN || '*';
 
+// Railway (and most PaaS) terminate TLS at their edge and forward plain
+// HTTP to this container, so without this Express always sees the
+// connection as "http" — req.protocol ignores the X-Forwarded-Proto header
+// unless the proxy in front of it is explicitly trusted. That's what was
+// causing generated file URLs (in routes/upload.js) to come out as
+// http://... on an https site, tripping the browser's mixed-content warning.
+app.set('trust proxy', 1);
+
 app.use(cors({ origin: ORIGIN }));
 app.use(express.json({ limit: '2mb' }));
 app.use(attachUser);
