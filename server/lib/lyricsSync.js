@@ -7,8 +7,7 @@
 // partial match is still useful, not a failure.
 const path = require('path');
 const fs = require('fs');
-const { execFile } = require('child_process');
-const ffmpegPath = require('ffmpeg-static');
+const { decodeAudioToPcm } = require('./audioDecode');
 
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..', 'data');
 const MODEL_CACHE_DIR = path.join(DATA_DIR, 'model-cache');
@@ -30,23 +29,6 @@ async function getTranscriber() {
     });
   }
   return transcriberPromise;
-}
-
-// Whisper wants raw PCM float32 samples at 16kHz mono; ffmpeg decodes
-// whatever format the track was uploaded as (mp3, m4a, wav...) into that.
-function decodeAudioToPcm(filePath) {
-  return new Promise((resolve, reject) => {
-    execFile(ffmpegPath, [
-      '-i', filePath,
-      '-f', 'f32le',
-      '-ac', '1',
-      '-ar', '16000',
-      'pipe:1',
-    ], { maxBuffer: 1024 * 1024 * 1024, encoding: 'buffer' }, (err, stdout) => {
-      if (err) return reject(err);
-      resolve(new Float32Array(stdout.buffer, stdout.byteOffset, stdout.length / Float32Array.BYTES_PER_ELEMENT));
-    });
-  });
 }
 
 function normalizeWord(w) {

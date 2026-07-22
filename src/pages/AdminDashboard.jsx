@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Upload, Trash2, Save, Loader2, Image as ImageIcon, Music, Music2, Users, Shield, Edit2, Camera, Eye, Search, Link as LinkIcon, Newspaper } from 'lucide-react';
+import { Plus, Upload, Trash2, Save, Loader2, Image as ImageIcon, Music, Music2, Users, Shield, Edit2, Camera, Eye, Search, Link as LinkIcon, Newspaper, Sparkles } from 'lucide-react';
 import { DiscordIcon } from '@/components/social/SocialBrandIcons';
 import ImageCropper from '@/components/profile/ImageCropper';
 import { Button } from "@/components/ui/button";
@@ -152,6 +152,16 @@ export default function AdminDashboard() {
     mutationFn: (id) => base44.entities.Song.delete(id),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['songs'] }); toast.success('Música removida'); },
     onError: () => toast.error('Erro ao remover música'),
+  });
+
+  const { data: autoPlaylists = [] } = useQuery({
+    queryKey: ['auto-playlists'],
+    queryFn: () => base44.entities.AutoPlaylist.list('-created_date'),
+  });
+  const regeneratePlaylistsMutation = useMutation({
+    mutationFn: () => base44.integrations.Core.RegenerateAutoPlaylists(),
+    onSuccess: (data) => toast.success(data?.message || 'Geração iniciada'),
+    onError: (err) => toast.error(err.message || 'Erro ao iniciar geração'),
   });
 
   // Cargos are now multi-select: ouvinte/artista/gravadora/staff live together
@@ -641,7 +651,31 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* Songs Tab */}
-          <TabsContent value="songs" className="mt-6">
+          <TabsContent value="songs" className="mt-6 space-y-4">
+            <div className="bg-[#181818] rounded-2xl border border-white/5 p-4 flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#c0c0c8]/10 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="w-5 h-5 text-[#c0c0c8]" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-white">Playlists "Para o seu momento"</h2>
+                  <p className="text-xs text-zinc-500">
+                    {autoPlaylists.length > 0
+                      ? `${autoPlaylists.length} coleção(ões) geradas — atualiza sozinho toda segunda-feira`
+                      : 'Nenhuma gerada ainda — roda automaticamente pouco depois do primeiro deploy'}
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() => regeneratePlaylistsMutation.mutate()}
+                disabled={regeneratePlaylistsMutation.isPending}
+                className="bg-white/5 hover:bg-white/10 border border-white/10 text-white"
+              >
+                {regeneratePlaylistsMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                Regenerar agora
+              </Button>
+            </div>
+
             <div className="bg-[#181818] rounded-2xl border border-white/5 overflow-hidden">
               <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between gap-4 flex-wrap">
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">

@@ -6,7 +6,7 @@ const { extractUploadUrls, cleanupOrphanedFiles } = require('../fileCleanup');
 
 const router = express.Router({ mergeParams: true });
 
-const ADMIN_ONLY_ENTITIES = new Set(['Banner', 'Label', 'Artist', 'AppSettings']);
+const ADMIN_ONLY_ENTITIES = new Set(['Banner', 'Label', 'Artist', 'AppSettings', 'AutoPlaylist']);
 const nowIso = () => new Date().toISOString();
 
 function requester(req) {

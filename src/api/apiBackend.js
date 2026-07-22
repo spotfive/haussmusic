@@ -133,6 +133,12 @@ const integrations = {
     async SyncLyrics({ audio_url, lines }) {
       return request('/api/lyrics-sync', { method: 'POST', body: { audio_url, lines } });
     },
+    // Kicks off "Para o seu momento" regeneration in the background on the
+    // server (admin only) — returns as soon as it's started, not when it's
+    // done, since a full catalog pass can take a long time.
+    async RegenerateAutoPlaylists() {
+      return request('/api/auto-playlists/regenerate', { method: 'POST' });
+    },
   },
 };
 

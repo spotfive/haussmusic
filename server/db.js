@@ -199,6 +199,17 @@ db.exec(`
     created_date text not null,
     updated_date text not null
   );
+
+  create table if not exists auto_playlists (
+    id text primary key,
+    name text not null,
+    subtitle text,
+    cover_url text,
+    song_ids text not null default '[]',
+    genre_summary text,
+    created_date text not null,
+    updated_date text not null
+  );
 `);
 
 // Lightweight migration: add columns that got introduced after a table
@@ -214,6 +225,7 @@ for (const [table, column, definition] of [
   ['banners', 'button_text', 'text'],
   ['banners', 'category', 'text'],
   ['banners', 'duration_seconds', 'real not null default 7'],
+  ['songs', 'detected_genre', 'text'],
 ]) {
   const cols = db.prepare(`pragma table_info(${table})`).all();
   if (!cols.some((c) => c.name === column)) {
@@ -256,6 +268,7 @@ const FILE_FIELDS_BY_TABLE = {
   banners: ['image_url'],
   labels: ['profile_picture'],
   artists: ['profile_picture'],
+  auto_playlists: ['cover_url'],
 };
 
 // Migration: PUBLIC_URL was misconfigured as http:// instead of https:// for
@@ -285,6 +298,7 @@ const ENTITIES = {
   Rating: { table: 'ratings', json: [], bool: [] },
   UserFavorite: { table: 'user_favorites', json: [], bool: [] },
   AppSettings: { table: 'app_settings', json: [], bool: [] },
+  AutoPlaylist: { table: 'auto_playlists', json: ['song_ids'], bool: [] },
 };
 
 function getEntityConfig(name) {
