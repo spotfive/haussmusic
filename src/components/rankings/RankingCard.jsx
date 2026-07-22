@@ -1,19 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, TrendingUp, Heart, Play } from 'lucide-react';
+import { TrendingUp, Heart, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import AddToPlaylistMenu from '@/components/playlist/AddToPlaylistMenu';
 
 export default function RankingCard({ item, rank, type }) {
   const isSong = !!item.audio_url;
-
-  const getTrophyColor = (rank) => {
-    if (rank === 1) return 'text-yellow-400';
-    if (rank === 2) return 'text-zinc-400';
-    if (rank === 3) return 'text-amber-600';
-    return 'text-zinc-600';
-  };
 
   const getBadgeColor = (rank) => {
     if (rank === 1) return 'from-yellow-500 to-amber-500';
@@ -42,7 +35,7 @@ export default function RankingCard({ item, rank, type }) {
           transition={{ duration: 2, repeat: Infinity }}
           className={`w-10 h-10 rounded-full bg-gradient-to-br ${getBadgeColor(rank)} flex items-center justify-center font-bold text-white shadow-lg`}
         >
-          {rank <= 3 ? <Trophy className={`w-5 h-5 ${getTrophyColor(rank)}`} /> : rank}
+          {rank}
         </motion.div>
       </div>
 

@@ -6,61 +6,6 @@ import { Flame, Heart, Play, Music, Disc3 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import RankingCard from '@/components/rankings/RankingCard';
 
-function PodiumPlatform({ rank, item, type, delay, isFirst }) {
-  const heights = { 1: 'h-24 lg:h-36', 2: 'h-16 lg:h-24', 3: 'h-12 lg:h-16' };
-  const colors = {
-    1: 'bg-gradient-to-t from-amber-500 to-amber-400 shadow-lg shadow-amber-500/30',
-    2: 'bg-gradient-to-t from-zinc-400 to-zinc-300 shadow-lg shadow-zinc-400/20',
-    3: 'bg-gradient-to-t from-amber-700 to-amber-600 shadow-lg shadow-amber-700/20',
-  };
-  const widths = { 1: 'w-24 lg:w-40', 2: 'w-20 lg:w-32', 3: 'w-16 lg:w-28' };
-  const imgSizes = { 1: 'w-14 h-14 lg:w-20 lg:h-20', 2: 'w-12 h-12 lg:w-16 lg:h-16', 3: 'w-10 h-10 lg:w-14 lg:h-14' };
-  const ringColors = { 1: 'ring-amber-400', 2: 'ring-zinc-300', 3: 'ring-amber-600' };
-
-  const statValue = type === 'likes' ? (item.likes || 0).toLocaleString() : (item.plays || 0).toLocaleString();
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, type: 'spring', stiffness: 120 }}
-      className="flex flex-col items-center justify-end"
-    >
-      <div className="flex flex-col items-center mb-1 z-10">
-        <div className={`${imgSizes[rank]} rounded-full ${ringColors[rank]} ring-3 lg:ring-4 overflow-hidden mb-2 shadow-xl`}>
-          {item.cover_url ? (
-            <img src={item.cover_url} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full bg-[#282828] flex items-center justify-center">
-              <Disc3 className="w-5 lg:w-7 h-5 lg:h-7 text-[#535353]" />
-            </div>
-          )}
-        </div>
-        <p className={`text-xs lg:text-sm font-bold text-white truncate max-w-[100px] lg:max-w-[140px] text-center ${isFirst ? 'text-base lg:text-lg' : ''}`}>{item.title}</p>
-        <p className="text-[10px] lg:text-xs text-[#B3B3B3] truncate max-w-[100px] lg:max-w-[140px] text-center">{item.artist}</p>
-        <div className="flex items-center gap-1 mt-0.5">
-          {type === 'likes' ? (
-            <Heart className="w-3 h-3 text-pink-400 fill-current" />
-          ) : (
-            <Play className="w-3 h-3 text-[#c0c0c8] fill-current" />
-          )}
-          <span className="text-[10px] lg:text-xs text-[#B3B3B3] font-medium">{statValue}</span>
-        </div>
-      </div>
-
-      <motion.div
-        initial={{ scaleY: 0 }}
-        animate={{ scaleY: 1 }}
-        transition={{ delay: delay + 0.2, duration: 0.4 }}
-        style={{ transformOrigin: 'bottom' }}
-        className={`${widths[rank]} ${heights[rank]} ${colors[rank]} rounded-t-xl flex items-start justify-center pt-1.5`}
-      >
-        <span className="text-xl lg:text-3xl font-black text-white/30">{rank}</span>
-      </motion.div>
-    </motion.div>
-  );
-}
-
 const TOP_N = 100;
 
 export default function Rankings() {
@@ -145,7 +90,7 @@ export default function Rankings() {
         </div>
       </div>
 
-      {/* Tabs at top, then podium + list below */}
+      {/* Tabs at top, then the numbered list below */}
       <div className="px-4 lg:px-6 xl:px-8">
         <Tabs defaultValue="albums" className="w-full">
           <TabsList className="bg-[#181818] border border-[#282828] mb-4 w-full grid grid-cols-4 p-1 rounded-xl">
@@ -157,75 +102,35 @@ export default function Rankings() {
             ))}
           </TabsList>
 
-          {tabConfigs.map(tab => {
-            const podiumItems = tab.list.slice(0, Math.min(3, tab.list.length));
-            const belowPodium = tab.list.slice(podiumItems.length);
+          {tabConfigs.map(tab => (
+            <TabsContent key={tab.value} value={tab.value}>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-4 pt-2">
+                <h2 className="text-lg lg:text-xl font-bold text-white">{tab.activeLabel}</h2>
+                <p className="text-xs text-zinc-500 mt-0.5">Top {tab.list.length} de {TOP_N}</p>
+              </motion.div>
 
-            return (
-              <TabsContent key={tab.value} value={tab.value} className="overflow-visible">
-                {/* Podium */}
-                <div className="pt-4 lg:pt-6 pb-6 lg:pb-8 overflow-visible">
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center mb-3 lg:mb-5">
-                    <h2 className="text-lg lg:text-xl font-bold text-white">{tab.activeLabel}</h2>
-                    <p className="text-xs text-zinc-500 mt-0.5">Top {tab.list.length} de {TOP_N}</p>
-                  </motion.div>
+              <div className="space-y-1.5 lg:space-y-2">
+                {tab.list.map((item, index) => (
+                  <RankingCard
+                    key={item.id}
+                    item={item}
+                    rank={index + 1}
+                    type={tab.type}
+                  />
+                ))}
 
-                  {podiumItems.length > 0 ? (
-                    <div className="flex items-end justify-center gap-2 lg:gap-5">
-                      {podiumItems.length >= 2 && (
-                        <PodiumPlatform key={podiumItems[1].id} rank={2} item={podiumItems[1]} type={tab.type} delay={0.1} isFirst={false} />
-                      )}
-                      <PodiumPlatform key={podiumItems[0].id} rank={1} item={podiumItems[0]} type={tab.type} delay={0} isFirst={true} />
-                      {podiumItems.length >= 3 && (
-                        <PodiumPlatform key={podiumItems[2].id} rank={3} item={podiumItems[2]} type={tab.type} delay={0.2} isFirst={false} />
-                      )}
-                      {podiumItems.length === 2 && <div className="w-20 lg:w-32" />}
+                {tab.list.length === 0 && (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 rounded-full bg-[#181818] flex items-center justify-center mx-auto mb-4">
+                      <Flame className="w-8 h-8 text-[#282828]" />
                     </div>
-                  ) : (
-                    <div className="text-center py-10">
-                      <div className="flex items-end justify-center gap-2 lg:gap-5 opacity-20">
-                        <div className="flex flex-col items-center">
-                          <div className="w-14 h-14 lg:w-20 lg:h-20 rounded-full bg-[#282828] mb-2" />
-                          <div className="w-24 lg:w-36 h-20 lg:h-28 bg-zinc-400 rounded-t-xl" />
-                        </div>
-                        <div className="flex flex-col items-center">
-                          <div className="w-16 h-16 lg:w-24 lg:h-24 rounded-full bg-[#282828] mb-2" />
-                          <div className="w-28 lg:w-44 h-28 lg:h-40 bg-amber-400 rounded-t-xl" />
-                        </div>
-                        <div className="flex flex-col items-center">
-                          <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-full bg-[#282828] mb-2" />
-                          <div className="w-20 lg:w-32 h-14 lg:h-20 bg-amber-600 rounded-t-xl" />
-                        </div>
-                      </div>
-                      <p className="text-[#B3B3B3] text-sm mt-4">Sem dados para exibir o pódio ainda</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* List below podium */}
-                <div className="space-y-1.5 lg:space-y-2">
-                  {belowPodium.map((item, index) => (
-                    <RankingCard
-                      key={item.id}
-                      item={item}
-                      rank={podiumItems.length + index + 1}
-                      type={tab.type}
-                    />
-                  ))}
-
-                  {tab.list.length === 0 && (
-                    <div className="text-center py-12">
-                      <div className="w-16 h-16 rounded-full bg-[#181818] flex items-center justify-center mx-auto mb-4">
-                        <Flame className="w-8 h-8 text-[#282828]" />
-                      </div>
-                      <h3 className="text-lg font-bold text-white mb-2">Nada por aqui ainda</h3>
-                      <p className="text-[#B3B3B3] text-sm">Assim que algo bombar, aparece aqui.</p>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
-            );
-          })}
+                    <h3 className="text-lg font-bold text-white mb-2">Nada por aqui ainda</h3>
+                    <p className="text-[#B3B3B3] text-sm">Assim que algo bombar, aparece aqui.</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          ))}
         </Tabs>
       </div>
     </div>
