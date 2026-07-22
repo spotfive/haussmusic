@@ -109,7 +109,7 @@ export default function Rankings() {
                 <p className="text-xs text-zinc-500 mt-0.5">Top {tab.list.length} de {TOP_N}</p>
               </motion.div>
 
-              <div className="space-y-1.5 lg:space-y-2">
+              <div className="space-y-1">
                 {tab.list.map((item, index) => (
                   <RankingCard
                     key={item.id}

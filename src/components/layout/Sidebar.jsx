@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Home, Search, Library, Music2, Trophy, Shield, Award, LogIn } from 'lucide-react';
+import { Home, Search, Library, Music2, Star, Shield, Award, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useAuth } from '@/lib/AuthContext';
@@ -15,7 +15,7 @@ const navItems = [
 ];
 
 const libraryItems = [
-  { icon: Trophy, label: 'HAUSS HITS', page: 'Rankings' },
+  { icon: Star, label: 'HAUSS HITS', page: 'Rankings' },
 ];
 
 export default function Sidebar({ currentPage }) {
@@ -80,7 +80,10 @@ export default function Sidebar({ currentPage }) {
                   : 'text-[#B3B3B3] hover:text-white'
               }`}
             >
-              <item.icon className="w-6 h-6" />
+              <item.icon
+                className={`w-6 h-6 ${isActive(item.page) ? 'fill-current' : ''}`}
+                style={isActive(item.page) ? { filter: 'drop-shadow(0 0 6px rgba(192,192,200,0.7))' } : undefined}
+              />
               <span className="text-[9px] font-medium leading-none">{item.label}</span>
             </motion.div>
           </Link>

@@ -10,7 +10,7 @@ import ExpandedMobilePlayer from '@/components/layout/ExpandedMobilePlayer';
 import ProfileSetup from '@/components/profile/ProfileSetup';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Home, Search, Library, Music2, Trophy, Award, LogIn, ChevronLeft } from 'lucide-react';
+import { Home, Search, Library, Music2, Star, Award, LogIn, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { hasUserType } from '@/lib/utils';
 
@@ -458,7 +458,7 @@ export default function Layout({ children, currentPageName }) {
       ? [{ icon: Award, label: 'Artista', page: 'ArtistDashboard' }]
       : [{ icon: Music2, label: 'Artistas', page: 'Artists' }]
     ),
-    { icon: Trophy, label: 'HAUSS HITS', page: 'Rankings' },
+    { icon: Star, label: 'HAUSS HITS', page: 'Rankings' },
     ...(isAuthenticated ? [] : [{ icon: LogIn, label: 'Entrar', page: 'AuthPage' }]),
   ];
 
