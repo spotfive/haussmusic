@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Flame, Heart, Play, Music, Disc3 } from 'lucide-react';
+import { Flame, Heart, Music, Disc3 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import RankingCard from '@/components/rankings/RankingCard';
 
@@ -40,18 +40,10 @@ export default function Rankings() {
     .sort((a, b) => (b.likes || 0) - (a.likes || 0))
     .slice(0, TOP_N);
 
-  // The one chart that mixes both types — the overall "most played on the
-  // platform" list, songs and albums together, ranked purely by plays.
-  const topPlaysOverall = [...posts, ...songs]
-    .filter(item => (item.plays || 0) > 0)
-    .sort((a, b) => (b.plays || 0) - (a.plays || 0))
-    .slice(0, TOP_N);
-
   const tabConfigs = [
     { value: 'albums', icon: Disc3, label: 'Álbuns', activeLabel: 'Álbuns Mais Ouvidos', type: 'plays', list: topAlbums },
     { value: 'songs', icon: Music, label: 'Músicas', activeLabel: 'Músicas Mais Ouvidas', type: 'plays', list: topSongs },
     { value: 'likes', icon: Heart, label: 'Curtidas', activeLabel: 'Mais Curtidos', type: 'likes', list: topLiked },
-    { value: 'plays', icon: Play, label: 'Plays', activeLabel: 'Mais Tocados (Geral)', type: 'plays', list: topPlaysOverall },
   ];
 
   return (
@@ -93,7 +85,7 @@ export default function Rankings() {
       {/* Tabs at top, then the numbered list below */}
       <div className="px-4 lg:px-6 xl:px-8">
         <Tabs defaultValue="albums" className="w-full">
-          <TabsList className="bg-[#181818] border border-[#282828] mb-4 w-full grid grid-cols-4 p-1 rounded-xl">
+          <TabsList className="bg-[#181818] border border-[#282828] mb-4 w-full grid grid-cols-3 p-1 rounded-xl">
             {tabConfigs.map(tab => (
               <TabsTrigger key={tab.value} value={tab.value} className="data-[state=active]:bg-[#c0c0c8]/20 data-[state=active]:text-[#e5e5ea] text-[11px] sm:text-sm lg:text-base flex items-center gap-1.5 lg:gap-2 rounded-lg">
                 <tab.icon className="w-3.5 lg:w-4 h-3.5 lg:h-4" />
