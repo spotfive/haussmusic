@@ -10,7 +10,7 @@ import ExpandedMobilePlayer from '@/components/layout/ExpandedMobilePlayer';
 import ProfileSetup from '@/components/profile/ProfileSetup';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Home, Search, Library, Music2, Trophy, Award, LogIn } from 'lucide-react';
+import { Home, Search, Library, Music2, Trophy, Award, LogIn, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { hasUserType } from '@/lib/utils';
 
@@ -519,6 +519,27 @@ export default function Layout({ children, currentPageName }) {
             repeatMode={repeatMode}
             onToggleRepeat={handleToggleRepeat}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Reopen tab — shows once the now-playing panel has been closed, so
+          there's still a way back to it besides hovering the mini player */}
+      <AnimatePresence>
+        {!showRightSidebar && currentSong && (
+          <motion.button
+            key="reopen-right-sidebar"
+            initial={{ x: 24, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 24, opacity: 0 }}
+            transition={{ type: 'spring', damping: 22, stiffness: 220 }}
+            whileHover={{ x: -4 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={() => setShowRightSidebar(true)}
+            title="Mostrar tocando agora"
+            className="hidden lg:flex fixed right-0 top-1/2 -translate-y-1/2 z-30 items-center justify-center w-8 h-14 bg-[#181818] hover:bg-[#282828] border border-r-0 border-white/10 rounded-l-xl shadow-lg transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4 text-[#B3B3B3]" />
+          </motion.button>
         )}
       </AnimatePresence>
 
