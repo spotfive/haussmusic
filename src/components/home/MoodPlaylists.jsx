@@ -98,23 +98,52 @@ export default function MoodPlaylists({ songs = [], onPlaySong, userEmail }) {
       .filter((p) => p.songs.length >= 4);
   }, [songs]);
 
-  // Vertical mouse wheel scrolls this row horizontally — attached natively so
-  // it can preventDefault (React's onWheel is passive and can't).
+  // Vertical mouse wheel scrolls this row horizontally. Attached natively so it
+  // can preventDefault (React's onWheel is passive). At either end we let the
+  // wheel fall through so the page keeps scrolling instead of feeling stuck.
+  // Momentum is eased by hand in a rAF loop against a `target` value, rather
+  // than writing straight to scrollLeft under the container's CSS
+  // scroll-behavior: smooth — modern browsers apply that smoothing to direct
+  // scrollLeft writes too, so a burst of wheel ticks was queuing/cancelling
+  // overlapping smooth-scroll animations against each other and making fast
+  // scrolling feel like it had stopped responding.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
+    let target = el.scrollLeft;
+    let raf = null;
+
+    const step = () => {
+      const current = el.scrollLeft;
+      const diff = target - current;
+      if (Math.abs(diff) < 0.5) {
+        el.scrollLeft = target;
+        raf = null;
+        return;
+      }
+      el.scrollLeft = current + diff * 0.22;
+      raf = requestAnimationFrame(step);
+    };
+
     const onWheel = (e) => {
       if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
-      el.scrollLeft += e.deltaY;
+      const max = el.scrollWidth - el.clientWidth;
+      if ((e.deltaY < 0 && target <= 0) || (e.deltaY > 0 && target >= max - 1)) return;
       e.preventDefault();
+      target = Math.max(0, Math.min(max, target + e.deltaY));
+      if (raf == null) raf = requestAnimationFrame(step);
     };
+
     el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      if (raf != null) cancelAnimationFrame(raf);
+    };
   }, [playlists.length]);
 
   const nudge = (dir) => {
     const el = scrollRef.current;
-    if (el) el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: 'smooth' });
+    if (el) el.scrollBy({ left: dir * el.clientWidth * 0.75, behavior: 'smooth' });
   };
 
   const playPlaylist = (pl) => {
@@ -163,29 +192,34 @@ export default function MoodPlaylists({ songs = [], onPlaySong, userEmail }) {
       {/* Edge-fade mask makes cards dissolve as they scroll past either side */}
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory scrollbar-hide"
-        style={{ WebkitMaskImage: 'linear-gradient(to right, transparent 0, #000 5%, #000 95%, transparent 100%)', maskImage: 'linear-gradient(to right, transparent 0, #000 5%, #000 95%, transparent 100%)' }}
+        className="flex gap-4 overflow-x-auto pt-1 pb-4 -mx-1 px-1 scrollbar-hide"
+        style={{ WebkitMaskImage: 'linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%)', maskImage: 'linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%)' }}
       >
         {playlists.map((pl, i) => (
           <motion.button
             key={pl.theme.id}
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: Math.min(i, 6) * 0.04 }}
-            whileHover={{ y: -4 }}
+            transition={{ delay: Math.min(i, 6) * 0.05, type: 'spring', damping: 20, stiffness: 220 }}
+            whileHover={{ y: -6, scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setActive(pl)}
-            className="group relative shrink-0 w-40 sm:w-44 lg:w-48 aspect-square rounded-2xl overflow-hidden snap-start border border-white/[0.06] text-left"
+            style={{ boxShadow: `0 10px 30px -12px ${pl.theme.to}` }}
+            className="group relative shrink-0 w-40 sm:w-44 lg:w-52 aspect-square rounded-[20px] overflow-hidden ring-1 ring-white/[0.08] text-left transition-shadow duration-300 hover:ring-white/20"
           >
             <PlaylistCover theme={pl.theme} songs={pl.songs} />
-            <div className="absolute inset-x-0 bottom-0 p-3">
+            {/* soft top sheen that brightens on hover */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'linear-gradient(160deg, rgba(255,255,255,0.16), transparent 40%)' }} />
+            <div className="absolute inset-x-0 bottom-0 p-3.5">
               <h3 className="text-white font-extrabold text-base sm:text-lg leading-tight drop-shadow-lg">{pl.theme.name}</h3>
-              <p className="text-white/65 text-[11px] leading-snug mt-0.5 truncate">{pl.theme.subtitle}</p>
+              <p className="text-white/70 text-[11px] leading-snug mt-0.5 truncate">{pl.theme.subtitle}</p>
             </div>
-            <div className="absolute top-2.5 left-2.5 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-sm">
-              <span className="text-[9px] font-bold tracking-wider text-[#e5e5ea]">HAUSS</span>
+            <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/35 backdrop-blur-md ring-1 ring-white/10">
+              <span className="text-[9px] font-bold tracking-[0.15em] text-[#e5e5ea]">HAUSS</span>
             </div>
             {/* Play affordance on hover */}
-            <div className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-[#c0c0c8] flex items-center justify-center shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200"
+            <div
+              className="absolute bottom-3.5 right-3.5 w-11 h-11 rounded-full bg-[#c0c0c8] flex items-center justify-center shadow-xl shadow-black/40 opacity-0 translate-y-3 scale-90 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 transition-all duration-300 ease-out hover:bg-[#d4d4dc]"
               onClick={(e) => { e.stopPropagation(); playPlaylist(pl); }}
               role="button"
             >
