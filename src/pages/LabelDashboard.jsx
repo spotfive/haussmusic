@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Music, Eye, Heart, Users, AlertCircle, Disc, Trash2, Play, Calendar, Trash, UserPlus, Loader2 } from 'lucide-react';
+import { Plus, Music, Eye, Heart, Users, AlertCircle, Disc, Trash2, Edit2, Play, Calendar, Trash, UserPlus, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ export default function LabelDashboard() {
   const [selectedLabelId, setSelectedLabelId] = useState(null);
   const [selectedArtistId, setSelectedArtistId] = useState('');
   const [showReleaseCreator, setShowReleaseCreator] = useState(false);
+  const [editingRelease, setEditingRelease] = useState(null);
   const [cropperImage, setCropperImage] = useState(null);
   const [searchRepresentative, setSearchRepresentative] = useState('');
   const [showAddRep, setShowAddRep] = useState(false);
@@ -308,7 +309,7 @@ export default function LabelDashboard() {
             >
               <Button
                 onClick={() => {
-                  if (selectedArtistId) setShowReleaseCreator(true);
+                  if (selectedArtistId) { setEditingRelease(null); setShowReleaseCreator(true); }
                   else toast.error('Selecione um artista primeiro');
                 }}
                 className="btn-metal rounded-full px-6 py-6 h-auto text-base font-bold shadow-lg shadow-[#c0c0c8]/30"
@@ -441,6 +442,12 @@ export default function LabelDashboard() {
                           {post.type}
                         </span>
                         <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setEditingRelease(post); setShowReleaseCreator(true); }}
+                            className="p-1.5 bg-black/60 backdrop-blur-sm hover:bg-[#c0c0c8] rounded-lg transition-colors"
+                          >
+                            <Edit2 className="w-3.5 h-3.5 text-white" />
+                          </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -732,8 +739,12 @@ export default function LabelDashboard() {
       {/* Release Creator Panel */}
       <ReleaseCreatorPanel
         isOpen={showReleaseCreator}
-        onClose={() => setShowReleaseCreator(false)}
-        managedArtist={selectedArtistObject}
+        onClose={() => { setShowReleaseCreator(false); setEditingRelease(null); }}
+        releaseToEdit={editingRelease}
+        // Only used to prefill/lock a *new* release's artist — while editing,
+        // the release keeps whichever artist it already has regardless of
+        // what's currently picked in the artist dropdown above.
+        managedArtist={editingRelease ? null : selectedArtistObject}
         labelContext={{
           label_id: label?.id,
           label_name: label?.name,
@@ -742,6 +753,7 @@ export default function LabelDashboard() {
         }}
         onSuccess={() => {
           setShowReleaseCreator(false);
+          setEditingRelease(null);
           queryClient.invalidateQueries({ queryKey: ['labelAllPosts'] });
           queryClient.invalidateQueries({ queryKey: ['labelAllSongs'] });
           queryClient.invalidateQueries({ queryKey: ['posts'] });
