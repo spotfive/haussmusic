@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Upload, Trash2, Save, Loader2, Image as ImageIcon, Music, Music2, Users, BarChart3, Settings, Shield, Edit2, Camera, Radio, Eye, Sparkles, Search, TrendingUp } from 'lucide-react';
+import { Plus, Upload, Trash2, Save, Loader2, Image as ImageIcon, Music, Music2, Users, Shield, Edit2, Camera, Eye, Search } from 'lucide-react';
 import ImageCropper from '@/components/profile/ImageCropper';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,14 +29,13 @@ export default function AdminDashboard() {
   const [newBanner, setNewBanner] = useState({
     title: '', description: '', artist_name: '', image_url: '', link_url: '', priority: 0
   });
-  const [logoUrl, setLogoUrl] = useState('');
   const [repSearchTerm, setRepSearchTerm] = useState('');
   const [artistSearchTerm, setArtistSearchTerm] = useState('');
-  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [cropperImage, setCropperImage] = useState(null);
-  const [cropperTarget, setCropperTarget] = useState(null); // 'logo' | 'user'
+  const [cropperTarget, setCropperTarget] = useState(null); // 'user' | 'labelLogo' | 'labelLogoEdit'
   const [isCreateLabelDialogOpen, setIsCreateLabelDialogOpen] = useState(false);
   const [newLabelForm, setNewLabelForm] = useState({ name: '', logo_url: '', representatives: [] });
+  const [newLabelRepSearch, setNewLabelRepSearch] = useState('');
   const [uploadingLabelLogo, setUploadingLabelLogo] = useState(false);
   
   // Get tab from URL query params
@@ -78,20 +76,10 @@ export default function AdminDashboard() {
     },
   });
 
-  const { data: appSettings = [] } = useQuery({
-    queryKey: ['appSettings'],
-    queryFn: () => base44.entities.AppSettings.list(),
-  });
-
   const { data: labels = [] } = useQuery({
     queryKey: ['labels'],
     queryFn: () => base44.entities.Label.list('-created_date', 100),
   });
-
-  useEffect(() => {
-    const logoSetting = appSettings.find(s => s.key === 'logo_url');
-    if (logoSetting) setLogoUrl(logoSetting.value);
-  }, [appSettings]);
 
   const createBannerMutation = useMutation({
     mutationFn: (data) => base44.entities.Banner.create(data),
@@ -318,29 +306,9 @@ export default function AdminDashboard() {
     reader.readAsDataURL(file);
   };
 
-  const handleUploadLogo = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => { setCropperImage(ev.target.result); setCropperTarget('logo'); };
-    reader.readAsDataURL(file);
-  };
-
   const handleCropSave = async ({ imageUrl }) => {
     if (cropperTarget === 'user') {
       setEditingUser(prev => ({ ...prev, profile_picture: imageUrl }));
-    } else if (cropperTarget === 'logo') {
-      setUploadingLogo(true);
-      setLogoUrl(imageUrl);
-      const existing = appSettings.find(s => s.key === 'logo_url');
-      if (existing) {
-        await base44.entities.AppSettings.update(existing.id, { value: imageUrl });
-      } else {
-        await base44.entities.AppSettings.create({ key: 'logo_url', value: imageUrl });
-      }
-      queryClient.invalidateQueries({ queryKey: ['appSettings'] });
-      toast.success('Logo atualizada!');
-      setUploadingLogo(false);
     } else if (cropperTarget === 'labelLogo') {
       setNewLabelForm(prev => ({ ...prev, logo_url: imageUrl }));
     } else if (cropperTarget === 'labelLogoEdit') {
@@ -348,14 +316,6 @@ export default function AdminDashboard() {
     }
     setCropperImage(null);
     setCropperTarget(null);
-  };
-
-  const handleRemoveLogo = async () => {
-    const existing = appSettings.find(s => s.key === 'logo_url');
-    if (existing) await base44.entities.AppSettings.delete(existing.id);
-    setLogoUrl('');
-    queryClient.invalidateQueries({ queryKey: ['appSettings'] });
-    toast.success('Logo removida');
   };
 
   if (cropperImage) {
@@ -449,12 +409,6 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="labels" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900">
               <Music2 className="w-4 h-4 mr-2" />Gravadoras
-            </TabsTrigger>
-            <TabsTrigger value="tools" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900">
-              <Settings className="w-4 h-4 mr-2" />Ferramentas
-            </TabsTrigger>
-            <TabsTrigger value="logo" className="rounded-lg data-[state=active]:bg-gradient-to-b data-[state=active]:from-zinc-200 data-[state=active]:to-zinc-400 data-[state=active]:text-zinc-900">
-              <Sparkles className="w-4 h-4 mr-2" />Logo
             </TabsTrigger>
           </TabsList>
 
@@ -748,26 +702,47 @@ export default function AdminDashboard() {
                   </label>
                   <div>
                     <label className="text-xs font-medium text-zinc-400 mb-2 block">Representantes</label>
-                    <Select value="" onValueChange={async (userId) => { 
-                      if (!newLabelForm.representatives.includes(userId)) {
-                        setNewLabelForm(prev => ({ ...prev, representatives: [...prev.representatives, userId] }));
-                        try {
-                          const rep = users.find(u => u.id === userId);
-                          await base44.entities.User.update(userId, { user_type: withUserType(rep, 'gravadora') });
-                          await new Promise(r => setTimeout(r, 500));
-                          await queryClient.invalidateQueries({ queryKey: ['users'] });
-                          await queryClient.refetchQueries({ queryKey: ['users'] });
-                          toast.success('Representante adicionado como gravadora');
-                        } catch (err) {
-                          toast.error('Erro ao atualizar tipo do representante');
-                        }
-                      }
-                    }}>
-                      <SelectTrigger className="h-8 bg-white/5 border-white/10 text-white text-xs"><SelectValue placeholder="Adicionar representante" /></SelectTrigger>
-                      <SelectContent className="bg-[#1a1a1a] border-white/10">
-                        {users.filter(u => !hasUserType(u, 'gravadora') && !newLabelForm.representatives.includes(u.id)).map(u => (<SelectItem key={u.id} value={u.id} className="text-white text-xs">{u.display_name || u.full_name || 'Sem nome'}</SelectItem>))}
-                      </SelectContent>
-                    </Select>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#535353]" />
+                      <Input
+                        placeholder="Buscar pessoa..."
+                        value={newLabelRepSearch}
+                        onChange={(e) => setNewLabelRepSearch(e.target.value)}
+                        className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600 h-8 pl-9 text-xs"
+                      />
+                    </div>
+                    <div className="mt-2 max-h-40 overflow-y-auto bg-[#1a1a1a] border border-white/10 rounded-lg">
+                      {(() => {
+                        const results = users.filter(u =>
+                          !hasUserType(u, 'gravadora') &&
+                          !newLabelForm.representatives.includes(u.id) &&
+                          (u.display_name?.toLowerCase().includes(newLabelRepSearch.toLowerCase()) || u.full_name?.toLowerCase().includes(newLabelRepSearch.toLowerCase()))
+                        );
+                        return results.length === 0 ? (
+                          <div className="text-xs text-zinc-500 p-3">Nenhuma pessoa encontrada</div>
+                        ) : results.map(u => (
+                          <button
+                            key={u.id}
+                            onClick={async () => {
+                              setNewLabelForm(prev => ({ ...prev, representatives: [...prev.representatives, u.id] }));
+                              setNewLabelRepSearch('');
+                              try {
+                                await base44.entities.User.update(u.id, { user_type: withUserType(u, 'gravadora') });
+                                await new Promise(r => setTimeout(r, 500));
+                                await queryClient.invalidateQueries({ queryKey: ['users'] });
+                                await queryClient.refetchQueries({ queryKey: ['users'] });
+                                toast.success('Representante adicionado como gravadora');
+                              } catch (err) {
+                                toast.error('Erro ao atualizar tipo do representante');
+                              }
+                            }}
+                            className="w-full text-left px-3 py-2 text-xs text-white hover:bg-[#282828] transition-colors border-b border-white/5 last:border-0"
+                          >
+                            {u.display_name || u.full_name || 'Sem nome'}
+                          </button>
+                        ));
+                      })()}
+                    </div>
                   </div>
                   {newLabelForm.representatives.length > 0 && (
                     <div className="bg-white/5 rounded-lg p-2 space-y-1">
@@ -789,180 +764,6 @@ export default function AdminDashboard() {
             </div>
           </TabsContent>
 
-          {/* Logo Tab */}
-          <TabsContent value="logo" className="mt-6">
-            <div className="max-w-md mx-auto bg-[#181818] rounded-2xl border border-white/5 p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-[#c0c0c8]/10 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-[#c0c0c8]" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-white">Logo da Plataforma</h2>
-                  <p className="text-sm text-zinc-400">Substitui o ícone roxo no menu lateral</p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {/* Preview */}
-                <div className="bg-[#121212] rounded-xl p-6 flex items-center justify-center">
-                  {logoUrl ? (
-                    <img src={logoUrl} alt="Logo" className="w-10 h-10 rounded-full object-cover" />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-[#c0c0c8] flex items-center justify-center">
-                      <Music2 className="w-5 h-5 text-black" />
-                    </div>
-                  )}
-                </div>
-
-                {/* Upload */}
-                <label className="block p-5 border-2 border-dashed border-white/10 rounded-xl hover:border-[#c0c0c8]/50 transition-colors cursor-pointer text-center">
-                  {uploadingLogo ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="w-5 h-5 animate-spin text-[#c0c0c8]" />
-                      <span className="text-zinc-400 text-sm">Enviando...</span>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center gap-2">
-                      <Upload className="w-7 h-7 text-zinc-600" />
-                      <span className="text-zinc-500 text-sm">Clique para enviar a logo</span>
-                      <span className="text-[10px] text-zinc-600">PNG ou SVG com fundo transparente recomendado</span>
-                    </div>
-                  )}
-                  <input type="file" accept="image/*" className="hidden" onChange={handleUploadLogo} disabled={uploadingLogo} />
-                </label>
-
-                {/* Remove */}
-                {logoUrl && (
-                  <Button
-                    onClick={handleRemoveLogo}
-                    variant="ghost"
-                    className="w-full text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl">
-                    <Trash2 className="w-4 h-4 mr-2" />Remover Logo
-                  </Button>
-                )}
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Tools Tab */}
-          <TabsContent value="tools" className="mt-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-[#181818] rounded-2xl border border-white/5 p-6 hover:border-orange-500/20 transition-colors">
-                <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4">
-                  <Radio className="w-5 h-5 text-orange-400" />
-                </div>
-                <h3 className="font-bold text-white mb-2">Sincronizar Tipos de Músicas</h3>
-                <p className="text-sm text-zinc-400 mb-4">Atualiza o campo "type" das músicas para corresponder ao Post (álbum/EP) ao qual pertencem.</p>
-                <Button
-                  onClick={async () => {
-                    try {
-                      toast.info('Sincronizando...');
-                      const allPosts = await base44.entities.Post.list();
-                      const allSongs = await base44.entities.Song.list();
-                      let updated = 0;
-                      for (const post of allPosts) {
-                        if (post.type === 'album' || post.type === 'ep') {
-                          for (const song of allSongs.filter(s => s.album === post.title)) {
-                            if (song.type !== post.type) { await base44.entities.Song.update(song.id, { type: post.type }); updated++; }
-                          }
-                        }
-                      }
-                      queryClient.invalidateQueries({ queryKey: ['songs'] });
-                      toast.success(`${updated} músicas atualizadas!`);
-                    } catch { toast.error('Erro ao sincronizar'); }
-                  }}
-                  className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 rounded-xl">
-                  Sincronizar Agora
-                </Button>
-              </div>
-              <div className="bg-[#181818] rounded-2xl border border-white/5 p-6 hover:border-emerald-500/20 transition-colors">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
-                  <Music className="w-5 h-5 text-emerald-400" />
-                </div>
-                <h3 className="font-bold text-white mb-2">Adicionar Música Teste</h3>
-                <p className="text-sm text-zinc-400 mb-4">Cria uma música de exemplo com áudio real pra você testar o player, playlists e avaliações.</p>
-                <Button
-                  onClick={async () => {
-                    try {
-                      const n = songs.filter(s => s.title?.startsWith('Faixa de Teste')).length + 1;
-                      await base44.entities.Song.create({
-                        title: n === 1 ? 'Faixa de Teste' : `Faixa de Teste ${n}`,
-                        artist: 'Artista Teste',
-                        album: '',
-                        type: 'single',
-                        genre: 'electronic',
-                        cover_url: '',
-                        audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-                        duration: 319,
-                        plays: 0,
-                        rating: 0,
-                        rating_count: 0,
-                        is_favorite: false,
-                      });
-                      queryClient.invalidateQueries({ queryKey: ['songs'] });
-                      toast.success('Música de teste adicionada!');
-                    } catch { toast.error('Erro ao criar música de teste'); }
-                  }}
-                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-xl">
-                  Adicionar Música Teste
-                </Button>
-              </div>
-              <div className="bg-[#181818] rounded-2xl border border-white/5 p-6 hover:border-[#c0c0c8]/20 transition-colors">
-                <div className="w-10 h-10 rounded-xl bg-[#c0c0c8]/10 flex items-center justify-center mb-4">
-                  <TrendingUp className="w-5 h-5 text-[#c0c0c8]" />
-                </div>
-                <h3 className="font-bold text-white mb-2">Postar Minha Música (Mais Ouvida)</h3>
-                <p className="text-sm text-zinc-400 mb-4">Cria uma música com o seu nome como artista e mais plays que qualquer outra, pra ela virar o destaque "Mais Ouvidas" da Home.</p>
-                <Button
-                  onClick={async () => {
-                    try {
-                      const maxPlays = songs.reduce((max, s) => Math.max(max, s.plays || 0), 0);
-                      const artistName = user?.display_name || user?.full_name || 'Eu';
-                      await base44.entities.Song.create({
-                        title: 'Minha Faixa',
-                        artist: artistName,
-                        album: '',
-                        type: 'single',
-                        genre: 'pop',
-                        cover_url: '',
-                        audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-                        duration: 226,
-                        plays: maxPlays + 1000,
-                        rating: 0,
-                        rating_count: 0,
-                        is_favorite: false,
-                      });
-                      queryClient.invalidateQueries({ queryKey: ['songs'] });
-                      queryClient.invalidateQueries({ queryKey: ['featured-artist'] });
-                      toast.success('Música postada e em destaque como mais ouvida!');
-                    } catch { toast.error('Erro ao postar música'); }
-                  }}
-                  className="bg-[#c0c0c8]/20 hover:bg-[#c0c0c8]/30 text-[#e5e5ea] rounded-xl">
-                  Postar e Destacar
-                </Button>
-              </div>
-              <div className="bg-[#181818] rounded-2xl border border-white/5 p-6 hover:border-[#c0c0c8]/20 transition-colors">
-                <div className="w-10 h-10 rounded-xl bg-[#c0c0c8]/10 flex items-center justify-center mb-4">
-                  <BarChart3 className="w-5 h-5 text-[#c0c0c8]" />
-                </div>
-                <h3 className="font-bold text-white mb-2">Verificar Posts</h3>
-                <p className="text-sm text-zinc-400 mb-4">Exibe estatísticas de posts (álbuns, EPs, singles) no sistema.</p>
-                <Button
-                  onClick={async () => {
-                    try {
-                      const allPosts = await base44.entities.Post.list();
-                      const albums = allPosts.filter(p => p.type === 'album').length;
-                      const eps = allPosts.filter(p => p.type === 'ep').length;
-                      const singles = allPosts.filter(p => p.type === 'single').length;
-                      toast.info(`Total: ${allPosts.length} | Álbuns: ${albums} | EPs: ${eps} | Singles: ${singles}`, { duration: 6000 });
-                    } catch { toast.error('Erro ao verificar'); }
-                  }}
-                  className="bg-[#c0c0c8]/20 hover:bg-[#c0c0c8]/30 text-[#e5e5ea] rounded-xl">
-                  Verificar Posts
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
         </Tabs>
       </div>
 
