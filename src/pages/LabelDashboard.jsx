@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Music, Eye, Heart, Users, AlertCircle, Disc, Trash2, Edit2, Play, Calendar, Trash, UserPlus, Loader2 } from 'lucide-react';
+import { Plus, Music, Eye, Heart, Users, AlertCircle, Disc, Trash2, Edit2, Play, Calendar, Trash, UserPlus, Loader2, Search } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,8 @@ export default function LabelDashboard() {
   const [cropperImage, setCropperImage] = useState(null);
   const [searchRepresentative, setSearchRepresentative] = useState('');
   const [showAddRep, setShowAddRep] = useState(false);
+  const [releaseSearch, setReleaseSearch] = useState('');
+  const [artistSearch, setArtistSearch] = useState('');
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -91,6 +93,20 @@ export default function LabelDashboard() {
     (item.artist && managedArtistNames.has(item.artist));
 
   const labelPosts = allPosts.filter(belongsToLabel);
+
+  const filteredLabelPosts = releaseSearch.trim()
+    ? labelPosts.filter(p =>
+        p.title?.toLowerCase().includes(releaseSearch.toLowerCase()) ||
+        p.artist?.toLowerCase().includes(releaseSearch.toLowerCase())
+      )
+    : labelPosts;
+
+  const filteredManagedArtists = artistSearch.trim()
+    ? managedArtists.filter(a =>
+        a.display_name?.toLowerCase().includes(artistSearch.toLowerCase()) ||
+        a.full_name?.toLowerCase().includes(artistSearch.toLowerCase())
+      )
+    : managedArtists;
 
   const { data: allUsers = [] } = useQuery({
     queryKey: ['allUsers'],
@@ -412,16 +428,27 @@ export default function LabelDashboard() {
 
           {/* Releases Tab */}
           <TabsContent value="releases" className="mt-6">
+            {labelPosts.length > 0 && (
+              <div className="relative max-w-sm mb-5">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <Input
+                  placeholder="Buscar lançamentos..."
+                  value={releaseSearch}
+                  onChange={(e) => setReleaseSearch(e.target.value)}
+                  className="bg-[#181818] border-white/10 text-white placeholder:text-zinc-600 pl-9"
+                />
+              </div>
+            )}
             <AnimatePresence mode="wait">
-              {labelPosts.length > 0 ? (
+              {filteredLabelPosts.length > 0 ? (
                 <motion.div
                   key="releases"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+                  className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
                 >
-                  {labelPosts.map((post, index) => (
+                  {filteredLabelPosts.map((post, index) => (
                     <motion.div
                       key={post.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -498,8 +525,12 @@ export default function LabelDashboard() {
                   <div className="w-20 h-20 rounded-full bg-[#c0c0c8]/10 flex items-center justify-center mx-auto mb-4">
                     <Disc className="w-10 h-10 text-[#c0c0c8]" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Nenhum lançamento ainda</h3>
-                  <p className="text-zinc-400">Selecione um artista e comece a publicar.</p>
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    {labelPosts.length === 0 ? 'Nenhum lançamento ainda' : 'Nenhum resultado'}
+                  </h3>
+                  <p className="text-zinc-400">
+                    {labelPosts.length === 0 ? 'Selecione um artista e comece a publicar.' : 'Tente buscar por outro termo.'}
+                  </p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -507,16 +538,27 @@ export default function LabelDashboard() {
 
           {/* Artists Tab */}
           <TabsContent value="artists" className="mt-6">
+            {managedArtists.length > 0 && (
+              <div className="relative max-w-sm mb-5">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <Input
+                  placeholder="Buscar artistas..."
+                  value={artistSearch}
+                  onChange={(e) => setArtistSearch(e.target.value)}
+                  className="bg-[#181818] border-white/10 text-white placeholder:text-zinc-600 pl-9"
+                />
+              </div>
+            )}
             <AnimatePresence mode="wait">
-              {managedArtists.length > 0 ? (
+              {filteredManagedArtists.length > 0 ? (
                 <motion.div
                   key="artists"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                  className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
                 >
-                  {managedArtists.map((artist, index) => (
+                  {filteredManagedArtists.map((artist, index) => (
                     <motion.div
                       key={artist.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -576,8 +618,12 @@ export default function LabelDashboard() {
                   <div className="w-20 h-20 rounded-full bg-[#c0c0c8]/10 flex items-center justify-center mx-auto mb-4">
                     <Users className="w-10 h-10 text-[#c0c0c8]" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Nenhum artista gerenciado</h3>
-                  <p className="text-zinc-400">Solicite a um admin para vincular artistas à sua gravadora.</p>
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    {managedArtists.length === 0 ? 'Nenhum artista gerenciado' : 'Nenhum resultado'}
+                  </h3>
+                  <p className="text-zinc-400">
+                    {managedArtists.length === 0 ? 'Solicite a um admin para vincular artistas à sua gravadora.' : 'Tente buscar por outro termo.'}
+                  </p>
                 </motion.div>
               )}
             </AnimatePresence>
