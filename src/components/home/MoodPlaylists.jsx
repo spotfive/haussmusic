@@ -78,16 +78,31 @@ export default function MoodPlaylists({ songs = [], onPlaySong, userEmail }) {
     queryFn: () => base44.entities.Label.list('-created_date', 100),
     staleTime: 60000,
   });
+  const { data: artists = [] } = useQuery({
+    queryKey: ['artists'],
+    queryFn: () => base44.entities.Artist.list('-created_date', 200),
+    staleTime: 60000,
+  });
 
   const playlists = useMemo(() => {
     return labels
       .map((label) => {
-        const managed = new Set(label.managed_artists || []);
-        const labelSongs = songs.filter((s) => s.label_id === label.id || (s.artist_id && managed.has(s.artist_id)));
+        const managedIds = new Set(label.managed_artists || []);
+        // Songs posted before an artist was linked to a label never got
+        // artist_id filled in, so id-matching alone misses them — fall
+        // back to matching by the managed artists' names too.
+        const managedNames = new Set(
+          artists.filter((a) => managedIds.has(a.user_id) || managedIds.has(a.id)).map((a) => a.display_name)
+        );
+        const labelSongs = songs.filter((s) =>
+          s.label_id === label.id ||
+          (s.artist_id && managedIds.has(s.artist_id)) ||
+          (s.artist && managedNames.has(s.artist))
+        );
         return { id: label.id, label, songs: labelSongs };
       })
       .filter((pl) => pl.songs.length >= 1);
-  }, [labels, songs]);
+  }, [labels, artists, songs]);
 
   // Vertical mouse wheel scrolls this row horizontally. Attached natively so it
   // can preventDefault (React's onWheel is passive). At either end we let the
