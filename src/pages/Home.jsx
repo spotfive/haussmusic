@@ -124,12 +124,11 @@ export default function Home() {
   });
   const recentArtists = recentUsers.filter(u => hasUserType(u, 'artista')).slice(0, 15);
   // Every account defaults to user_type ['ouvinte'] at signup, and granting
-  // another cargo (artista/gravadora/staff) adds to that array rather than
-  // replacing it — so an artist still carries 'ouvinte' too. "Ouvintes"
-  // here means people who are *only* listening, not anyone with another
-  // cargo who technically still has it.
+  // another cargo adds to that array rather than replacing it. Only
+  // artistas are excluded from "Ouvintes" here — staff and gravadora
+  // accounts are still fine to show there.
   const recentListeners = recentUsers
-    .filter(u => hasUserType(u, 'ouvinte') && !hasUserType(u, 'artista') && !hasUserType(u, 'gravadora') && !hasUserType(u, 'staff'))
+    .filter(u => hasUserType(u, 'ouvinte') && !hasUserType(u, 'artista'))
     .slice(0, 15);
 
   const { data: appSettings = [] } = useQuery({
