@@ -13,8 +13,11 @@ const { runInWorker } = require('./mlWorker');
 const { generatePlaylistName, generatePlaylistCover, isConfigured: aiConfigured } = require('./aiCreative');
 const { cleanupOrphanedFiles, extractUploadUrls } = require('../fileCleanup');
 
-const MIN_SONGS_PER_PLAYLIST = 4;
-const MAX_SONGS_PER_PLAYLIST = 24;
+// A "collection" needs at least 2 songs to mean anything, but otherwise
+// this uses whatever a genre actually has — no artificial minimum blocking
+// a small catalog from getting any playlists at all.
+const MIN_SONGS_PER_PLAYLIST = 2;
+const MAX_SONGS_PER_PLAYLIST = 16;
 const MAX_TOTAL_PLAYLISTS = 12;
 
 const GENRE_LABELS_PT = {
@@ -22,28 +25,22 @@ const GENRE_LABELS_PT = {
   hiphop: 'hip-hop', jazz: 'jazz', metal: 'metal', pop: 'pop', reggae: 'reggae', rock: 'rock',
 };
 
-const VARIANTS = [
-  { sort: 'plays', flavor: 'as músicas mais tocadas' },
-  { sort: 'newest', flavor: 'as descobertas mais recentes' },
-  { sort: 'shuffle', flavor: 'uma mistura variada' },
-];
-
-function seededShuffle(arr, seed) {
-  const a = [...arr];
-  let s = seed % 233280 || 1;
-  const rnd = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(rnd() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+// Splits a genre's songs into playlist-sized, non-overlapping chunks —
+// every song lands in exactly one playlist, never duplicated across
+// several. Sorted once by engagement first so the strongest songs open the
+// first chunk instead of landing wherever they happen to fall.
+function partitionSongs(songs) {
+  const sorted = [...songs].sort((a, b) => ((b.plays || 0) + (b.likes || 0) * 2) - ((a.plays || 0) + (a.likes || 0) * 2));
+  const chunks = [];
+  for (let i = 0; i < sorted.length; i += MAX_SONGS_PER_PLAYLIST) {
+    chunks.push(sorted.slice(i, i + MAX_SONGS_PER_PLAYLIST));
   }
-  return a;
-}
-
-function sortSongs(songs, sort, seed) {
-  const arr = [...songs];
-  if (sort === 'plays') { arr.sort((a, b) => (b.plays || 0) - (a.plays || 0)); return arr; }
-  if (sort === 'newest') { arr.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)); return arr; }
-  return seededShuffle(arr, seed);
+  // A tiny leftover chunk (e.g. 1 song) reads as an afterthought — fold it
+  // into the previous chunk instead of giving it its own thin playlist.
+  if (chunks.length > 1 && chunks[chunks.length - 1].length < MIN_SONGS_PER_PLAYLIST) {
+    chunks[chunks.length - 2].push(...chunks.pop());
+  }
+  return chunks;
 }
 
 function uploadFilenameFromUrl(url) {
@@ -103,16 +100,13 @@ async function regenerateAutoPlaylists() {
   const clusters = [];
   outer:
   for (const [genre, genreSongs] of genreEntries) {
-    // More songs in a genre earns it more variant playlists (top-played /
-    // newest / shuffled mix) instead of piling everything into one, capped
-    // so one huge genre can't crowd out every other one.
-    const numVariants = Math.min(VARIANTS.length, Math.max(1, Math.floor(genreSongs.length / 6)));
-    for (let i = 0; i < numVariants; i++) {
+    // A big genre becomes several non-overlapping playlists (partitioned,
+    // not resampled) instead of one giant list or several copies of the
+    // same songs reordered.
+    const chunks = partitionSongs(genreSongs);
+    for (let i = 0; i < chunks.length; i++) {
       if (clusters.length >= MAX_TOTAL_PLAYLISTS) break outer;
-      const variant = VARIANTS[i];
-      const seed = genre.length * 7919 + i * 104729 + genreSongs.length;
-      const picked = sortSongs(genreSongs, variant.sort, seed).slice(0, MAX_SONGS_PER_PLAYLIST);
-      clusters.push({ genre, variant, songs: picked });
+      clusters.push({ genre, part: i + 1, totalParts: chunks.length, songs: chunks[i] });
     }
   }
 
@@ -120,17 +114,18 @@ async function regenerateAutoPlaylists() {
   for (const cluster of clusters) {
     const genreLabel = GENRE_LABELS_PT[cluster.genre] || cluster.genre;
     const sampleSongs = cluster.songs.slice(0, 5).map((s) => ({ title: s.title, artist: s.artist }));
+    const flavor = cluster.totalParts > 1 ? `parte ${cluster.part} de ${cluster.totalParts}` : null;
 
     let name = null, subtitle = '';
     try {
-      const generated = await generatePlaylistName({ genre: `${genreLabel} (${cluster.variant.flavor})`, sampleSongs });
+      const generated = await generatePlaylistName({ genre: flavor ? `${genreLabel} (${flavor})` : genreLabel, sampleSongs });
       if (generated) { name = generated.name; subtitle = generated.subtitle; }
     } catch (err) {
       console.error('AI playlist naming failed:', err.message);
     }
     if (!name) {
-      name = genreLabel.charAt(0).toUpperCase() + genreLabel.slice(1);
-      subtitle = cluster.variant.flavor;
+      name = genreLabel.charAt(0).toUpperCase() + genreLabel.slice(1) + (cluster.totalParts > 1 ? ` Vol. ${cluster.part}` : '');
+      subtitle = 'selecionadas do acervo HAUSS';
     }
 
     let coverUrl = '';

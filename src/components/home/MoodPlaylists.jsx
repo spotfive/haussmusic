@@ -101,7 +101,7 @@ export default function MoodPlaylists({ songs = [], onPlaySong, userEmail }) {
   const playlists = useMemo(() => {
     return autoPlaylists
       .map((pl) => ({ ...pl, songs: (pl.song_ids || []).map((id) => songById.get(id)).filter(Boolean) }))
-      .filter((pl) => pl.songs.length >= 4);
+      .filter((pl) => pl.songs.length >= 2);
   }, [autoPlaylists, songById]);
 
   // Vertical mouse wheel scrolls this row horizontally. Attached natively so it
