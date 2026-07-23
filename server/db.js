@@ -199,17 +199,6 @@ db.exec(`
     created_date text not null,
     updated_date text not null
   );
-
-  create table if not exists auto_playlists (
-    id text primary key,
-    name text not null,
-    subtitle text,
-    cover_url text,
-    song_ids text not null default '[]',
-    genre_summary text,
-    created_date text not null,
-    updated_date text not null
-  );
 `);
 
 // Lightweight migration: add columns that got introduced after a table
@@ -225,11 +214,34 @@ for (const [table, column, definition] of [
   ['banners', 'button_text', 'text'],
   ['banners', 'category', 'text'],
   ['banners', 'duration_seconds', 'real not null default 7'],
-  ['songs', 'detected_genre', 'text'],
 ]) {
   const cols = db.prepare(`pragma table_info(${table})`).all();
   if (!cols.some((c) => c.name === column)) {
     db.exec(`alter table ${table} add column ${column} ${definition}`);
+  }
+}
+
+// Migration: the AI-curated "Para o seu momento" auto-playlists feature
+// (audio genre classification + AI-generated names/covers) was replaced
+// with a simpler one-playlist-per-label view — drop the table it used and
+// the now-unused per-song genre column, cleaning up any cover images it
+// generated first. Safe to run every startup: a no-op once they're gone.
+{
+  const autoPlaylistsTable = db.prepare("select name from sqlite_master where type='table' and name='auto_playlists'").get();
+  if (autoPlaylistsTable) {
+    const rows = db.prepare("select cover_url from auto_playlists where cover_url is not null and cover_url != ''").all();
+    const uploadsDir = process.env.UPLOADS_DIR || path.join(__dirname, 'uploads');
+    for (const row of rows) {
+      const match = row.cover_url.match(/\/uploads\/([^/?#]+)/);
+      if (match) {
+        try { fs.unlinkSync(path.join(uploadsDir, match[1])); } catch { /* already gone */ }
+      }
+    }
+    db.exec('drop table auto_playlists');
+  }
+  const songColumns = db.prepare('pragma table_info(songs)').all();
+  if (songColumns.some((c) => c.name === 'detected_genre')) {
+    db.exec('alter table songs drop column detected_genre');
   }
 }
 
@@ -268,7 +280,6 @@ const FILE_FIELDS_BY_TABLE = {
   banners: ['image_url'],
   labels: ['profile_picture'],
   artists: ['profile_picture'],
-  auto_playlists: ['cover_url'],
 };
 
 // Migration: PUBLIC_URL was misconfigured as http:// instead of https:// for
@@ -298,7 +309,6 @@ const ENTITIES = {
   Rating: { table: 'ratings', json: [], bool: [] },
   UserFavorite: { table: 'user_favorites', json: [], bool: [] },
   AppSettings: { table: 'app_settings', json: [], bool: [] },
-  AutoPlaylist: { table: 'auto_playlists', json: ['song_ids'], bool: [] },
 };
 
 function getEntityConfig(name) {

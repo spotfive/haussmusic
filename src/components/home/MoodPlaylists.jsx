@@ -1,33 +1,14 @@
 import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Plus, X, ChevronLeft, ChevronRight, ListMusic, Check, Loader2, Sparkles } from 'lucide-react';
+import { Play, Plus, X, ChevronLeft, ChevronRight, ListMusic, Check, Loader2, Music2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-// Auto-curated "mood" collections — generated server-side (server/lib/
-// autoPlaylists.js) by actually listening to each track (audio genre
-// classification, not the artist-typed genre field) and regenerated
-// weekly. This component only renders what the server already built:
-// a name, subtitle, AI cover image and song list per collection.
-
-// Fallback gradient for a collection whose AI cover didn't get generated
-// (e.g. OPENAI_API_KEY not set yet, or that one image call failed) — keyed
-// by the dominant detected genre so the mosaic-cover fallback still reads
-// as intentional rather than a broken/empty card.
-const GENRE_COLORS = {
-  pop: ['#9d174d', '#3b0a24'],
-  rock: ['#b91c1c', '#1c0a0a'],
-  hiphop: ['#c2410c', '#7c2d12'],
-  jazz: ['#334155', '#0f172a'],
-  blues: ['#0f766e', '#082f2b'],
-  classical: ['#334155', '#0b1026'],
-  country: ['#a16207', '#3f2d0a'],
-  disco: ['#a21caf', '#4a044e'],
-  metal: ['#3f3f46', '#0a0a0a'],
-  reggae: ['#15803d', '#062b16'],
-};
-const DEFAULT_COLORS = ['#334155', '#0b1026'];
+// One collection per label — its name, its logo, and every song it manages
+// (published directly by the label, or by an artist the label manages).
+// No AI involved: this is a straightforward group-by over data the app
+// already has.
 
 function seededShuffle(arr, seed) {
   const a = [...arr];
@@ -46,26 +27,24 @@ function formatTotal(songs) {
   return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}min` : `${m} min`;
 }
 
-// The generated cover: either the AI-generated image, or — if that isn't
-// available for this collection — a 2×2 mosaic of its song art unified
-// under a genre-matched colour wash and a metallic sheen, so it still
-// reads as part of the same HAUSS system rather than a placeholder.
-function PlaylistCover({ playlist, songs, rounded = 'rounded-2xl' }) {
-  if (playlist.cover_url) {
+// The label's own logo when it has one; otherwise a mosaic of its songs'
+// art under the HAUSS silver/black wash, same treatment used elsewhere so
+// a label without a logo still reads as part of the same system.
+function PlaylistCover({ label, songs, rounded = 'rounded-2xl' }) {
+  if (label.profile_picture) {
     return (
       <div className={`absolute inset-0 ${rounded} overflow-hidden bg-[#18181b]`}>
-        <img src={playlist.cover_url} alt="" className="w-full h-full object-cover" />
+        <img src={label.profile_picture} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-black/5" />
       </div>
     );
   }
 
-  const [from, to] = GENRE_COLORS[playlist.genre_summary] || DEFAULT_COLORS;
   const covers = songs.map((s) => s.cover_url).filter(Boolean).slice(0, 4);
   return (
     <div className={`absolute inset-0 ${rounded} overflow-hidden`}>
-      <div className="absolute inset-0" style={{ background: `linear-gradient(140deg, ${from}, ${to})` }} />
-      {covers.length > 0 && (
+      <div className="absolute inset-0 bg-gradient-to-br from-[#334155] to-[#0b1026]" />
+      {covers.length > 0 ? (
         <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="relative overflow-hidden">
@@ -75,8 +54,12 @@ function PlaylistCover({ playlist, songs, rounded = 'rounded-2xl' }) {
             </div>
           ))}
         </div>
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Music2 className="w-10 h-10 text-white/20" />
+        </div>
       )}
-      <div className="absolute inset-0 mix-blend-soft-light opacity-80" style={{ background: `linear-gradient(140deg, ${from}, ${to})` }} />
+      <div className="absolute inset-0 mix-blend-soft-light opacity-80 bg-gradient-to-br from-[#334155] to-[#0b1026]" />
       <div className="absolute inset-0 opacity-40" style={{ background: 'radial-gradient(120% 80% at 20% 0%, rgba(224,224,232,0.35) 0%, transparent 45%)' }} />
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10" />
     </div>
@@ -90,19 +73,21 @@ export default function MoodPlaylists({ songs = [], onPlaySong, userEmail }) {
   const [saving, setSaving] = useState(false);
   const [savedIds, setSavedIds] = useState([]);
 
-  const { data: autoPlaylists = [] } = useQuery({
-    queryKey: ['auto-playlists'],
-    queryFn: () => base44.entities.AutoPlaylist.list('-created_date'),
+  const { data: labels = [] } = useQuery({
+    queryKey: ['labels'],
+    queryFn: () => base44.entities.Label.list('-created_date', 100),
     staleTime: 60000,
   });
 
-  const songById = useMemo(() => new Map(songs.map((s) => [s.id, s])), [songs]);
-
   const playlists = useMemo(() => {
-    return autoPlaylists
-      .map((pl) => ({ ...pl, songs: (pl.song_ids || []).map((id) => songById.get(id)).filter(Boolean) }))
-      .filter((pl) => pl.songs.length >= 2);
-  }, [autoPlaylists, songById]);
+    return labels
+      .map((label) => {
+        const managed = new Set(label.managed_artists || []);
+        const labelSongs = songs.filter((s) => s.label_id === label.id || (s.artist_id && managed.has(s.artist_id)));
+        return { id: label.id, label, songs: labelSongs };
+      })
+      .filter((pl) => pl.songs.length >= 1);
+  }, [labels, songs]);
 
   // Vertical mouse wheel scrolls this row horizontally. Attached natively so it
   // can preventDefault (React's onWheel is passive). At either end we let the
@@ -155,7 +140,7 @@ export default function MoodPlaylists({ songs = [], onPlaySong, userEmail }) {
   const playPlaylist = (pl) => {
     const order = seededShuffle(pl.songs, pl.id.length * 7919);
     if (order[0]) onPlaySong?.(order[0]);
-    toast(`Tocando ${pl.name}`, { icon: <Sparkles className="w-4 h-4 text-[#c0c0c8]" /> });
+    toast(`Tocando ${pl.label.name}`);
   };
 
   const savePlaylist = async (pl) => {
@@ -163,14 +148,14 @@ export default function MoodPlaylists({ songs = [], onPlaySong, userEmail }) {
     setSaving(true);
     try {
       await base44.entities.Playlist.create({
-        name: pl.name,
-        description: pl.subtitle,
+        name: pl.label.name,
+        description: `Lançamentos de ${pl.label.name}`,
         song_ids: pl.songs.map((s) => s.id),
-        cover_url: pl.cover_url || '',
+        cover_url: pl.label.profile_picture || '',
       });
       setSavedIds((ids) => [...ids, pl.id]);
       queryClient.invalidateQueries({ queryKey: ['playlists'] });
-      toast.success(`"${pl.name}" salva na sua biblioteca`);
+      toast.success(`"${pl.label.name}" salva na sua biblioteca`);
     } catch {
       toast.error('Erro ao salvar playlist');
     }
@@ -183,8 +168,8 @@ export default function MoodPlaylists({ songs = [], onPlaySong, userEmail }) {
     <section className="mb-8">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-xl lg:text-2xl font-bold text-white">Para o seu momento</h2>
-          <p className="text-xs text-[#B3B3B3] mt-0.5">Coleções geradas por IA a partir do acervo HAUSS</p>
+          <h2 className="text-xl lg:text-2xl font-bold text-white">Por Gravadora</h2>
+          <p className="text-xs text-[#B3B3B3] mt-0.5">As músicas de cada gravadora do acervo HAUSS</p>
         </div>
         <div className="hidden sm:flex items-center gap-1.5">
           <button onClick={() => nudge(-1)} className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center text-white/70 hover:text-white transition-colors">
@@ -202,41 +187,37 @@ export default function MoodPlaylists({ songs = [], onPlaySong, userEmail }) {
         className="flex gap-4 overflow-x-auto pt-1 pb-4 -mx-1 px-1 scrollbar-hide"
         style={{ WebkitMaskImage: 'linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%)', maskImage: 'linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%)' }}
       >
-        {playlists.map((pl, i) => {
-          const [, glow] = GENRE_COLORS[pl.genre_summary] || DEFAULT_COLORS;
-          return (
-            <motion.button
-              key={pl.id}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(i, 6) * 0.05, type: 'spring', damping: 20, stiffness: 220 }}
-              whileHover={{ y: -6, scale: 1.03, transition: { type: 'spring', damping: 18, stiffness: 260 } }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setActive(pl)}
-              style={{ boxShadow: `0 10px 30px -12px ${glow}` }}
-              className="group relative shrink-0 w-40 sm:w-44 lg:w-52 aspect-square rounded-[20px] overflow-hidden ring-1 ring-white/[0.08] text-left transition-shadow duration-300 hover:ring-white/20"
+        {playlists.map((pl, i) => (
+          <motion.button
+            key={pl.id}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: Math.min(i, 6) * 0.05, type: 'spring', damping: 20, stiffness: 220 }}
+            whileHover={{ y: -6, scale: 1.03, transition: { type: 'spring', damping: 18, stiffness: 260 } }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setActive(pl)}
+            className="group relative shrink-0 w-40 sm:w-44 lg:w-52 aspect-square rounded-[20px] overflow-hidden ring-1 ring-white/[0.08] text-left transition-shadow duration-300 hover:ring-white/20 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
+          >
+            <PlaylistCover label={pl.label} songs={pl.songs} />
+            {/* soft top sheen that brightens on hover */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'linear-gradient(160deg, rgba(255,255,255,0.16), transparent 40%)' }} />
+            <div className="absolute inset-x-0 bottom-0 p-3.5">
+              <h3 className="text-white font-extrabold text-base sm:text-lg leading-tight drop-shadow-lg">{pl.label.name}</h3>
+              <p className="text-white/70 text-[11px] leading-snug mt-0.5 truncate">{pl.songs.length} {pl.songs.length === 1 ? 'música' : 'músicas'}</p>
+            </div>
+            <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/35 backdrop-blur-md ring-1 ring-white/10">
+              <span className="text-[9px] font-bold tracking-[0.15em] text-[#e5e5ea]">HAUSS</span>
+            </div>
+            {/* Play affordance on hover */}
+            <div
+              className="absolute bottom-3.5 right-3.5 w-11 h-11 rounded-full bg-[#c0c0c8] flex items-center justify-center shadow-xl shadow-black/40 opacity-0 translate-y-3 scale-90 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 transition-all duration-300 ease-out hover:bg-[#d4d4dc]"
+              onClick={(e) => { e.stopPropagation(); playPlaylist(pl); }}
+              role="button"
             >
-              <PlaylistCover playlist={pl} songs={pl.songs} />
-              {/* soft top sheen that brightens on hover */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'linear-gradient(160deg, rgba(255,255,255,0.16), transparent 40%)' }} />
-              <div className="absolute inset-x-0 bottom-0 p-3.5">
-                <h3 className="text-white font-extrabold text-base sm:text-lg leading-tight drop-shadow-lg">{pl.name}</h3>
-                <p className="text-white/70 text-[11px] leading-snug mt-0.5 truncate">{pl.subtitle}</p>
-              </div>
-              <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/35 backdrop-blur-md ring-1 ring-white/10">
-                <span className="text-[9px] font-bold tracking-[0.15em] text-[#e5e5ea]">HAUSS</span>
-              </div>
-              {/* Play affordance on hover */}
-              <div
-                className="absolute bottom-3.5 right-3.5 w-11 h-11 rounded-full bg-[#c0c0c8] flex items-center justify-center shadow-xl shadow-black/40 opacity-0 translate-y-3 scale-90 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 transition-all duration-300 ease-out hover:bg-[#d4d4dc]"
-                onClick={(e) => { e.stopPropagation(); playPlaylist(pl); }}
-                role="button"
-              >
-                <Play className="w-5 h-5 text-black fill-black ml-0.5" />
-              </div>
-            </motion.button>
-          );
-        })}
+              <Play className="w-5 h-5 text-black fill-black ml-0.5" />
+            </div>
+          </motion.button>
+        ))}
       </div>
 
       {/* Detail modal — full playlist, escapes the masked row via fixed positioning */}
@@ -255,16 +236,16 @@ export default function MoodPlaylists({ songs = [], onPlaySong, userEmail }) {
             >
               {/* Header with the big cover */}
               <div className="relative h-44 flex-shrink-0">
-                <PlaylistCover playlist={active} songs={active.songs} rounded="rounded-none" />
+                <PlaylistCover label={active.label} songs={active.songs} rounded="rounded-none" />
                 <button onClick={() => setActive(null)} className="absolute top-3 right-3 p-2 rounded-full bg-black/40 hover:bg-black/60 text-white/80 hover:text-white transition-colors">
                   <X className="w-4 h-4" />
                 </button>
                 <div className="absolute bottom-0 inset-x-0 p-5">
                   <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-sm w-fit mb-2">
-                    <span className="text-[9px] font-bold tracking-wider text-[#e5e5ea]">COLEÇÃO HAUSS</span>
+                    <span className="text-[9px] font-bold tracking-wider text-[#e5e5ea]">GRAVADORA</span>
                   </div>
-                  <h2 className="text-2xl font-black text-white drop-shadow-lg">{active.name}</h2>
-                  <p className="text-white/70 text-sm">{active.subtitle} · {active.songs.length} músicas · {formatTotal(active.songs)}</p>
+                  <h2 className="text-2xl font-black text-white drop-shadow-lg">{active.label.name}</h2>
+                  <p className="text-white/70 text-sm">{active.songs.length} músicas · {formatTotal(active.songs)}</p>
                 </div>
               </div>
 
