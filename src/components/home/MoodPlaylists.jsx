@@ -220,9 +220,6 @@ export default function MoodPlaylists({ songs = [], onPlaySong, userEmail }) {
               <h3 className="text-white font-extrabold text-base sm:text-lg leading-tight drop-shadow-lg">{pl.label.name}</h3>
               <p className="text-white/70 text-[11px] leading-snug mt-0.5 truncate">{pl.songs.length} {pl.songs.length === 1 ? 'música' : 'músicas'}</p>
             </div>
-            <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/35 backdrop-blur-md ring-1 ring-white/10">
-              <span className="text-[9px] font-bold tracking-[0.15em] text-[#e5e5ea]">HAUSS</span>
-            </div>
             {/* Play affordance on hover */}
             <div
               className="absolute bottom-3.5 right-3.5 w-11 h-11 rounded-full bg-[#c0c0c8] flex items-center justify-center shadow-xl shadow-black/40 opacity-0 translate-y-3 scale-90 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 transition-all duration-300 ease-out hover:bg-[#d4d4dc]"
