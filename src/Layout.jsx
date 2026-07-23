@@ -67,6 +67,30 @@ export default function Layout({ children, currentPageName }) {
     refetchInterval: 3000,
   });
 
+  // ===== PLAY COUNTING =====
+  // A play counts once a listen reaches its last CROSSFADE_DURATION seconds
+  // (or the raw `ended` event, which only ever fires exactly at the end) —
+  // not the moment playback starts. Reusing the crossfade window as the
+  // completion threshold means a natural crossfade-triggered advance always
+  // qualifies regardless of track length, while skipping away earlier via
+  // next/previous/picking a different song does not. Tracks "has THIS
+  // listen (whatever's currently loaded in currentAudioRef) been counted
+  // yet" — reset to false every time a new src is loaded, so a repeated
+  // song (repeat mode, or replaying it later) can count again each time.
+  const hasCountedCurrentListenRef = useRef(false);
+  const maybeCountPlay = (song, audioEl) => {
+    if (!song || !audioEl || hasCountedCurrentListenRef.current) return;
+    const { currentTime, duration } = audioEl;
+    if (!Number.isFinite(duration) || duration <= 0) return;
+    if (duration - currentTime <= CROSSFADE_DURATION) {
+      hasCountedCurrentListenRef.current = true;
+      const fresh = songs.find(s => s.id === song.id);
+      base44.entities.Song.update(song.id, { plays: (fresh?.plays ?? song.plays ?? 0) + 1 })
+        .then(() => queryClient.invalidateQueries({ queryKey: ['songs'] }))
+        .catch(() => {});
+    }
+  };
+
   // ===== Initialize audio refs =====
   useEffect(() => {
     if (audioA.current && audioB.current) {
@@ -180,6 +204,8 @@ export default function Layout({ children, currentPageName }) {
     const current = currentAudioRef.current;
     if (!current) return;
 
+    maybeCountPlay(currentSong, current);
+
     // If crossfade is enabled and a song is already playing, use crossfade instead
     if (!skipCrossfade && crossfadeEnabled && currentSong && currentAudioRef.current?.src) {
       startCrossfade(song);
@@ -198,6 +224,7 @@ export default function Layout({ children, currentPageName }) {
     current.src = song.audio_url;
     current.currentTime = 0;
     current.volume = isMuted ? 0 : volume;
+    hasCountedCurrentListenRef.current = false;
 
     setCurrentSong(song);
     autoFadeAttemptedForRef.current = null;
@@ -248,6 +275,8 @@ export default function Layout({ children, currentPageName }) {
 
     if (!fromAudio || !toAudio || !nextSong?.audio_url) return;
 
+    maybeCountPlay(currentSong, fromAudio);
+
     isCrossfadingRef.current = true;
 
     toAudio.pause();
@@ -255,6 +284,7 @@ export default function Layout({ children, currentPageName }) {
     toAudio.currentTime = 0;
     toAudio.volume = 0;
     toAudio.load();
+    hasCountedCurrentListenRef.current = false;
 
     try {
       await toAudio.play();
@@ -430,9 +460,12 @@ export default function Layout({ children, currentPageName }) {
     const handleEnded = (e) => {
       if (e.target !== currentAudioRef.current || isCrossfadingRef.current) return;
 
+      maybeCountPlay(currentSong, e.target);
+
       if (!crossfadeEnabled && repeatMode) {
         e.target.currentTime = 0;
         e.target.play().catch(() => {});
+        hasCountedCurrentListenRef.current = false; // each loop is its own listen
       } else if (!crossfadeEnabled) {
         handleNext();
       }

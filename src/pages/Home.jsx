@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Play, Pause, Heart, Music2, TrendingUp, Star, Calendar, User, Timer, Newspaper } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
@@ -157,14 +157,6 @@ export default function Home() {
 
   const featuredBackdrop = featuredArtist?.profile_banner;
 
-  const playMutation = useMutation({
-    mutationFn: (songId) => {
-      const song = allSongs.find(s => s.id === songId);
-      return base44.entities.Song.update(songId, { plays: (song?.plays || 0) + 1 }).catch(() => {});
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['songs'] }),
-  });
-
   const getScheduledInfo = (song) => {
     if (!song.album) return null;
     return posts.find(p => p.title === song.album && p.is_scheduled && p.scheduled_datetime);
@@ -189,7 +181,6 @@ export default function Home() {
     } else {
       setCurrentPlayingSong(song);
       window.dispatchEvent(new CustomEvent('playSong', { detail: song }));
-      playMutation.mutate(song.id);
     }
   };
 
