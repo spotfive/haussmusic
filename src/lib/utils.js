@@ -52,14 +52,28 @@ export function withoutUserType(user, type) {
 // directly) — that's a record of who actually released it. Falls back to
 // the artist's *current* label when the row wasn't stamped (the artist
 // posted it themselves), so an artist's back catalog picks up their label
-// as soon as they're linked, without needing to be republished.
-export function getItemLabel(item, labels) {
+// as soon as they're linked, without needing to be republished. artist_id
+// only exists on rows created after that linking existed, so older rows
+// fall back further still, matching by the artist's display name against
+// `artists` (pass the current Artist.list() in, or omit to skip this step).
+export function getItemLabel(item, labels, artists = []) {
   if (item?.label_name) {
     return { name: item.label_name, logo: item.label_logo || '' };
   }
-  if (!item?.artist_id) return null;
-  const label = (labels || []).find((l) => l.managed_artists?.includes(item.artist_id));
-  return label ? { name: label.name, logo: label.profile_picture || '' } : null;
+  if (item?.artist_id) {
+    const label = (labels || []).find((l) => l.managed_artists?.includes(item.artist_id));
+    if (label) return { name: label.name, logo: label.profile_picture || '' };
+  }
+  if (item?.artist) {
+    const label = (labels || []).find((l) =>
+      (l.managed_artists || []).some((artistId) => {
+        const a = artists.find((x) => x.id === artistId || x.user_id === artistId);
+        return a && a.display_name === item.artist;
+      })
+    );
+    if (label) return { name: label.name, logo: label.profile_picture || '' };
+  }
+  return null;
 }
 
 export function decodeJwtPayload(token) {

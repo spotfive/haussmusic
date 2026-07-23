@@ -42,7 +42,11 @@ export default function RightSidebar({ song, onClose, currentTime = 0, duration 
     queryKey: ['labels'],
     queryFn: () => base44.entities.Label.list('-created_date', 100),
   });
-  const label = getItemLabel(song, labels);
+  const { data: artists = [] } = useQuery({
+    queryKey: ['artists'],
+    queryFn: () => base44.entities.Artist.list('-created_date', 200),
+  });
+  const label = getItemLabel(song, labels, artists);
 
   if (!song) return null;
 

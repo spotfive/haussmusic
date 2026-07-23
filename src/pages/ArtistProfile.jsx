@@ -76,6 +76,10 @@ export default function ArtistProfile() {
     queryKey: ['labels'],
     queryFn: () => base44.entities.Label.list('-created_date', 100),
   });
+  const { data: artists = [] } = useQuery({
+    queryKey: ['artists'],
+    queryFn: () => base44.entities.Artist.list('-created_date', 200),
+  });
 
   // Seguidores do artista em tempo real
   const { data: allFollows = [] } = useQuery({
@@ -322,7 +326,7 @@ export default function ArtistProfile() {
                     <div className="font-medium text-white truncate">{song.title}</div>
                     <div className="text-sm text-zinc-500">{song.plays || 0} plays</div>
                     {(() => {
-                      const label = getItemLabel(song, labels);
+                      const label = getItemLabel(song, labels, artists);
                       return label && (
                         <div className="flex items-center gap-1 text-xs text-[#e5e5ea] mt-0.5">
                           <Music2 className="w-3 h-3" />

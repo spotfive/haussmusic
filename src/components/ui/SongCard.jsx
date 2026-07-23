@@ -18,7 +18,11 @@ export default function SongCard({ song, isPlaying, isCurrentSong, onPlay, onFav
     queryKey: ['labels'],
     queryFn: () => base44.entities.Label.list('-created_date', 100),
   });
-  const label = getItemLabel(song, labels);
+  const { data: artists = [] } = useQuery({
+    queryKey: ['artists'],
+    queryFn: () => base44.entities.Artist.list('-created_date', 200),
+  });
+  const label = getItemLabel(song, labels, artists);
 
   const formatDuration = (s) => {
     if (!s) return '--:--';
