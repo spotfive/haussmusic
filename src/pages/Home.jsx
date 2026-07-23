@@ -41,6 +41,7 @@ export default function Home() {
   const [activeSongId, setActiveSongId] = useState(null);
   const [user, setUser] = useState(null);
   const [showIntro, setShowIntro] = useState(() => !sessionStorage.getItem('hasSeenIntro'));
+  const [peopleTab, setPeopleTab] = useState('artists');
   const queryClient = useQueryClient();
 
   // Handle shared song from URL
@@ -110,6 +111,19 @@ export default function Home() {
     queryKey: ['artists'],
     queryFn: () => base44.entities.User.list('-created_date', 12),
   });
+
+  // Wider pool than the `artists` query above (which only grabs the 12
+  // most recent signups overall, not 12 most recent artists specifically)
+  // so "15 most recent artists"/"15 most recent listeners" is accurate
+  // even when the two cargos are unevenly mixed in recent signups. Polled
+  // so the sidebar widget picks up new accounts without a manual refresh.
+  const { data: recentUsers = [] } = useQuery({
+    queryKey: ['recent-users-sidebar'],
+    queryFn: () => base44.entities.User.list('-created_date', 200),
+    refetchInterval: 3000,
+  });
+  const recentArtists = recentUsers.filter(u => hasUserType(u, 'artista')).slice(0, 15);
+  const recentListeners = recentUsers.filter(u => hasUserType(u, 'ouvinte')).slice(0, 15);
 
   const { data: appSettings = [] } = useQuery({
     queryKey: ['appSettings'],
@@ -762,30 +776,47 @@ export default function Home() {
                 </motion.div>
               )}
 
-              {/* Top Artists Widget */}
-              {songArtists.length > 0 && (
+              {/* Recent People Widget — newest artists / newest listeners */}
+              {(recentArtists.length > 0 || recentListeners.length > 0) && (
                 <motion.div
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
                   className="card-spotify-elevated"
                 >
-                  <h3 className="text-xs font-bold text-[#B3B3B3] uppercase tracking-wider mb-3">Artistas</h3>
-                  <div className="space-y-2">
-                    {songArtists.slice(0, 4).map((artist) => (
-                      <Link key={artist.id} to={createPageUrl('ArtistProfile') + '?id=' + artist.id}>
+                  <div className="flex items-center gap-1 mb-3">
+                    <button
+                      onClick={() => setPeopleTab('artists')}
+                      className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-md transition-colors ${
+                        peopleTab === 'artists' ? 'text-white bg-white/10' : 'text-[#B3B3B3] hover:text-white'
+                      }`}
+                    >
+                      Artistas
+                    </button>
+                    <button
+                      onClick={() => setPeopleTab('listeners')}
+                      className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-md transition-colors ${
+                        peopleTab === 'listeners' ? 'text-white bg-white/10' : 'text-[#B3B3B3] hover:text-white'
+                      }`}
+                    >
+                      Ouvintes
+                    </button>
+                  </div>
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {(peopleTab === 'artists' ? recentArtists : recentListeners).map((person) => {
+                      const row = (
                         <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#383838] transition-colors cursor-pointer">
                           <div className="relative shrink-0">
                             <div className="w-10 h-10 rounded-full overflow-hidden bg-[#282828]">
-                              {artist.profile_picture ? (
-                                <img src={artist.profile_picture} alt="" className="w-full h-full object-cover" />
+                              {person.profile_picture ? (
+                                <img src={person.profile_picture} alt="" className="w-full h-full object-cover" />
                               ) : (
                                 <div className="w-full h-full bg-gradient-to-br from-[#c0c0c8]/30 to-zinc-800 flex items-center justify-center">
                                   <User className="w-5 h-5 text-[#535353]" />
                                 </div>
                               )}
                             </div>
-                            {artist.verified && (
+                            {person.verified && (
                               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center border-2 border-[#181818]">
                                 <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -794,12 +825,17 @@ export default function Home() {
                             )}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-white truncate">{artist.display_name || artist.full_name || 'Artista'}</p>
-                            <p className="text-[11px] text-[#B3B3B3]">Artista</p>
+                            <p className="text-sm font-medium text-white truncate">{person.display_name || person.full_name || 'Usuário'}</p>
+                            <p className="text-[11px] text-[#B3B3B3]">{peopleTab === 'artists' ? 'Artista' : 'Ouvinte'}</p>
                           </div>
                         </div>
-                      </Link>
-                    ))}
+                      );
+                      return peopleTab === 'artists' ? (
+                        <Link key={person.id} to={createPageUrl('ArtistProfile') + '?id=' + person.id}>{row}</Link>
+                      ) : (
+                        <div key={person.id}>{row}</div>
+                      );
+                    })}
                   </div>
                 </motion.div>
               )}
